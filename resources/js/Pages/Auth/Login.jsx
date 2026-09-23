@@ -29,7 +29,7 @@ export default function Login({ status, canResetPassword }) {
                 <h2 className="text-2xl font-bold text-gray-900">
                     Welcome Back
                 </h2>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="mt-1 text-sm text-gray-600">
                     Log in to access your Daily Task Log System
                 </p>
             </div>
@@ -101,9 +101,17 @@ export default function Login({ status, canResetPassword }) {
                 <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-4">
                     <Link
                         href="/"
-                        className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1"
+                        className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
                     >
                         &larr; Back to Home
+                    </Link>
+
+                    {/* FIXED: Proper Ziggy route helper syntax */}
+                    <Link
+                        href={route('register')}
+                        className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
+                    >
+                        Register &rarr;
                     </Link>
 
                     <PrimaryButton disabled={processing}>

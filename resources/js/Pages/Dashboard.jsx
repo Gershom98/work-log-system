@@ -62,12 +62,17 @@ export default function Dashboard({ stats = {}, recentLogs = [] }) {
         return param ? `/work-logs/${param}` : '/work-logs';
     };
 
+    // Link ya kudownload PDF
+    const pdfExportUrl = typeof route === 'function' ? route('work-logs.downloadPdf') : '/work-logs/download-pdf';
+
     return (
         <AuthenticatedLayout
             header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Work Log Dashboard
-                </h2>
+                <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold leading-tight text-gray-800">
+                        Work Log Dashboard
+                    </h2>
+                </div>
             }
         >
             <Head title="Work Log Dashboard" />
@@ -106,14 +111,28 @@ export default function Dashboard({ stats = {}, recentLogs = [] }) {
                     {/* Recent Work Activity Table */}
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div className="p-6 text-gray-900">
-                            <div className="flex items-center justify-between pb-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 gap-3">
                                 <h3 className="text-lg font-semibold text-gray-800">Recent Work Activity</h3>
-                                <Link
-                                    href={getRoute('work-logs.index')}
-                                    className="text-sm font-medium text-indigo-600 hover:text-indigo-900"
-                                >
-                                    View All Logs &rarr;
-                                </Link>
+                                
+                                <div className="flex items-center gap-4">
+                                    {/* Batani ya Download PDF */}
+                                    <a
+                                        href={pdfExportUrl}
+                                        className="inline-flex items-center gap-2 rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-red-500 transition"
+                                    >
+                                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        Download PDF
+                                    </a>
+
+                                    <Link
+                                        href={getRoute('work-logs.index')}
+                                        className="text-sm font-medium text-indigo-600 hover:text-indigo-900"
+                                    >
+                                        View All Logs &rarr;
+                                    </Link>
+                                </div>
                             </div>
 
                             <div className="overflow-x-auto">

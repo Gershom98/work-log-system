@@ -31,6 +31,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Daily Work Logs (Resource Routes)
     Route::get('/work-logs', [WorkLogController::class, 'index'])->name('work-logs.index');
     Route::get('/work-logs/create', [WorkLogController::class, 'create'])->name('work-logs.create');
+    
+    // 💡 ROUTE YA DOWNLOAD PDF (Lazima ikae juu ya /{workLog})
+    Route::get('/work-logs/download-pdf', [WorkLogController::class, 'downloadPdf'])->name('work-logs.downloadPdf');
+
     Route::post('/work-logs', [WorkLogController::class, 'store'])->name('work-logs.store');
     Route::get('/work-logs/{workLog}', [WorkLogController::class, 'show'])->name('work-logs.show');
     Route::get('/work-logs/{workLog}/edit', [WorkLogController::class, 'edit'])->name('work-logs.edit');

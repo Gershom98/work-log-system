@@ -5,13 +5,17 @@ namespace App\Http\Controllers;
 use App\Models\WorkLog;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Auth;
 
-class WorkLogController extends Controller
-{
+class WorkLogController extends Controller {
+    /**
+    * Display a listing of the user's work logs.
+     */
     public function index(Request $request)
     {
         $logs = WorkLog::where('user_id', $request->user()->id)
-            ->latest('log_date') // Column sahihi kulingana na migration
+            ->latest('log_date')
             ->paginate(10);
 
         return Inertia::render('WorkLogs/Index', [
@@ -19,11 +23,17 @@ class WorkLogController extends Controller
         ]);
     }
 
+    /**
+     * Show the form for creating a new work log.
+     */
     public function create()
     {
         return Inertia::render('WorkLogs/Create');
     }
 
+    /**
+     * Store a newly created work log in storage.
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -31,15 +41,18 @@ class WorkLogController extends Controller
             'title'          => 'required|string|max:255',
             'log_date'       => 'required|date',
             'hours_spent'    => 'required|integer|min:1|max:24',
-            'status'         => 'required|in:pending,approved,rejected',
+            'status'         => 'required|in:pending, approved, rejected',
             'description'    => 'required|string',
         ]);
 
         $request->user()->workLogs()->create($validated);
 
-        return redirect()->route('work-logs.index')->with('message', 'Kazi imerekodiwa kikamilifu!');
+        return redirect()->route('work-logs.index')->with('message', 'Work log created successfully!');
     }
 
+    /**
+     * Display the specified work log.
+     */
     public function show(Request $request, WorkLog $workLog)
     {
         if ($workLog->user_id !== $request->user()->id) {
@@ -51,6 +64,9 @@ class WorkLogController extends Controller
         ]);
     }
 
+    /**
+     * Show the form for editing the specified work log.
+     */
     public function edit(Request $request, WorkLog $workLog)
     {
         if ($workLog->user_id !== $request->user()->id) {
@@ -62,6 +78,9 @@ class WorkLogController extends Controller
         ]);
     }
 
+    /**
+     * Update the specified work log in storage.
+     */
     public function update(Request $request, WorkLog $workLog)
     {
         if ($workLog->user_id !== $request->user()->id) {
@@ -73,15 +92,18 @@ class WorkLogController extends Controller
             'title'          => 'required|string|max:255',
             'log_date'       => 'required|date',
             'hours_spent'    => 'required|integer|min:1|max:24',
-            'status'         => 'required|in:pending,approved,rejected',
+            'status'         => 'required|in:pending, approved, rejected',
             'description'    => 'required|string',
         ]);
 
         $workLog->update($validated);
 
-        return redirect()->route('work-logs.index')->with('message', 'Taarifa za kazi zimesasishwa kikamilifu!');
+        return redirect()->route('work-logs.index')->with('message', 'Work log updated successfully!');
     }
 
+    /**
+     * Remove the specified work log from storage.
+     */
     public function destroy(Request $request, WorkLog $workLog)
     {
         if ($workLog->user_id !== $request->user()->id) {
@@ -90,6 +112,25 @@ class WorkLogController extends Controller
 
         $workLog->delete();
 
-        return redirect()->route('work-logs.index')->with('message', 'Work log imefutwa kikamilifu!');
+        return redirect()->route('work-logs.index')->with('message', 'Work log deleted successfully!');
+    }
+
+    /**
+     * Download the authenticated user's work logs report as a PDF.
+    */
+
+    public function downloadPdf( Request $request ) {
+        // Fetch all work logs for the currently authenticated user
+        $workLogs = WorkLog::where( 'user_id', $request->user()->id )
+        ->latest( 'log_date' )
+        ->get();
+
+        $user = $request->user();
+
+        // Render the Blade PDF template
+        $pdf = Pdf::loadView( 'pdf.work-logs', compact( 'workLogs', 'user' ) );
+
+        // Download the generated PDF file
+        return $pdf->download( 'work-log-report.pdf' );
     }
 }
