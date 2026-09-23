@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class WorkLogController extends Controller {
     /**
@@ -120,17 +121,28 @@ class WorkLogController extends Controller {
     */
 
     public function downloadPdf( Request $request ) {
-        // Fetch all work logs for the currently authenticated user
-        $workLogs = WorkLog::where( 'user_id', $request->user()->id )
-        ->latest( 'log_date' )
-        ->get();
+        try {
+            // Fetch all work logs for the currently authenticated user
+            $workLogs = WorkLog::where( 'user_id', $request->user()->id )
+            ->latest( 'log_date' )
+            ->get();
 
-        $user = $request->user();
+            $user = $request->user();
 
-        // Render the Blade PDF template
-        $pdf = Pdf::loadView( 'pdf.work-logs', compact( 'workLogs', 'user' ) );
+            // Render the Blade PDF template with required DomPDF options
+            $pdf = Pdf::loadView( 'pdf.work-logs', compact( 'workLogs', 'user' ) )
+            ->setPaper( 'a4', 'portrait' )
+            ->setOptions( [
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled'      => true,
+                'chroot'               => public_path(),
+            ] );
 
-        // Download the generated PDF file
-        return $pdf->download( 'work-log-report.pdf' );
+            // Download the generated PDF file
+            return $pdf->download( 'work-log-report.pdf' );
+        } catch ( \Exception $e ) {
+            Log::error( 'PDF Error: ' . $e->getMessage() );
+            return response()->json( [ 'error' => $e->getMessage() ], 500 );
+        }
     }
 }
