@@ -9,9 +9,10 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
-class WorkLogController extends Controller {
+class WorkLogController extends Controller
+{
     /**
-    * Display a listing of the user's work logs.
+     * Display a listing of the user's work logs.
      */
     public function index(Request $request)
     {
@@ -42,7 +43,7 @@ class WorkLogController extends Controller {
             'title'          => 'required|string|max:255',
             'log_date'       => 'required|date',
             'hours_spent'    => 'required|integer|min:1|max:24',
-            'status'         => 'required|in:pending, approved, rejected',
+            'status'         => 'required|in:pending,approved,rejected',
             'description'    => 'required|string',
         ]);
 
@@ -93,7 +94,7 @@ class WorkLogController extends Controller {
             'title'          => 'required|string|max:255',
             'log_date'       => 'required|date',
             'hours_spent'    => 'required|integer|min:1|max:24',
-            'status'         => 'required|in:pending, approved, rejected',
+            'status'         => 'required|in:pending,approved,rejected',
             'description'    => 'required|string',
         ]);
 
@@ -118,31 +119,31 @@ class WorkLogController extends Controller {
 
     /**
      * Download the authenticated user's work logs report as a PDF.
-    */
-
-    public function downloadPdf( Request $request ) {
+     */
+    public function downloadPdf(Request $request)
+    {
         try {
             // Fetch all work logs for the currently authenticated user
-            $workLogs = WorkLog::where( 'user_id', $request->user()->id )
-            ->latest( 'log_date' )
-            ->get();
+            $workLogs = WorkLog::where('user_id', $request->user()->id)
+                ->latest('log_date')
+                ->get();
 
             $user = $request->user();
 
             // Render the Blade PDF template with required DomPDF options
-            $pdf = Pdf::loadView( 'pdf.work-logs', compact( 'workLogs', 'user' ) )
-            ->setPaper( 'a4', 'portrait' )
-            ->setOptions( [
-                'isHtml5ParserEnabled' => true,
-                'isRemoteEnabled'      => true,
-                'chroot'               => public_path(),
-            ] );
+            $pdf = Pdf::loadView('pdf.work-logs', compact('workLogs', 'user'))
+                ->setPaper('a4', 'portrait')
+                ->setOptions([
+                    'isHtml5ParserEnabled' => true,
+                    'isRemoteEnabled'      => true,
+                    'chroot'               => public_path(),
+                ]);
 
             // Download the generated PDF file
-            return $pdf->download( 'work-log-report.pdf' );
-        } catch ( \Exception $e ) {
-            Log::error( 'PDF Error: ' . $e->getMessage() );
-            return response()->json( [ 'error' => $e->getMessage() ], 500 );
+            return $pdf->download('work-log-report.pdf');
+        } catch (\Exception $e) {
+            Log::error('PDF Error: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 }
