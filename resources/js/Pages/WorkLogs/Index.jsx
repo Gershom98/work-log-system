@@ -14,12 +14,16 @@ export default function Index({ logs }) {
     // Helper for status badge styling
     const getStatusBadge = (status) => {
         switch (status) {
+            case 'submitted':
+                return <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Submitted</span>;
             case 'approved':
                 return <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Approved</span>;
             case 'rejected':
                 return <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Rejected</span>;
-            default:
+            case 'pending':
                 return <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Pending</span>;
+            default:
+                return <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{status || 'Submitted'}</span>;
         }
     };
 
@@ -118,11 +122,10 @@ export default function Index({ logs }) {
                                                 key={index}
                                                 href={link.url}
                                                 dangerouslySetInnerHTML={{ __html: link.label }}
-                                                className={`px-3 py-1 text-sm rounded border ${
-                                                    link.active
+                                                className={`px-3 py-1 text-sm rounded border ${link.active
                                                         ? 'bg-indigo-600 text-white border-indigo-600'
                                                         : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                                                }`}
+                                                    }`}
                                             />
                                         ) : (
                                             <span

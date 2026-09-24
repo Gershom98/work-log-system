@@ -13,6 +13,7 @@ class DashboardController extends Controller
         // Badilisha status zilizo hapa chini zifanane na zile zilizo kwenye database yako (mfano: approved/pending/rejected au completed/in_progress/pending)
         $stats = [
             'totalLogs'      => WorkLog::count(),
+            'submittedLogs' => WorkLog::where('status', 'submitted')->count(),
             'completedLogs'  => WorkLog::whereIn('status', ['completed', 'approved'])->count(),
             'inProgressLogs' => WorkLog::where('status', 'in_progress')->count(),
             'pendingLogs'    => WorkLog::where('status', 'pending')->count(),

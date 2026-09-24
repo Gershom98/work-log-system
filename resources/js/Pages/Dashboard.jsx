@@ -32,6 +32,7 @@ function StatCard({ title, count = 0, color = 'indigo', iconPath }) {
 // Status Badge Component
 function StatusBadge({ status }) {
     const styles = {
+        submitted: 'bg-green-100 text-green-800',
         completed: 'bg-green-100 text-green-800',
         approved: 'bg-green-100 text-green-800',
         in_progress: 'bg-blue-100 text-blue-800',
@@ -40,6 +41,7 @@ function StatusBadge({ status }) {
     };
 
     const labels = {
+        submitted: 'submitted',
         completed: 'Completed',
         approved: 'Approved',
         in_progress: 'In Progress',
@@ -89,6 +91,12 @@ export default function Dashboard({ stats = {}, recentLogs = [] }) {
                             iconPath="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                         />
                         <StatCard
+                            title="submitted Tasks"
+                            count={stats?.submittedLogs ?? 0}
+                            color="green"
+                            iconPath="M5 13l4 4L19 7"
+                        />
+                        <StatCard
                             title="Completed Tasks"
                             count={stats?.completedLogs ?? 0}
                             color="green"
@@ -113,7 +121,7 @@ export default function Dashboard({ stats = {}, recentLogs = [] }) {
                         <div className="p-6 text-gray-900">
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 gap-3">
                                 <h3 className="text-lg font-semibold text-gray-800">Recent Work Activity</h3>
-                                
+
                                 <div className="flex items-center gap-4">
                                     {/* Batani ya Download PDF */}
                                     <a

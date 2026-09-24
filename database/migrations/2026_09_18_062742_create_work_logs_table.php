@@ -17,9 +17,9 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->date('log_date');
             $table->string('title');
-            $table->text('description');
+            $table->text('description')->nullable();
             $table->integer('hours_spent');
-            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->enum('status', ['submitted','pending', 'approved', 'rejected'])->default('submitted');
             $table->text('supervisor_comment')->nullable();
             $table->timestamps();
         });

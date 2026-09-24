@@ -5,9 +5,9 @@ export default function Edit({ workLog }) {
     const { data, setData, put, processing, errors } = useForm({
         requester_name: workLog.requester_name || '',
         title: workLog.title || '',
-        description: workLog.description || '',
+        // description: workLog.description || '',
         hours_spent: workLog.hours_spent || 1,
-        status: workLog.status || 'pending',
+        status: workLog.status || 'submitted', // Default status imewekwa 'submitted'
         log_date: workLog.log_date || new Date().toISOString().split('T')[0],
     });
 
@@ -39,7 +39,7 @@ export default function Edit({ workLog }) {
                 <div className="mx-auto max-w-3xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white p-6 shadow-sm sm:rounded-lg">
                         <form onSubmit={handleSubmit} className="space-y-6">
-                            
+
                             {/* Requester Name */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">
@@ -49,9 +49,8 @@ export default function Edit({ workLog }) {
                                     type="text"
                                     value={data.requester_name}
                                     onChange={(e) => setData('requester_name', e.target.value)}
-                                    className={`mt-1 block w-full rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500 ${
-                                        errors.requester_name ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'
-                                    }`}
+                                    className={`mt-1 block w-full rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500 ${errors.requester_name ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'
+                                        }`}
                                 />
                                 {errors.requester_name && (
                                     <p className="mt-1 text-xs text-red-600">{errors.requester_name}</p>
@@ -67,9 +66,8 @@ export default function Edit({ workLog }) {
                                     type="text"
                                     value={data.title}
                                     onChange={(e) => setData('title', e.target.value)}
-                                    className={`mt-1 block w-full rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500 ${
-                                        errors.title ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'
-                                    }`}
+                                    className={`mt-1 block w-full rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500 ${errors.title ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'
+                                        }`}
                                 />
                                 {errors.title && (
                                     <p className="mt-1 text-xs text-red-600">{errors.title}</p>
@@ -86,9 +84,8 @@ export default function Edit({ workLog }) {
                                         type="date"
                                         value={data.log_date}
                                         onChange={(e) => setData('log_date', e.target.value)}
-                                        className={`mt-1 block w-full rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500 ${
-                                            errors.log_date ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'
-                                        }`}
+                                        className={`mt-1 block w-full rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500 ${errors.log_date ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'
+                                            }`}
                                     />
                                     {errors.log_date && (
                                         <p className="mt-1 text-xs text-red-600">{errors.log_date}</p>
@@ -105,9 +102,8 @@ export default function Edit({ workLog }) {
                                         max="24"
                                         value={data.hours_spent}
                                         onChange={(e) => setData('hours_spent', e.target.value)}
-                                        className={`mt-1 block w-full rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500 ${
-                                            errors.hours_spent ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'
-                                        }`}
+                                        className={`mt-1 block w-full rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500 ${errors.hours_spent ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'
+                                            }`}
                                     />
                                     {errors.hours_spent && (
                                         <p className="mt-1 text-xs text-red-600">{errors.hours_spent}</p>
@@ -121,10 +117,10 @@ export default function Edit({ workLog }) {
                                     <select
                                         value={data.status}
                                         onChange={(e) => setData('status', e.target.value)}
-                                        className={`mt-1 block w-full rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500 ${
-                                            errors.status ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'
-                                        }`}
+                                        className={`mt-1 block w-full rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500 ${errors.status ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'
+                                            }`}
                                     >
+                                        <option value="submitted">Submitted</option>
                                         <option value="pending">Pending</option>
                                         <option value="approved">Approved</option>
                                         <option value="rejected">Rejected</option>
@@ -136,7 +132,7 @@ export default function Edit({ workLog }) {
                             </div>
 
                             {/* Description */}
-                            <div>
+                            {/* <div>
                                 <label className="block text-sm font-medium text-gray-700">
                                     Additional Description / Actions Taken <span className="text-red-500">*</span>
                                 </label>
@@ -144,14 +140,13 @@ export default function Edit({ workLog }) {
                                     rows="4"
                                     value={data.description}
                                     onChange={(e) => setData('description', e.target.value)}
-                                    className={`mt-1 block w-full rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500 ${
-                                        errors.description ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'
-                                    }`}
+                                    className={`mt-1 block w-full rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500 ${errors.description ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'
+                                        }`}
                                 />
                                 {errors.description && (
                                     <p className="mt-1 text-xs text-red-600">{errors.description}</p>
                                 )}
-                            </div>
+                            </div> */}
 
                             {/* Submit Buttons */}
                             <div className="flex justify-end space-x-3">

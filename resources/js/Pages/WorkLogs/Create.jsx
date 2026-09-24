@@ -5,9 +5,9 @@ export default function Create() {
     const { data, setData, post, processing, errors } = useForm({
         requester_name: '',
         title: '',
-        description: '',
+        // description: '',
         hours_spent: 1,
-        status: 'pending',
+        status: 'submitted', // Default status imewekwa 'submitted'
         log_date: new Date().toISOString().split('T')[0],
     });
 
@@ -127,6 +127,7 @@ export default function Create() {
                                             errors.status ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-300'
                                         }`}
                                     >
+                                        <option value="submitted">Submitted</option>
                                         <option value="pending">Pending</option>
                                         <option value="approved">Approved</option>
                                         <option value="rejected">Rejected</option>
@@ -138,7 +139,7 @@ export default function Create() {
                             </div>
 
                             {/* Description */}
-                            <div>
+                            {/* <div>
                                 <label className="block text-sm font-medium text-gray-700">
                                     Additional Description / Actions Taken <span className="text-red-500">*</span>
                                 </label>
@@ -154,7 +155,7 @@ export default function Create() {
                                 {errors.description && (
                                     <p className="mt-1 text-xs text-red-600">{errors.description}</p>
                                 )}
-                            </div>
+                            </div> */}
 
                             {/* Submit Buttons */}
                             <div className="flex justify-end space-x-3">
