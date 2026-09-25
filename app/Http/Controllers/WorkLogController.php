@@ -41,8 +41,8 @@ class WorkLogController extends Controller {
             'title'          => 'required|string|max:255',
             'log_date'       => 'required|date',
             'hours_spent'    => 'required|integer|min:1|max:24',
-            'status'         => 'required|in:submitted,pending,approved,rejected',
-            // 'description'    => 'required|string',
+            'status'         => 'required|in:submitted, pending, approved, rejected',
+        
         ]);
 
         $request->user()->workLogs()->create($validated);
@@ -92,8 +92,8 @@ class WorkLogController extends Controller {
             'title'          => 'required|string|max:255',
             'log_date'       => 'required|date',
             'hours_spent'    => 'required|integer|min:1|max:24',
-            'status'         => 'required|in:submitted,pending,approved,rejected', 
-            // 'description'    => 'required|string',
+            'status'         => 'required|in:submitted, pending, approved, rejected', 
+            
         ]);
 
         $workLog->update($validated);

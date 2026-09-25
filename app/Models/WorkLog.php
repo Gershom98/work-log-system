@@ -10,7 +10,6 @@ class WorkLog extends Model {
         'user_id',
         'log_date',
         'title',
-        'description',
         'hours_spent',
         'status',
         'supervisor_comment'
