@@ -8,6 +8,7 @@ function StatCard({ title, count = 0, color = 'indigo', iconPath }) {
         green: { border: 'border-green-500', bg: 'bg-green-50', text: 'text-green-600' },
         blue: { border: 'border-blue-500', bg: 'bg-blue-50', text: 'text-blue-600' },
         yellow: { border: 'border-yellow-500', bg: 'bg-yellow-50', text: 'text-yellow-600' },
+        emerald: { border: 'border-emerald-500', bg: 'bg-emerald-50', text: 'text-emerald-600' },
     };
 
     const activeColor = colorClasses[color] || colorClasses.indigo;
@@ -32,7 +33,7 @@ function StatCard({ title, count = 0, color = 'indigo', iconPath }) {
 // Status Badge Component
 function StatusBadge({ status }) {
     const styles = {
-        submitted: 'bg-green-100 text-green-800',
+        submitted: 'bg-emerald-100 text-emerald-800',
         completed: 'bg-green-100 text-green-800',
         approved: 'bg-green-100 text-green-800',
         in_progress: 'bg-blue-100 text-blue-800',
@@ -49,9 +50,11 @@ function StatusBadge({ status }) {
         rejected: 'Rejected',
     };
 
+    const formattedStatus = status ? status.toLowerCase() : '';
+
     return (
-        <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${styles[status] || 'bg-gray-100 text-gray-800'}`}>
-            {labels[status] || status || 'N/A'}
+        <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${styles[formattedStatus] || 'bg-gray-100 text-gray-800'}`}>
+            {labels[formattedStatus] || status || 'N/A'}
         </span>
     );
 }
@@ -92,7 +95,7 @@ export default function Dashboard({ stats = {}, recentLogs = [] }) {
                 <div className="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">
 
                     {/* Summary Cards */}
-                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
                         <StatCard
                             title="Total Work Logs"
                             count={stats?.totalLogs ?? 0}
@@ -102,8 +105,8 @@ export default function Dashboard({ stats = {}, recentLogs = [] }) {
                         <StatCard
                             title="Submitted Tasks"
                             count={stats?.submittedLogs ?? 0}
-                            color="green"
-                            iconPath="M5 13l4 4L19 7"
+                            color="emerald"
+                            iconPath="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
                         />
                         <StatCard
                             title="Completed Tasks"
@@ -132,12 +135,12 @@ export default function Dashboard({ stats = {}, recentLogs = [] }) {
                                 <h3 className="text-lg font-semibold text-gray-800">Recent Work Activity</h3>
 
                                 <div className="flex items-center gap-4">
-                                    {/* Batani ya Download PDF */}
+                                    {/* Download PDF Button */}
                                     <a
                                         href={pdfExportUrl}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded inline-flex items-center text-sm"
+                                        className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded inline-flex items-center text-sm transition"
                                     >
                                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -147,7 +150,7 @@ export default function Dashboard({ stats = {}, recentLogs = [] }) {
 
                                     <Link
                                         href={getRoute('work-logs.index')}
-                                        className="text-sm font-medium text-indigo-600 hover:text-indigo-900"
+                                        className="text-sm font-medium text-indigo-600 hover:text-indigo-900 transition"
                                     >
                                         View All Logs &rarr;
                                     </Link>
