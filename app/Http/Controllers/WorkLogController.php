@@ -41,7 +41,7 @@ class WorkLogController extends Controller {
             'title'          => 'required|string|max:255',
             'log_date'       => 'required|date',
             'hours_spent'    => 'required|integer|min:1|max:24',
-            'status'         => 'required|in:submitted, pending, approved, rejected',
+            'status'         => 'required|in:submitted,pending,approved,rejected',
         
         ]);
 
@@ -92,7 +92,7 @@ class WorkLogController extends Controller {
             'title'          => 'required|string|max:255',
             'log_date'       => 'required|date',
             'hours_spent'    => 'required|integer|min:1|max:24',
-            'status'         => 'required|in:submitted, pending, approved, rejected', 
+            'status'         => 'required|in:submitted,pending,approved,rejected', 
             
         ]);
 
