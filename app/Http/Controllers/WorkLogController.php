@@ -127,21 +127,25 @@ class WorkLogController extends Controller {
 
             $user = $request->user();
 
+            // Hakikisha temp directory ipo
+            $tempDir = storage_path( 'app/temp' );
+            if ( !file_exists( $tempDir ) ) {
+                mkdir( $tempDir, 0755, true );
+            }
+
             $pdf = Pdf::loadView( 'pdf.work-logs', compact( 'workLogs', 'user' ) )
             ->setPaper( 'a4', 'portrait' )
             ->setOptions( [
                 'isHtml5ParserEnabled' => true,
                 'isRemoteEnabled'      => true,
-                'chroot'               => public_path(),
+                'chroot'               => base_path(), // Inatoa access ya public na storage
+                'tempDir'              => $tempDir,
             ] );
 
-            return response()->streamDownload(
-                fn () => print( $pdf->output() ),
-                'work-log-report-' . now()->format( 'Y-m-d' ) . '.pdf',
-                [
-                    'Content-Type' => 'application/pdf',
-                ]
-            );
+            $fileName = 'work-log-report-' . now()->format( 'Y-m-d' ) . '.pdf';
+
+            return $pdf->download( $fileName );
+
         } catch ( \Exception $e ) {
             Log::error( 'PDF Error: ' . $e->getMessage() );
             return back()->with( 'error', 'Imefeli kutengeneza PDF: ' . $e->getMessage() );
