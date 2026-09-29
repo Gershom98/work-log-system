@@ -135,12 +135,12 @@ export default function Dashboard({ stats = {}, recentLogs = [] }) {
                                 <h3 className="text-lg font-semibold text-gray-800">Recent Work Activity</h3>
 
                                 <div className="flex items-center gap-4">
-                                    {/* Download PDF Button */}
+                                    {/* Download PDF Anchor Link */}
                                     <a
                                         href={pdfExportUrl}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded inline-flex items-center text-sm transition"
+                                        className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded inline-flex items-center text-sm cursor-pointer transition"
                                     >
                                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
