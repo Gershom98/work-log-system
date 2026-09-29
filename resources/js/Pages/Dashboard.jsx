@@ -41,7 +41,7 @@ function StatusBadge({ status }) {
     };
 
     const labels = {
-        submitted: 'submitted',
+        submitted: 'Submitted',
         completed: 'Completed',
         approved: 'Approved',
         in_progress: 'In Progress',
@@ -59,13 +59,22 @@ function StatusBadge({ status }) {
 export default function Dashboard({ stats = {}, recentLogs = [] }) {
     const getRoute = (routeName, param = null) => {
         if (typeof route === 'function') {
-            return param ? route(routeName, param) : route(routeName);
+            try {
+                return param ? route(routeName, param) : route(routeName);
+            } catch (e) {
+                console.warn(`Route ${routeName} not found in Ziggy, using fallback.`);
+            }
         }
         return param ? `/work-logs/${param}` : '/work-logs';
     };
 
-    // Link ya kudownload PDF
-    const pdfExportUrl = typeof route === 'function' ? route('work-logs.downloadPdf') : '/work-logs/download-pdf';
+    // Safe PDF Export URL fallback
+    const pdfExportUrl = (typeof route === 'function')
+        ? (() => {
+            try { return route('work-logs.downloadPdf'); } 
+            catch (e) { return '/work-logs/download-pdf'; }
+        })()
+        : '/work-logs/download-pdf';
 
     return (
         <AuthenticatedLayout
@@ -91,7 +100,7 @@ export default function Dashboard({ stats = {}, recentLogs = [] }) {
                             iconPath="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                         />
                         <StatCard
-                            title="submitted Tasks"
+                            title="Submitted Tasks"
                             count={stats?.submittedLogs ?? 0}
                             color="green"
                             iconPath="M5 13l4 4L19 7"
@@ -125,16 +134,16 @@ export default function Dashboard({ stats = {}, recentLogs = [] }) {
                                 <div className="flex items-center gap-4">
                                     {/* Batani ya Download PDF */}
                                     <a
-                                        href={route('work-logs.download-pdf')}
+                                        href={pdfExportUrl}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded inline-flex items-center"
+                                        className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded inline-flex items-center text-sm"
                                     >
                                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                         </svg>
                                         Download PDF
-                                        </a> 
+                                    </a>
 
                                     <Link
                                         href={getRoute('work-logs.index')}
