@@ -42,7 +42,6 @@ class WorkLogController extends Controller {
             'log_date'       => 'required|date',
             'hours_spent'    => 'required|integer|min:1|max:24',
             'status'         => 'required|in:submitted,pending,approved,rejected',
-        
         ]);
 
         $request->user()->workLogs()->create($validated);
@@ -93,7 +92,6 @@ class WorkLogController extends Controller {
             'log_date'       => 'required|date',
             'hours_spent'    => 'required|integer|min:1|max:24',
             'status'         => 'required|in:submitted,pending,approved,rejected', 
-            
         ]);
 
         $workLog->update($validated);
@@ -119,7 +117,11 @@ class WorkLogController extends Controller {
      * Download the authenticated user's work logs report as a PDF.
     */
 
-    public function downloadPdf( Request $request ) {
+    public function downloadPdf( Request $request )  {
+        // Ongeza memory limit na execution time ili kuzuia error kwenye server zenye memory ndogo ( mf. Render )
+        ini_set( 'memory_limit', '256M' );
+        set_time_limit( 300 );
+
         try {
             $workLogs = WorkLog::where( 'user_id', $request->user()->id )
             ->latest( 'log_date' )
@@ -148,7 +150,9 @@ class WorkLogController extends Controller {
 
         } catch ( \Exception $e ) {
             Log::error( 'PDF Error: ' . $e->getMessage() );
-            return back()->with( 'error', 'Imefeli kutengeneza PDF: ' . $e->getMessage() );
+
+            // Rudisha HTTP 500 Response yenye ujumbe badala ya Inertia redirect ili tab mpya ionyeshe kosa wazi
+            return response( 'Imefeli kutengeneza PDF: ' . $e->getMessage(), 500 );
         }
     }
 }

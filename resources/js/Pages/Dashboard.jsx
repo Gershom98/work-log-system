@@ -71,14 +71,6 @@ export default function Dashboard({ stats = {}, recentLogs = [] }) {
         return param ? `/work-logs/${param}` : '/work-logs';
     };
 
-    // Safe PDF Export URL fallback
-    const pdfExportUrl = (typeof route === 'function')
-        ? (() => {
-            try { return route('work-logs.downloadPdf'); } 
-            catch (e) { return '/work-logs/download-pdf'; }
-        })()
-        : '/work-logs/download-pdf';
-
     return (
         <AuthenticatedLayout
             header={
@@ -135,11 +127,9 @@ export default function Dashboard({ stats = {}, recentLogs = [] }) {
                                 <h3 className="text-lg font-semibold text-gray-800">Recent Work Activity</h3>
 
                                 <div className="flex items-center gap-4">
-                                    {/* Download PDF Anchor Link */}
+                                    {/* Direct HTML Anchor Link for Download */}
                                     <a
-                                        href={pdfExportUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
+                                        href="/work-logs/download-pdf"
                                         className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded inline-flex items-center text-sm cursor-pointer transition"
                                     >
                                         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
