@@ -1,6 +1,6 @@
 FROM php:8.2-fpm
 
-# Install system dependencies & libraries needed for DomPDF (GD, Fonts, Libxml)
+# 1. Install system dependencies & libraries needed for DomPDF (GD, Fonts, Libxml)
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -16,40 +16,44 @@ RUN apt-get update && apt-get install -y \
 # Clear apt cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Configure and Install PHP extensions
+# 2. Configure and Install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd xml dom
 
-# Increase PHP Memory Limit for PDF Generation
+# 3. Increase PHP Memory Limit for PDF Generation
 RUN echo "memory_limit=256M" > /usr/local/etc/php/conf.d/memory-limit.ini
 
-# Get latest Composer
+# 4. Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Set working directory
 WORKDIR /var/www
 
-# Copy application files
+# 5. Copy composer dependencies first (for layer caching)
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --no-autoloader
+
+# 6. COPY mradi wote (ikijumuisha resources/views/pdf/work-logs.blade.php)
 COPY . .
 
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader
+# 7. Complete composer dump-autoload
+RUN composer dump-autoload --optimize
 
-# Install Node dependencies and build assets
+# 8. Install Node dependencies & build frontend assets (Inertia/Vite)
 RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs \
     && npm install \
     && npm run build
 
-# Clear Laravel caches during build phase
+# 9. Clear Laravel build caches
 RUN php artisan config:clear && php artisan view:clear && php artisan route:clear
 
-# Create necessary storage directories and fix permissions
+# 10. Create necessary storage directories and fix Linux permissions
 RUN mkdir -p /var/www/storage/fonts /var/www/storage/framework/views \
     && chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
     && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
 EXPOSE 80
 
-# Execute migrations, clear view cache on startup, and serve
+# 11. Run migrations, clear startup cache, and start PHP server
 CMD php artisan migrate --force && php artisan view:clear && php artisan config:clear && php artisan serve --host=0.0.0.0 --port=80
