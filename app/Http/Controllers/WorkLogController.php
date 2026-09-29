@@ -7,11 +7,10 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\View;
 
 class WorkLogController extends Controller {
-    /**
-    * Display a listing of the user's work logs.
-     */
+
     public function index(Request $request)
     {
         $logs = WorkLog::where('user_id', $request->user()->id)
@@ -23,17 +22,11 @@ class WorkLogController extends Controller {
         ]);
     }
 
-    /**
-     * Show the form for creating a new work log.
-     */
     public function create()
     {
         return Inertia::render('WorkLogs/Create');
     }
 
-    /**
-     * Store a newly created work log in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -49,9 +42,6 @@ class WorkLogController extends Controller {
         return redirect()->route('work-logs.index')->with('message', 'Work log created successfully!');
     }
 
-    /**
-     * Display the specified work log.
-     */
     public function show(Request $request, WorkLog $workLog)
     {
         if ($workLog->user_id !== $request->user()->id) {
@@ -63,9 +53,6 @@ class WorkLogController extends Controller {
         ]);
     }
 
-    /**
-     * Show the form for editing the specified work log.
-     */
     public function edit(Request $request, WorkLog $workLog)
     {
         if ($workLog->user_id !== $request->user()->id) {
@@ -77,9 +64,6 @@ class WorkLogController extends Controller {
         ]);
     }
 
-    /**
-     * Update the specified work log in storage.
-     */
     public function update(Request $request, WorkLog $workLog)
     {
         if ($workLog->user_id !== $request->user()->id) {
@@ -99,9 +83,6 @@ class WorkLogController extends Controller {
         return redirect()->route('work-logs.index')->with('message', 'Work log updated successfully!');
     }
 
-    /**
-     * Remove the specified work log from storage.
-     */
     public function destroy(Request $request, WorkLog $workLog)
     {
         if ($workLog->user_id !== $request->user()->id) {
@@ -115,44 +96,42 @@ class WorkLogController extends Controller {
 
     /**
      * Download the authenticated user's work logs report as a PDF.
-    */
-
-    public function downloadPdf( Request $request )  {
-        // Ongeza memory limit na execution time ili kuzuia error kwenye server zenye memory ndogo ( mf. Render )
-        ini_set( 'memory_limit', '256M' );
-        set_time_limit( 300 );
+     */
+    public function downloadPdf(Request $request) 
+    {
+        ini_set('memory_limit', '256M');
+        set_time_limit(300);
 
         try {
-            $workLogs = WorkLog::where( 'user_id', $request->user()->id )
-            ->latest( 'log_date' )
-            ->get();
+            // Check if blade view exists before trying to load it
+            if (!View::exists('pdf.work-logs')) {
+                Log::error('PDF Error: View resources/views/pdf/work-logs.blade.php missing.');
+                return response('Kosa: Faili la template ya PDF (resources/views/pdf/work-logs.blade.php) halipatikani kwenye server.', 404);
+            }
+
+            $workLogs = WorkLog::where('user_id', $request->user()->id)
+                ->latest('log_date')
+                ->get();
 
             $user = $request->user();
 
-            // Hakikisha temp directory ipo
-            $tempDir = storage_path( 'app/temp' );
-            if ( !file_exists( $tempDir ) ) {
-                mkdir( $tempDir, 0755, true );
-            }
+            // Use system default temp directory to avoid Linux permission issues on Render
+            $pdf = Pdf::loadView('pdf.work-logs', compact('workLogs', 'user'))
+                ->setPaper('a4', 'portrait')
+                ->setOptions([
+                    'isHtml5ParserEnabled' => true,
+                    'isRemoteEnabled'      => true,
+                    'chroot'               => base_path(),
+                    'tempDir'              => sys_get_temp_dir(),
+                ]);
 
-            $pdf = Pdf::loadView( 'pdf.work-logs', compact( 'workLogs', 'user' ) )
-            ->setPaper( 'a4', 'portrait' )
-            ->setOptions( [
-                'isHtml5ParserEnabled' => true,
-                'isRemoteEnabled'      => true,
-                'chroot'               => base_path(), // Inatoa access ya public na storage
-                'tempDir'              => $tempDir,
-            ] );
+            $fileName = 'work-log-report-' . now()->format('Y-m-d') . '.pdf';
 
-            $fileName = 'work-log-report-' . now()->format( 'Y-m-d' ) . '.pdf';
+            return $pdf->download($fileName);
 
-            return $pdf->download( $fileName );
-
-        } catch ( \Exception $e ) {
-            Log::error( 'PDF Error: ' . $e->getMessage() );
-
-            // Rudisha HTTP 500 Response yenye ujumbe badala ya Inertia redirect ili tab mpya ionyeshe kosa wazi
-            return response( 'Imefeli kutengeneza PDF: ' . $e->getMessage(), 500 );
+        } catch (\Exception $e) {
+            Log::error('PDF Generation Error: ' . $e->getMessage());
+            return response('Imefeli kutengeneza PDF: ' . $e->getMessage(), 500);
         }
     }
 }
