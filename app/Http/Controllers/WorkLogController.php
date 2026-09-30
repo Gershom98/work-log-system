@@ -9,16 +9,17 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View;
 
-class WorkLogController extends Controller {
-
+class WorkLogController extends Controller 
+{
     public function index(Request $request)
     {
+        // filter kwa user_id ya aliyelogin pekee
         $logs = WorkLog::where('user_id', $request->user()->id)
             ->latest('log_date')
             ->paginate(10);
 
         return Inertia::render('WorkLogs/Index', [
-            'logs' => $logs
+            'logs' => $logs,
         ]);
     }
 

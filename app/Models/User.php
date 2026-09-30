@@ -51,8 +51,4 @@ class User extends Authenticatable {
     public function workLogs() {
         return $this->hasMany( WorkLog::class );
     }
-
-    public function department() {
-        return $this->belongsTo( Department::class );
-    }
 }

@@ -31,9 +31,11 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        // Safisha na ujenge session mpya kabisa
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Elekeza moja kwa moja kwenye work-logs bila kutumia intended URL ya zamani
+        return redirect()->route('work-logs.index');
     }
 
     /**
@@ -47,6 +49,6 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect('/login');
     }
 }
