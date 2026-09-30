@@ -10,14 +10,27 @@ export default function AuthenticatedLayout({ header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
 
+    // Helper ya kupata URL ya Download PDF
+    const getDownloadPdfUrl = () => {
+        if (typeof route === 'function') {
+            try {
+                return route('work-logs.downloadPdf');
+            } catch (e) {
+                return '/work-logs/download-pdf';
+            }
+        }
+        return '/work-logs/download-pdf';
+    };
+
     return (
         <div className="min-h-screen bg-gray-100">
             <nav className="border-b border-gray-100 bg-white">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 justify-between">
                         <div className="flex">
+                            {/* Brand Logo - Inampeleka user kwenye Daily Work Logs */}
                             <div className="flex shrink-0 items-center">
-                                <Link href={route('dashboard')}>
+                                <Link href={typeof route === 'function' ? route('work-logs.index') : '/work-logs'}>
                                     <div className="flex items-center space-x-2">
                                         <div className="h-9 w-9 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-white text-base shadow-sm">
                                             TL
@@ -29,23 +42,30 @@ export default function AuthenticatedLayout({ header, children }) {
                                 </Link>
                             </div>
 
-                            {/* Navigation Links za Desktop */}
+                            {/* Navigation Links */}
                             <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                                
+                                {/* DASHBOARD LINK: Inaonyeshwa kwa ADMIN pekee */}
+                                {user?.role === 'admin' && (
+                                    <NavLink
+                                        href={typeof route === 'function' ? route('dashboard') : '/dashboard'}
+                                        active={typeof route === 'function' ? route().current('dashboard') : false}
+                                    >
+                                        Dashboard
+                                    </NavLink>
+                                )}
+
+                                {/* DAILY WORK LOGS LINK: Kila mtu anaiona */}
                                 <NavLink
-                                    href={route('dashboard')}
-                                    active={route().current('dashboard')}
-                                >
-                                    Dashboard
-                                </NavLink>
-                                <NavLink
-                                    href={route('work-logs.index')}
-                                    active={route().current('work-logs.index')}
+                                    href={typeof route === 'function' ? route('work-logs.index') : '/work-logs'}
+                                    active={typeof route === 'function' ? route().current('work-logs.index') : false}
                                 >
                                     Daily Work Logs
                                 </NavLink>
                             </div>
                         </div>
 
+                        {/* User Profile Dropdown */}
                         <div className="hidden sm:ms-6 sm:flex sm:items-center">
                             <div className="relative ms-3">
                                 <Dropdown>
@@ -75,12 +95,12 @@ export default function AuthenticatedLayout({ header, children }) {
 
                                     <Dropdown.Content>
                                         <Dropdown.Link
-                                            href={route('profile.edit')}
+                                            href={typeof route === 'function' ? route('profile.edit') : '/profile'}
                                         >
                                             Profile
                                         </Dropdown.Link>
                                         <Dropdown.Link
-                                            href={route('logout')}
+                                            href={typeof route === 'function' ? route('logout') : '/logout'}
                                             method="post"
                                             as="button"
                                         >
@@ -91,6 +111,7 @@ export default function AuthenticatedLayout({ header, children }) {
                             </div>
                         </div>
 
+                        {/* Hamburger Button kwa ajili ya Mobile */}
                         <div className="-me-2 flex items-center sm:hidden">
                             <button
                                 onClick={() =>
@@ -142,15 +163,19 @@ export default function AuthenticatedLayout({ header, children }) {
                     }
                 >
                     <div className="space-y-1 pb-3 pt-2">
+                        {/* Dashboard kwa Admin tu kwenye Mobile */}
+                        {user?.role === 'admin' && (
+                            <ResponsiveNavLink
+                                href={typeof route === 'function' ? route('dashboard') : '/dashboard'}
+                                active={typeof route === 'function' ? route().current('dashboard') : false}
+                            >
+                                Dashboard
+                            </ResponsiveNavLink>
+                        )}
+
                         <ResponsiveNavLink
-                            href={route('dashboard')}
-                            active={route().current('dashboard')}
-                        >
-                            Dashboard
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            href={route('work-logs.index')}
-                            active={route().current('work-logs.index')}
+                            href={typeof route === 'function' ? route('work-logs.index') : '/work-logs'}
+                            active={typeof route === 'function' ? route().current('work-logs.index') : false}
                         >
                             Daily Work Logs
                         </ResponsiveNavLink>
@@ -167,12 +192,12 @@ export default function AuthenticatedLayout({ header, children }) {
                         </div>
 
                         <div className="mt-3 space-y-1">
-                            <ResponsiveNavLink href={route('profile.edit')}>
+                            <ResponsiveNavLink href={typeof route === 'function' ? route('profile.edit') : '/profile'}>
                                 Profile
                             </ResponsiveNavLink>
                             <ResponsiveNavLink
                                 method="post"
-                                href={route('logout')}
+                                href={typeof route === 'function' ? route('logout') : '/logout'}
                                 as="button"
                             >
                                 Log Out

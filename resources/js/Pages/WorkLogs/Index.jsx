@@ -2,7 +2,9 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 
 export default function Index({ logs }) {
-    const { flash } = usePage().props;
+    const { flash, auth } = usePage().props;
+    // Angalia kama aliyeingia ni Admin
+    const isAdmin = auth?.user?.role === 'admin';
 
     const handleDelete = (id) => {
         if (confirm('Are you sure you want to delete this work log?')) {
@@ -11,7 +13,6 @@ export default function Index({ logs }) {
         }
     };
 
-    // Helper for status badge styling
     const getStatusBadge = (status) => {
         switch (status) {
             case 'submitted':
@@ -27,6 +28,17 @@ export default function Index({ logs }) {
         }
     };
 
+    const getDownloadPdfUrl = () => {
+        if (typeof route === 'function') {
+            try {
+                return route('work-logs.downloadPdf');
+            } catch (e) {
+                return '/work-logs/download-pdf';
+            }
+        }
+        return '/work-logs/download-pdf';
+    };
+
     return (
         <AuthenticatedLayout
             header={
@@ -34,12 +46,27 @@ export default function Index({ logs }) {
                     <h2 className="text-xl font-semibold leading-tight text-gray-800">
                         Work Logs List
                     </h2>
-                    <Link
-                        href={typeof route === 'function' ? route('work-logs.create') : '/work-logs/create'}
-                        className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none"
-                    >
-                        + Add New Log
-                    </Link>
+
+                    <div className="flex items-center space-x-3">
+                        <a
+                            href={getDownloadPdfUrl()}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 focus:outline-none transition ease-in-out duration-150"
+                        >
+                            <svg className="me-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Download Report (PDF)
+                        </a>
+
+                        <Link
+                            href={typeof route === 'function' ? route('work-logs.create') : '/work-logs/create'}
+                            className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none"
+                        >
+                            + Add New Log
+                        </Link>
+                    </div>
                 </div>
             }
         >
@@ -48,7 +75,6 @@ export default function Index({ logs }) {
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-4">
 
-                    {/* Flash Success Message */}
                     {flash?.message && (
                         <div className="rounded-md bg-green-50 p-4 border border-green-200 text-sm text-green-800">
                             {flash.message}
@@ -61,7 +87,15 @@ export default function Index({ logs }) {
                                 <thead className="bg-gray-50">
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requester</th>
+
+                                        {/* Inaonyeshwa kwa ADMIN pekee */}
+                                        {isAdmin && (
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Submitted By
+                                            </th>
+                                        )}
+
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requester / Client</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Task Title</th>
                                         <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Hours</th>
                                         <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -75,6 +109,19 @@ export default function Index({ logs }) {
                                                 <td className="px-6 py-4 whitespace-nowrap text-gray-600">
                                                     {log.log_date}
                                                 </td>
+
+                                                {/* Data ya Submitted By inaonyeshwa kwa ADMIN pekee */}
+                                                {isAdmin && (
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <div className="font-semibold text-gray-900">
+                                                            {log.user?.name || 'N/A'}
+                                                        </div>
+                                                        <div className="text-xs text-gray-500">
+                                                            {log.user?.email || ''}
+                                                        </div>
+                                                    </td>
+                                                )}
+
                                                 <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
                                                     {log.requester_name}
                                                 </td>
@@ -105,7 +152,7 @@ export default function Index({ logs }) {
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan="6" className="px-6 py-10 text-center text-gray-500">
+                                            <td colSpan={isAdmin ? 7 : 6} className="px-6 py-10 text-center text-gray-500">
                                                 No work logs recorded yet.
                                             </td>
                                         </tr>
@@ -123,8 +170,8 @@ export default function Index({ logs }) {
                                                 href={link.url}
                                                 dangerouslySetInnerHTML={{ __html: link.label }}
                                                 className={`px-3 py-1 text-sm rounded border ${link.active
-                                                        ? 'bg-indigo-600 text-white border-indigo-600'
-                                                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                                    ? 'bg-indigo-600 text-white border-indigo-600'
+                                                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                                                     }`}
                                             />
                                         ) : (

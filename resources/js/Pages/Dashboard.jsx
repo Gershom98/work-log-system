@@ -1,146 +1,99 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
 
-// Reusable Summary Card Component
-function StatCard({ title, count = 0, color = 'indigo', iconPath }) {
-    const colorClasses = {
-        indigo: { border: 'border-indigo-500', bg: 'bg-indigo-50', text: 'text-indigo-600' },
-        green: { border: 'border-green-500', bg: 'bg-green-50', text: 'text-green-600' },
-        blue: { border: 'border-blue-500', bg: 'bg-blue-50', text: 'text-blue-600' },
-        yellow: { border: 'border-yellow-500', bg: 'bg-yellow-50', text: 'text-yellow-600' },
-        emerald: { border: 'border-emerald-500', bg: 'bg-emerald-50', text: 'text-emerald-600' },
-    };
-
-    const activeColor = colorClasses[color] || colorClasses.indigo;
-
-    return (
-        <div className={`overflow-hidden rounded-lg bg-white p-5 shadow-sm border-l-4 ${activeColor.border}`}>
-            <div className="flex items-center justify-between">
-                <div>
-                    <p className="text-sm font-medium text-gray-500">{title}</p>
-                    <p className="mt-1 text-3xl font-semibold text-gray-900">{count ?? 0}</p>
-                </div>
-                <div className={`rounded-full p-3 ${activeColor.bg} ${activeColor.text}`}>
-                    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={iconPath} />
-                    </svg>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-// Status Badge Component
-function StatusBadge({ status }) {
-    const styles = {
-        submitted: 'bg-emerald-100 text-emerald-800',
-        completed: 'bg-green-100 text-green-800',
-        approved: 'bg-green-100 text-green-800',
-        in_progress: 'bg-blue-100 text-blue-800',
-        pending: 'bg-yellow-100 text-yellow-800',
-        rejected: 'bg-red-100 text-red-800',
-    };
-
-    const labels = {
-        submitted: 'Submitted',
-        completed: 'Completed',
-        approved: 'Approved',
-        in_progress: 'In Progress',
-        pending: 'Pending',
-        rejected: 'Rejected',
-    };
-
-    const formattedStatus = status ? status.toLowerCase() : '';
-
-    return (
-        <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${styles[formattedStatus] || 'bg-gray-100 text-gray-800'}`}>
-            {labels[formattedStatus] || status || 'N/A'}
-        </span>
-    );
-}
-
-export default function Dashboard({ stats = {}, recentLogs = [] }) {
-    const getRoute = (routeName, param = null) => {
+export default function Dashboard({ stats, recentLogs }) {
+    // Helper ya kupata URL ya Download PDF
+    const getDownloadPdfUrl = () => {
         if (typeof route === 'function') {
             try {
-                return param ? route(routeName, param) : route(routeName);
+                return route('work-logs.downloadPdf');
             } catch (e) {
-                console.warn(`Route ${routeName} not found in Ziggy, using fallback.`);
+                return '/work-logs/download-pdf';
             }
         }
-        return param ? `/work-logs/${param}` : '/work-logs';
+        return '/work-logs/download-pdf';
     };
 
     return (
         <AuthenticatedLayout
             header={
-                <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                        Work Log Dashboard
-                    </h2>
-                </div>
+                <h2 className="text-xl font-semibold leading-tight text-gray-800">
+                    Admin Dashboard
+                </h2>
             }
         >
-            <Head title="Work Log Dashboard" />
+            <Head title="Admin Dashboard" />
 
             <div className="py-12">
                 <div className="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">
 
-                    {/* Summary Cards */}
-                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
-                        <StatCard
-                            title="Total Work Logs"
-                            count={stats?.totalLogs ?? 0}
-                            color="indigo"
-                            iconPath="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                        />
-                        <StatCard
-                            title="Submitted Tasks"
-                            count={stats?.submittedLogs ?? 0}
-                            color="emerald"
-                            iconPath="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-                        />
-                        <StatCard
-                            title="Completed Tasks"
-                            count={stats?.completedLogs ?? 0}
-                            color="green"
-                            iconPath="M5 13l4 4L19 7"
-                        />
-                        <StatCard
-                            title="In Progress"
-                            count={stats?.inProgressLogs ?? 0}
-                            color="blue"
-                            iconPath="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                        <StatCard
-                            title="Pending Tasks"
-                            count={stats?.pendingLogs ?? 0}
-                            color="yellow"
-                            iconPath="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
+                    {/* Stats Cards Section */}
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                        <div className="overflow-hidden rounded-lg bg-white p-5 shadow">
+                            <div className="flex items-center">
+                                <div className="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt className="truncate text-sm font-medium text-gray-500">Total Work Logs</dt>
+                                        <dd className="text-3xl font-semibold text-gray-900">{stats?.totalLogs || 0}</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="overflow-hidden rounded-lg bg-white p-5 shadow">
+                            <div className="flex items-center">
+                                <div className="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt className="truncate text-sm font-medium text-gray-500">Submitted Logs</dt>
+                                        <dd className="text-3xl font-semibold text-blue-600">{stats?.submittedLogs || 0}</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="overflow-hidden rounded-lg bg-white p-5 shadow">
+                            <div className="flex items-center">
+                                <div className="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt className="truncate text-sm font-medium text-gray-500">Completed / Approved</dt>
+                                        <dd className="text-3xl font-semibold text-emerald-600">{stats?.completedLogs || 0}</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="overflow-hidden rounded-lg bg-white p-5 shadow">
+                            <div className="flex items-center">
+                                <div className="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt className="truncate text-sm font-medium text-gray-500">Pending Logs</dt>
+                                        <dd className="text-3xl font-semibold text-amber-600">{stats?.pendingLogs || 0}</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Recent Work Activity Table */}
+                    {/* Recent Work Activity Section */}
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div className="p-6 text-gray-900">
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 gap-3">
-                                <h3 className="text-lg font-semibold text-gray-800">Recent Work Activity</h3>
-
-                                <div className="flex items-center gap-4">
-                                    {/* Direct HTML Anchor Link for Download */}
+                            <div className="mb-6 flex items-center justify-between">
+                                <h3 className="text-lg font-bold text-gray-800">Recent Work Activity</h3>
+                                <div className="flex items-center space-x-4">
                                     <a
-                                        href="/work-logs/download-pdf"
-                                        className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded inline-flex items-center text-sm cursor-pointer transition"
+                                        href={getDownloadPdfUrl()}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 transition duration-150"
                                     >
-                                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                        <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
                                         Download PDF
                                     </a>
-
                                     <Link
-                                        href={getRoute('work-logs.index')}
-                                        className="text-sm font-medium text-indigo-600 hover:text-indigo-900 transition"
+                                        href={typeof route === 'function' ? route('work-logs.index') : '/work-logs'}
+                                        className="text-sm font-semibold text-indigo-600 hover:text-indigo-800"
                                     >
                                         View All Logs &rarr;
                                     </Link>
@@ -151,31 +104,47 @@ export default function Dashboard({ stats = {}, recentLogs = [] }) {
                                 <table className="min-w-full divide-y divide-gray-200">
                                     <thead className="bg-gray-50">
                                         <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Date</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Requester / Client</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Task Title</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Status</th>
-                                            <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">Action</th>
+                                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+                                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Submitted By</th>
+                                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Requester / Client</th>
+                                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Task Title</th>
+                                            <th className="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Action</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-200 bg-white">
+                                    <tbody className="bg-white divide-y divide-gray-200 text-sm">
                                         {recentLogs && recentLogs.length > 0 ? (
                                             recentLogs.map((log) => (
-                                                <tr key={log.id} className="hover:bg-gray-50 transition">
-                                                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                                                        {log.log_date || log.date || '-'}
+                                                <tr key={log.id} className="hover:bg-gray-50">
+                                                    <td className="px-6 py-4 whitespace-nowrap text-gray-500">
+                                                        {log.log_date}
                                                     </td>
-                                                    <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
-                                                        {log.requester_name || log.reported_by || log.client_name || '-'}
+
+                                                    {/* Jina na Email ya Aliyetuma Log */}
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <div className="font-semibold text-gray-900">
+                                                            {log.user?.name || 'N/A'}
+                                                        </div>
+                                                        <div className="text-xs text-gray-500">
+                                                            {log.user?.email || ''}
+                                                        </div>
                                                     </td>
-                                                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">{log.title || '-'}</td>
-                                                    <td className="whitespace-nowrap px-6 py-4 text-sm">
-                                                        <StatusBadge status={log.status} />
+
+                                                    <td className="px-6 py-4 whitespace-nowrap text-gray-800 font-medium">
+                                                        {log.requester_name}
                                                     </td>
-                                                    <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
+                                                    <td className="px-6 py-4 text-gray-700 max-w-xs truncate">
+                                                        {log.title}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                                                        <span className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
+                                                            {log.status ? log.status.charAt(0).toUpperCase() + log.status.slice(1) : 'Submitted'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                         <Link
-                                                            href={getRoute('work-logs.show', log.id)}
-                                                            className="text-indigo-600 hover:text-indigo-900"
+                                                            href={typeof route === 'function' ? route('work-logs.edit', log.id) : `/work-logs/${log.id}/edit`}
+                                                            className="text-indigo-600 hover:text-indigo-900 font-semibold"
                                                         >
                                                             View
                                                         </Link>
@@ -184,14 +153,15 @@ export default function Dashboard({ stats = {}, recentLogs = [] }) {
                                             ))
                                         ) : (
                                             <tr>
-                                                <td colSpan="5" className="px-6 py-4 text-center text-sm text-gray-500">
-                                                    No recent work logs recorded yet.
+                                                <td colSpan="6" className="px-6 py-10 text-center text-gray-500">
+                                                    No recent work activity found.
                                                 </td>
                                             </tr>
                                         )}
                                     </tbody>
                                 </table>
                             </div>
+
                         </div>
                     </div>
 

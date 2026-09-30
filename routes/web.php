@@ -20,7 +20,7 @@ Route::get('/', function () {
 // Protected Routes (Inahitaji Login na Email Verification)
 Route::middleware(['auth', 'verified'])->group(function () {
     
-    // Dashboard - Inatumia DashboardController ili kupata Takwimu (Stats) na Recent Logs
+    // 🔒 Dashboard - Inaweza kufikiwa na Admin TU au kupitia Controller Redirect Check
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Profile Management
@@ -29,12 +29,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Daily Work Logs (Resource Routes)
-    // 💡 ROUTE YA DOWNLOAD PDF (Lazima ikae juu ya /{workLog})
     Route::get('/work-logs/download-pdf', [WorkLogController::class, 'downloadPdf'])->name('work-logs.downloadPdf');
-    // Daily Work Logs (Resource Routes)
     Route::get('/work-logs', [WorkLogController::class, 'index'])->name('work-logs.index');
     Route::get('/work-logs/create', [WorkLogController::class, 'create'])->name('work-logs.create');
-
     Route::post('/work-logs', [WorkLogController::class, 'store'])->name('work-logs.store');
     Route::get('/work-logs/{workLog}', [WorkLogController::class, 'show'])->name('work-logs.show');
     Route::get('/work-logs/{workLog}/edit', [WorkLogController::class, 'edit'])->name('work-logs.edit');
