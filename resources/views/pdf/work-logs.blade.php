@@ -126,18 +126,23 @@
         border-top: 1px solid #e5e7eb;
         padding-top: 5px;
     }
-
-    .pagenum:before {
-        content: counter(page);
-    }
     </style>
 </head>
 
 <body>
 
-    <footer>
-        Daily Work Log Report &mdash; Generated automatically | Page <span class="pagenum"></span>
-    </footer>
+    <!-- Script ya DomPDF kwa ajili ya kuonyesha Pagination ya Ukurasa (Page X of Y) -->
+    <script type="text/php">
+        if (isset($pdf)) {
+            $text = "Daily Work Log Report — Generated automatically | Page {PAGE_NUM} of {PAGE_COUNT}";
+            $font = $fontMetrics->get_font("Helvetica", "normal");
+            $size = 9;
+            $color = array(0.42, 0.45, 0.5); // Rangi sawa na #6b7280
+            
+            // Inaweka footer katikati chini kabisa ya kila ukurasa
+            $pdf->page_text(160, 815, $text, $font, $size, $color);
+        }
+    </script>
 
     <div class="header">
         <h2>Daily Work Log Report</h2>
