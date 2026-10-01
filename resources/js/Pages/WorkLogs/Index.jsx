@@ -1,10 +1,41 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 
-export default function Index({ logs }) {
+export default function Index({ logs, filters = {} }) {
     const { flash, auth } = usePage().props;
-    // Angalia kama aliyeingia ni Admin
-    const isAdmin = auth?.user?.role === 'admin';
+
+    // Angalia kama aliyeingia ni Admin au Supervisor
+    const isAdminOrSupervisor = ['admin', 'supervisor'].includes(auth?.user?.role);
+
+    // State za Filter
+    const [search, setSearch] = useState(filters.search || '');
+    const [status, setStatus] = useState(filters.status || '');
+    const [startDate, setStartDate] = useState(filters.start_date || '');
+    const [endDate, setEndDate] = useState(filters.end_date || '');
+
+    // Function ya kutuma Filter request kwa server
+    const handleFilter = (e) => {
+        e.preventDefault();
+        router.get(
+            typeof route === 'function' ? route('work-logs.index') : '/work-logs',
+            { search, status, start_date: startDate, end_date: endDate },
+            { preserveState: true, replace: true }
+        );
+    };
+
+    // Reset Filters
+    const handleReset = () => {
+        setSearch('');
+        setStatus('');
+        setStartDate('');
+        setEndDate('');
+        router.get(
+            typeof route === 'function' ? route('work-logs.index') : '/work-logs',
+            {},
+            { preserveState: true, replace: true }
+        );
+    };
 
     const handleDelete = (id) => {
         if (confirm('Are you sure you want to delete this work log?')) {
@@ -28,21 +59,24 @@ export default function Index({ logs }) {
         }
     };
 
+    // Tengeneza URL ya PDF ikiwa na query parameters zote za filters
     const getDownloadPdfUrl = () => {
-        if (typeof route === 'function') {
-            try {
-                return route('work-logs.downloadPdf');
-            } catch (e) {
-                return '/work-logs/download-pdf';
-            }
-        }
-        return '/work-logs/download-pdf';
+        const baseUrl = typeof route === 'function' ? route('work-logs.downloadPdf') : '/work-logs/download-pdf';
+        const params = new URLSearchParams();
+
+        if (search) params.append('search', search);
+        if (status) params.append('status', status);
+        if (startDate) params.append('start_date', startDate);
+        if (endDate) params.append('end_date', endDate);
+
+        const queryString = params.toString();
+        return queryString ? `${baseUrl}?${queryString}` : baseUrl;
     };
 
     return (
         <AuthenticatedLayout
             header={
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <h2 className="text-xl font-semibold leading-tight text-gray-800">
                         Work Logs List
                     </h2>
@@ -72,7 +106,7 @@ export default function Index({ logs }) {
         >
             <Head title="Work Logs List" />
 
-            <div className="py-12">
+            <div className="py-8">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-4">
 
                     {flash?.message && (
@@ -81,6 +115,74 @@ export default function Index({ logs }) {
                         </div>
                     )}
 
+                    {/* Filter Section */}
+                    <div className="bg-white p-4 shadow-sm sm:rounded-lg">
+                        <form onSubmit={handleFilter} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 items-end">
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Search</label>
+                                <input
+                                    type="text"
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    placeholder="Title or Requester..."
+                                    className="w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
+                                <select
+                                    value={status}
+                                    onChange={(e) => setStatus(e.target.value)}
+                                    className="w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                >
+                                    <option value="">All Statuses</option>
+                                    <option value="submitted">Submitted</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="approved">Approved</option>
+                                    <option value="rejected">Rejected</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">From Date</label>
+                                <input
+                                    type="date"
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                    className="w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">To Date</label>
+                                <input
+                                    type="date"
+                                    value={endDate}
+                                    onChange={(e) => setEndDate(e.target.value)}
+                                    className="w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                />
+                            </div>
+
+                            <div className="flex space-x-2">
+                                <button
+                                    type="submit"
+                                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2 px-3 rounded-md shadow-sm transition"
+                                >
+                                    Filter
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleReset}
+                                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium py-2 px-3 rounded-md transition"
+                                >
+                                    Reset
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    {/* Table Section */}
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div className="p-6 text-gray-900 overflow-x-auto">
                             <table className="min-w-full divide-y divide-gray-200">
@@ -88,8 +190,8 @@ export default function Index({ logs }) {
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
 
-                                        {/* Inaonyeshwa kwa ADMIN pekee */}
-                                        {isAdmin && (
+                                        {/* Inaonyeshwa kwa ADMIN/SUPERVISOR pekee */}
+                                        {isAdminOrSupervisor && (
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Submitted By
                                             </th>
@@ -110,8 +212,7 @@ export default function Index({ logs }) {
                                                     {log.log_date}
                                                 </td>
 
-                                                {/* Data ya Submitted By inaonyeshwa kwa ADMIN pekee */}
-                                                {isAdmin && (
+                                                {isAdminOrSupervisor && (
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div className="font-semibold text-gray-900">
                                                             {log.user?.name || 'N/A'}
@@ -152,8 +253,8 @@ export default function Index({ logs }) {
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan={isAdmin ? 7 : 6} className="px-6 py-10 text-center text-gray-500">
-                                                No work logs recorded yet.
+                                            <td colSpan={isAdminOrSupervisor ? 7 : 6} className="px-6 py-10 text-center text-gray-500">
+                                                No work logs found.
                                             </td>
                                         </tr>
                                     )}
