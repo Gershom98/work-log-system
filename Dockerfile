@@ -55,5 +55,5 @@ RUN mkdir -p /var/www/storage/fonts /var/www/storage/framework/views \
 
 EXPOSE 80
 
-# 11. Run migrations, clear startup cache, and start PHP server
-CMD php artisan migrate --force && php artisan view:clear && php artisan config:clear && php artisan serve --host=0.0.0.0 --port=80
+# 11. Run migrations, seeders, clear startup cache, and start PHP server
+CMD php artisan migrate --force && php artisan db:seed --force && php artisan view:clear && php artisan config:clear && php artisan serve --host=0.0.0.0 --port=80

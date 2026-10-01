@@ -15,9 +15,9 @@ class DatabaseSeeder extends Seeder
     {
         // 1. Akaunti ya Admin
         User::updateOrCreate(
-            ['email' => 'admin@example.com'],
+            ['email' => 'admin@logs.com'],
             [
-                'name'     => 'System Admin',
+                'name'     => 'Admin',
                 'password' => Hash::make('password123'), // Weka password unayotaka
                 'role'     => 'admin',
             ]
@@ -25,9 +25,9 @@ class DatabaseSeeder extends Seeder
 
         // 2. Akaunti ya User / Staff wa kawaida
         User::updateOrCreate(
-            ['email' => 'user@example.com'],
+            ['email' => 'user@gmail.com'],
             [
-                'name'     => 'Regular User',
+                'name'     => 'User',
                 'password' => Hash::make('password123'), // Weka password unayotaka
                 'role'     => 'user',
             ]
