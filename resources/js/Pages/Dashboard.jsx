@@ -1,7 +1,8 @@
+import React from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
 
-export default function Dashboard({ stats, recentLogs }) {
+export default function Dashboard({ stats = {}, recentLogs = [] }) {
     // Helper ya kupata URL ya Download PDF
     const getDownloadPdfUrl = () => {
         if (typeof route === 'function') {
@@ -12,6 +13,38 @@ export default function Dashboard({ stats, recentLogs }) {
             }
         }
         return '/work-logs/download-pdf';
+    };
+
+    // Helper ya kutoa Status Badge kwa kulingana na rangi
+    const renderStatusBadge = (status) => {
+        const normalizedStatus = status ? status.toLowerCase() : 'submitted';
+
+        switch (normalizedStatus) {
+            case 'approved':
+                return (
+                    <span className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
+                        Approved
+                    </span>
+                );
+            case 'rejected':
+                return (
+                    <span className="inline-flex rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800">
+                        Rejected
+                    </span>
+                );
+            case 'pending':
+                return (
+                    <span className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
+                        Pending
+                    </span>
+                );
+            default:
+                return (
+                    <span className="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800">
+                        Submitted
+                    </span>
+                );
+        }
     };
 
     return (
@@ -29,52 +62,56 @@ export default function Dashboard({ stats, recentLogs }) {
 
                     {/* Stats Cards Section */}
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                        {/* Total Logs */}
                         <div className="overflow-hidden rounded-lg bg-white p-5 shadow">
                             <div className="flex items-center">
                                 <div className="ml-5 w-0 flex-1">
                                     <dl>
                                         <dt className="truncate text-sm font-medium text-gray-500">Total Work Logs</dt>
-                                        <dd className="text-3xl font-semibold text-gray-900">{stats?.totalLogs || 0}</dd>
+                                        <dd className="text-3xl font-semibold text-gray-900">{stats?.total_logs || 0}</dd>
                                     </dl>
                                 </div>
                             </div>
                         </div>
 
+                        {/* Submitted Logs */}
                         <div className="overflow-hidden rounded-lg bg-white p-5 shadow">
                             <div className="flex items-center">
                                 <div className="ml-5 w-0 flex-1">
                                     <dl>
                                         <dt className="truncate text-sm font-medium text-gray-500">Submitted Logs</dt>
-                                        <dd className="text-3xl font-semibold text-blue-600">{stats?.submittedLogs || 0}</dd>
+                                        <dd className="text-3xl font-semibold text-blue-600">{stats?.submitted_logs || 0}</dd>
                                     </dl>
                                 </div>
                             </div>
                         </div>
 
+                        {/* Approved / Completed Logs */}
                         <div className="overflow-hidden rounded-lg bg-white p-5 shadow">
                             <div className="flex items-center">
                                 <div className="ml-5 w-0 flex-1">
                                     <dl>
-                                        <dt className="truncate text-sm font-medium text-gray-500">Completed / Approved</dt>
-                                        <dd className="text-3xl font-semibold text-emerald-600">{stats?.completedLogs || 0}</dd>
+                                        <dt className="truncate text-sm font-medium text-gray-500">Approved Logs</dt>
+                                        <dd className="text-3xl font-semibold text-emerald-600">{stats?.approved_logs || 0}</dd>
                                     </dl>
                                 </div>
                             </div>
                         </div>
 
+                        {/* Pending Logs */}
                         <div className="overflow-hidden rounded-lg bg-white p-5 shadow">
                             <div className="flex items-center">
                                 <div className="ml-5 w-0 flex-1">
                                     <dl>
                                         <dt className="truncate text-sm font-medium text-gray-500">Pending Logs</dt>
-                                        <dd className="text-3xl font-semibold text-amber-600">{stats?.pendingLogs || 0}</dd>
+                                        <dd className="text-3xl font-semibold text-amber-600">{stats?.pending_logs || 0}</dd>
                                     </dl>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Recent Work Activity Section */}
+                    {/* Recent Work Activity Table */}
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div className="p-6 text-gray-900">
                             <div className="mb-6 flex items-center justify-between">
@@ -120,7 +157,7 @@ export default function Dashboard({ stats, recentLogs }) {
                                                         {log.log_date}
                                                     </td>
 
-                                                    {/* Jina na Email ya Aliyetuma Log */}
+                                                    {/* User Details */}
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div className="font-semibold text-gray-900">
                                                             {log.user?.name || 'N/A'}
@@ -137,9 +174,7 @@ export default function Dashboard({ stats, recentLogs }) {
                                                         {log.title}
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-center">
-                                                        <span className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
-                                                            {log.status ? log.status.charAt(0).toUpperCase() + log.status.slice(1) : 'Submitted'}
-                                                        </span>
+                                                        {renderStatusBadge(log.status)}
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                         <Link
@@ -153,7 +188,7 @@ export default function Dashboard({ stats, recentLogs }) {
                                             ))
                                         ) : (
                                             <tr>
-                                                <td colSpan="6" className="px-6 py-10 text-center text-gray-500">
+                                                <td colSpan={6} className="px-6 py-10 text-center text-gray-500">
                                                     No recent work activity found.
                                                 </td>
                                             </tr>

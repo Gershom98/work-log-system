@@ -9,24 +9,55 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View;
 
-class WorkLogController extends Controller  {
+class WorkLogController extends Controller {
+
     public function index( Request $request ) {
         $user = $request->user();
 
-        // Kama ni admin/supervisor, leta logs ZOTE pamoja na taarifa za mtumiaji aliyeunda log hiyo
+        // 1. Anzisha Eloquent Query Builder
+        $query = WorkLog::query();
+
+        // Kama ni admin/supervisor, leta na mhusika; la sivyo chukua za user huyo tu
         if ( in_array( $user->role, [ 'admin', 'supervisor' ] ) ) {
-            $logs = WorkLog::with( 'user:id,name,email' )
-            ->latest( 'log_date' )
-            ->paginate( 10 );
+            $query->with( 'user:id,name,email' );
         } else {
-            // Kama ni user wa kawaida, leta logs ZAKE PEKEE
-            $logs = WorkLog::where( 'user_id', $user->id )
-            ->latest( 'log_date' )
-            ->paginate( 10 );
+            $query->where( 'user_id', $user->id );
         }
 
+        // 2. Filter: Search Keyword (Title au Requester)
+        if ( $request->filled( 'search' ) ) {
+            $search = $request->input( 'search' );
+            $query->where( function ( $q ) use ( $search ) {
+                $q->where( 'title', 'like', "%{$search}%" )
+                  ->orWhere( 'requester_name', 'like', "%{$search}%" );
+            } );
+        }
+
+        // 3. Filter: Status
+        if ( $request->filled( 'status' ) ) {
+            $query->where( 'status', $request->input( 'status' ) );
+        }
+
+        // 4. Filter: Date Range
+        if ( $request->filled( 'start_date' ) ) {
+            $query->whereDate( 'log_date', '>=', $request->input( 'start_date' ) );
+        }
+
+        if ( $request->filled( 'end_date' ) ) {
+            $query->whereDate( 'log_date', '<=', $request->input( 'end_date' ) );
+        }
+
+        // 5. Paginate na hifadhi query parameters kwenye pagination links
+        $perPage = in_array( $user->role, [ 'admin', 'supervisor' ] ) ? 10 : 10;
+        
+        $logs = $query->latest( 'log_date' )
+                      ->paginate( $perPage )
+                      ->withQueryString();
+
+        // 6. Tuma logs na filters kurudi React (Index.jsx)
         return Inertia::render( 'WorkLogs/Index', [
-            'logs' => $logs,
+            'logs'    => $logs,
+            'filters' => $request->only( [ 'search', 'status', 'start_date', 'end_date' ] ),
         ] );
     }
 
@@ -51,7 +82,6 @@ class WorkLogController extends Controller  {
     public function show( Request $request, WorkLog $workLog ) {
         $user = $request->user();
 
-        // Ruhusu kama ni admin AU kama log ni ya mtumiaji husika
         if ( !in_array( $user->role, [ 'admin', 'supervisor' ] ) && $workLog->user_id !== $user->id ) {
             abort( 403, 'Huna ruhusa ya kuona log hii.' );
         }
@@ -106,10 +136,9 @@ class WorkLogController extends Controller  {
     }
 
     /**
-    * Download the work logs report as a PDF.
+    * Download the work logs report as a PDF (inafuata filters zilizowekwa).
     */
-
-    public function downloadPdf( Request $request )  {
+    public function downloadPdf( Request $request ) {
         ini_set( 'memory_limit', '256M' );
         set_time_limit( 300 );
 
@@ -120,13 +149,36 @@ class WorkLogController extends Controller  {
             }
 
             $user = $request->user();
+            $query = WorkLog::query();
 
-            // Admin anapakua logs zote, User anapakua zake tu
             if ( in_array( $user->role, [ 'admin', 'supervisor' ] ) ) {
-                $workLogs = WorkLog::with( 'user:id,name,email' )->latest( 'log_date' )->get();
+                $query->with( 'user:id,name,email' );
             } else {
-                $workLogs = WorkLog::where( 'user_id', $user->id )->latest( 'log_date' )->get();
+                $query->where( 'user_id', $user->id );
             }
+
+            // Weka filtering zilezile kwa ajili ya PDF report
+            if ( $request->filled( 'search' ) ) {
+                $search = $request->input( 'search' );
+                $query->where( function ( $q ) use ( $search ) {
+                    $q->where( 'title', 'like', "%{$search}%" )
+                      ->orWhere( 'requester_name', 'like', "%{$search}%" );
+                } );
+            }
+
+            if ( $request->filled( 'status' ) ) {
+                $query->where( 'status', $request->input( 'status' ) );
+            }
+
+            if ( $request->filled( 'start_date' ) ) {
+                $query->whereDate( 'log_date', '>=', $request->input( 'start_date' ) );
+            }
+
+            if ( $request->filled( 'end_date' ) ) {
+                $query->whereDate( 'log_date', '<=', $request->input( 'end_date' ) );
+            }
+
+            $workLogs = $query->latest( 'log_date' )->get();
 
             $pdf = Pdf::loadView( 'pdf.work-logs', compact( 'workLogs', 'user' ) )
             ->setPaper( 'a4', 'portrait' )

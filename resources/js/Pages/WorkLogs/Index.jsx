@@ -4,37 +4,40 @@ import { useState } from 'react';
 
 export default function Index({ logs, filters = {} }) {
     const { flash, auth } = usePage().props;
+    const isAdmin = auth?.user?.role === 'admin';
 
-    // Angalia kama aliyeingia ni Admin au Supervisor
-    const isAdminOrSupervisor = ['admin', 'supervisor'].includes(auth?.user?.role);
-
-    // State za Filter
+    // State za kuzuilia filter values
     const [search, setSearch] = useState(filters.search || '');
     const [status, setStatus] = useState(filters.status || '');
     const [startDate, setStartDate] = useState(filters.start_date || '');
     const [endDate, setEndDate] = useState(filters.end_date || '');
 
-    // Function ya kutuma Filter request kwa server
+    // Function ya kusafisha params zisizo na data kabla ya kutuma URL
+    const getCleanFilters = () => {
+        const rawFilters = { search, status, start_date: startDate, end_date: endDate };
+        return Object.fromEntries(
+            Object.entries(rawFilters).filter(([_, val]) => val !== '' && val !== null && val !== undefined)
+        );
+    };
+
+    // Function ya kutuma request kwenda backend pindi user anapochuja
     const handleFilter = (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
+
         router.get(
-            typeof route === 'function' ? route('work-logs.index') : '/work-logs',
-            { search, status, start_date: startDate, end_date: endDate },
+            route('work-logs.index'),
+            getCleanFilters(),
             { preserveState: true, replace: true }
         );
     };
 
-    // Reset Filters
+    // Function ya kusafisha Filter zote (Reset)
     const handleReset = () => {
         setSearch('');
         setStatus('');
         setStartDate('');
         setEndDate('');
-        router.get(
-            typeof route === 'function' ? route('work-logs.index') : '/work-logs',
-            {},
-            { preserveState: true, replace: true }
-        );
+        router.get(route('work-logs.index'), {}, { preserveState: true, replace: true });
     };
 
     const handleDelete = (id) => {
@@ -59,24 +62,18 @@ export default function Index({ logs, filters = {} }) {
         }
     };
 
-    // Tengeneza URL ya PDF ikiwa na query parameters zote za filters
     const getDownloadPdfUrl = () => {
+        const activeFilters = getCleanFilters();
+        const queryParams = new URLSearchParams(activeFilters).toString();
         const baseUrl = typeof route === 'function' ? route('work-logs.downloadPdf') : '/work-logs/download-pdf';
-        const params = new URLSearchParams();
 
-        if (search) params.append('search', search);
-        if (status) params.append('status', status);
-        if (startDate) params.append('start_date', startDate);
-        if (endDate) params.append('end_date', endDate);
-
-        const queryString = params.toString();
-        return queryString ? `${baseUrl}?${queryString}` : baseUrl;
+        return queryParams ? `${baseUrl}?${queryParams}` : baseUrl;
     };
 
     return (
         <AuthenticatedLayout
             header={
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold leading-tight text-gray-800">
                         Work Logs List
                     </h2>
@@ -106,7 +103,7 @@ export default function Index({ logs, filters = {} }) {
         >
             <Head title="Work Logs List" />
 
-            <div className="py-8">
+            <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-4">
 
                     {flash?.message && (
@@ -115,16 +112,16 @@ export default function Index({ logs, filters = {} }) {
                         </div>
                     )}
 
-                    {/* Filter Section */}
+                    {/* SEHEMU YA FILTER FORM - MSTARI MMOJA (5 COLUMNS) */}
                     <div className="bg-white p-4 shadow-sm sm:rounded-lg">
-                        <form onSubmit={handleFilter} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 items-end">
+                        <form onSubmit={handleFilter} className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Search</label>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Search Keyword</label>
                                 <input
                                     type="text"
+                                    placeholder="Task title or client..."
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    placeholder="Title or Requester..."
                                     className="w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                 />
                             </div>
@@ -137,15 +134,15 @@ export default function Index({ logs, filters = {} }) {
                                     className="w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                 >
                                     <option value="">All Statuses</option>
-                                    <option value="submitted">Submitted</option>
                                     <option value="pending">Pending</option>
+                                    <option value="submitted">Submitted</option>
                                     <option value="approved">Approved</option>
                                     <option value="rejected">Rejected</option>
                                 </select>
                             </div>
 
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">From Date</label>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Start Date</label>
                                 <input
                                     type="date"
                                     value={startDate}
@@ -155,7 +152,7 @@ export default function Index({ logs, filters = {} }) {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">To Date</label>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">End Date</label>
                                 <input
                                     type="date"
                                     value={endDate}
@@ -167,14 +164,14 @@ export default function Index({ logs, filters = {} }) {
                             <div className="flex space-x-2">
                                 <button
                                     type="submit"
-                                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2 px-3 rounded-md shadow-sm transition"
+                                    className="w-full px-4 py-2 bg-indigo-600 text-white text-sm rounded-md font-medium hover:bg-indigo-700 transition"
                                 >
                                     Filter
                                 </button>
                                 <button
                                     type="button"
                                     onClick={handleReset}
-                                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium py-2 px-3 rounded-md transition"
+                                    className="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-md font-medium hover:bg-gray-300 transition"
                                 >
                                     Reset
                                 </button>
@@ -182,21 +179,18 @@ export default function Index({ logs, filters = {} }) {
                         </form>
                     </div>
 
-                    {/* Table Section */}
+                    {/* TABLE */}
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div className="p-6 text-gray-900 overflow-x-auto">
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-
-                                        {/* Inaonyeshwa kwa ADMIN/SUPERVISOR pekee */}
-                                        {isAdminOrSupervisor && (
+                                        {isAdmin && (
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Submitted By
                                             </th>
                                         )}
-
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requester / Client</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Task Title</th>
                                         <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Hours</th>
@@ -212,7 +206,7 @@ export default function Index({ logs, filters = {} }) {
                                                     {log.log_date}
                                                 </td>
 
-                                                {isAdminOrSupervisor && (
+                                                {isAdmin && (
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <div className="font-semibold text-gray-900">
                                                             {log.user?.name || 'N/A'}
@@ -253,8 +247,8 @@ export default function Index({ logs, filters = {} }) {
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan={isAdminOrSupervisor ? 7 : 6} className="px-6 py-10 text-center text-gray-500">
-                                                No work logs found.
+                                            <td colSpan={isAdmin ? 7 : 6} className="px-6 py-10 text-center text-gray-500">
+                                                No work logs recorded matching your filters.
                                             </td>
                                         </tr>
                                     )}
