@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WorkLogController;
@@ -17,10 +18,10 @@ Route::get('/', function () {
     ]);
 });
 
-// Protected Routes (Inahitaji Login na Email Verification)
+// Protected Routes (Requires Login and Email Verification)
 Route::middleware(['auth', 'verified'])->group(function () {
     
-    // 🔒 Dashboard - Inaweza kufikiwa na Admin TU au kupitia Controller Redirect Check
+    // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Profile Management
@@ -37,6 +38,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/work-logs/{workLog}/edit', [WorkLogController::class, 'edit'])->name('work-logs.edit');
     Route::put('/work-logs/{workLog}', [WorkLogController::class, 'update'])->name('work-logs.update');
     Route::delete('/work-logs/{workLog}', [WorkLogController::class, 'destroy'])->name('work-logs.destroy');
+
+    // 🔒 Admin Only Routes (User Management CRUD)
+    Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function () {
+        Route::resource('users', UserController::class);
+    });
 });
 
 require __DIR__.'/auth.php';

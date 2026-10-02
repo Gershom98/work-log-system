@@ -10,7 +10,10 @@ export default function AuthenticatedLayout({ header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
 
-    // Helper ya kupata URL ya Download PDF
+    // Check if current user is an Admin
+    const isAdmin = user?.is_admin || user?.role === 'admin';
+
+    // Helper to get Download PDF URL safely
     const getDownloadPdfUrl = () => {
         if (typeof route === 'function') {
             try {
@@ -28,7 +31,7 @@ export default function AuthenticatedLayout({ header, children }) {
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 justify-between">
                         <div className="flex">
-                            {/* Brand Logo - Inampeleka user kwenye Daily Work Logs */}
+                            {/* Brand Logo - Redirects to Daily Work Logs */}
                             <div className="flex shrink-0 items-center">
                                 <Link href={typeof route === 'function' ? route('work-logs.index') : '/work-logs'}>
                                     <div className="flex items-center space-x-2">
@@ -42,11 +45,11 @@ export default function AuthenticatedLayout({ header, children }) {
                                 </Link>
                             </div>
 
-                            {/* Navigation Links */}
+                            {/* Desktop Navigation Links */}
                             <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                                 
-                                {/* DASHBOARD LINK: Inaonyeshwa kwa ADMIN pekee */}
-                                {user?.role === 'admin' && (
+                                {/* DASHBOARD LINK: Visible to ADMIN only */}
+                                {isAdmin && (
                                     <NavLink
                                         href={typeof route === 'function' ? route('dashboard') : '/dashboard'}
                                         active={typeof route === 'function' ? route().current('dashboard') : false}
@@ -55,10 +58,20 @@ export default function AuthenticatedLayout({ header, children }) {
                                     </NavLink>
                                 )}
 
-                                {/* DAILY WORK LOGS LINK: Kila mtu anaiona */}
+                                {/* USER MANAGEMENT LINK: Visible to ADMIN only */}
+                                {isAdmin && (
+                                    <NavLink
+                                        href={typeof route === 'function' ? route('admin.users.index') : '/admin/users'}
+                                        active={typeof route === 'function' ? route().current('admin.users.*') : false}
+                                    >
+                                        Users
+                                    </NavLink>
+                                )}
+
+                                {/* DAILY WORK LOGS LINK: Accessible to all users */}
                                 <NavLink
                                     href={typeof route === 'function' ? route('work-logs.index') : '/work-logs'}
-                                    active={typeof route === 'function' ? route().current('work-logs.index') : false}
+                                    active={typeof route === 'function' ? route().current('work-logs.*') : false}
                                 >
                                     Daily Work Logs
                                 </NavLink>
@@ -75,7 +88,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                                 type="button"
                                                 className="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
                                             >
-                                                {user.name}
+                                                {user?.name}
 
                                                 <svg
                                                     className="-me-0.5 ms-2 h-4 w-4"
@@ -111,7 +124,7 @@ export default function AuthenticatedLayout({ header, children }) {
                             </div>
                         </div>
 
-                        {/* Hamburger Button kwa ajili ya Mobile */}
+                        {/* Mobile Hamburger Button */}
                         <div className="-me-2 flex items-center sm:hidden">
                             <button
                                 onClick={() =>
@@ -163,8 +176,8 @@ export default function AuthenticatedLayout({ header, children }) {
                     }
                 >
                     <div className="space-y-1 pb-3 pt-2">
-                        {/* Dashboard kwa Admin tu kwenye Mobile */}
-                        {user?.role === 'admin' && (
+                        {/* Dashboard for Admin on Mobile */}
+                        {isAdmin && (
                             <ResponsiveNavLink
                                 href={typeof route === 'function' ? route('dashboard') : '/dashboard'}
                                 active={typeof route === 'function' ? route().current('dashboard') : false}
@@ -173,9 +186,19 @@ export default function AuthenticatedLayout({ header, children }) {
                             </ResponsiveNavLink>
                         )}
 
+                        {/* User Management for Admin on Mobile */}
+                        {isAdmin && (
+                            <ResponsiveNavLink
+                                href={typeof route === 'function' ? route('admin.users.index') : '/admin/users'}
+                                active={typeof route === 'function' ? route().current('admin.users.*') : false}
+                            >
+                                Users
+                            </ResponsiveNavLink>
+                        )}
+
                         <ResponsiveNavLink
                             href={typeof route === 'function' ? route('work-logs.index') : '/work-logs'}
-                            active={typeof route === 'function' ? route().current('work-logs.index') : false}
+                            active={typeof route === 'function' ? route().current('work-logs.*') : false}
                         >
                             Daily Work Logs
                         </ResponsiveNavLink>
@@ -184,10 +207,10 @@ export default function AuthenticatedLayout({ header, children }) {
                     <div className="border-t border-gray-200 pb-1 pt-4">
                         <div className="px-4">
                             <div className="text-base font-medium text-gray-800">
-                                {user.name}
+                                {user?.name}
                             </div>
                             <div className="text-sm font-medium text-gray-500">
-                                {user.email}
+                                {user?.email}
                             </div>
                         </div>
 
