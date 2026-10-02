@@ -1,70 +1,98 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 
 export default function Index({ logs, filters = {} }) {
     const { flash, auth } = usePage().props;
     const isAdmin = auth?.user?.role === 'admin';
 
-    // State za kuzuilia filter values
+    // Filter States
     const [search, setSearch] = useState(filters.search || '');
     const [status, setStatus] = useState(filters.status || '');
     const [startDate, setStartDate] = useState(filters.start_date || '');
     const [endDate, setEndDate] = useState(filters.end_date || '');
 
-    // State ya Modal ya Kufuta (Delete Confirmation Modal)
+    // Delete Confirmation Modal State
     const [deletingId, setDeletingId] = useState(null);
 
-    // Function ya kusafisha params zisizo na data kabla ya kutuma URL
-    const getCleanFilters = () => {
+    // Track initial render to skip automatic debounced fetch on mount
+    const isFirstRender = useRef(true);
+
+    // Clean empty query parameters
+    const getCleanFilters = useCallback(() => {
         const rawFilters = { search, status, start_date: startDate, end_date: endDate };
         return Object.fromEntries(
             Object.entries(rawFilters).filter(([_, val]) => val !== '' && val !== null && val !== undefined)
         );
-    };
+    }, [search, status, startDate, endDate]);
 
-    // Function ya kutuma request kwenda backend pindi user anapochuja
-    const handleFilter = (e) => {
-        if (e) e.preventDefault();
-
+    // Apply filters via Inertia
+    const applyFilters = useCallback(() => {
+        const routeUrl = typeof route === 'function' ? route('work-logs.index') : '/work-logs';
         router.get(
-            route('work-logs.index'),
+            routeUrl,
             getCleanFilters(),
             { preserveState: true, replace: true }
         );
+    }, [getCleanFilters]);
+
+    // Debounced filter execution on input change
+    useEffect(() => {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            applyFilters();
+        }, 400);
+
+        return () => clearTimeout(timer);
+    }, [search, status, startDate, endDate, applyFilters]);
+
+    // Manual Submit
+    const handleFilter = (e) => {
+        if (e) e.preventDefault();
+        applyFilters();
     };
 
-    // Function ya kusafisha Filter zote (Reset)
+    // Reset Filters
     const handleReset = () => {
         setSearch('');
         setStatus('');
         setStartDate('');
         setEndDate('');
-        router.get(route('work-logs.index'), {}, { preserveState: true, replace: true });
+        
+        const routeUrl = typeof route === 'function' ? route('work-logs.index') : '/work-logs';
+        router.get(routeUrl, {}, { preserveState: true, replace: true });
     };
 
-    // Hakikisha deletion
+    // Confirm Delete Action
     const confirmDelete = () => {
         if (!deletingId) return;
         const deleteUrl = typeof route === 'function' ? route('work-logs.destroy', deletingId) : `/work-logs/${deletingId}`;
+        
         router.delete(deleteUrl, {
             onSuccess: () => setDeletingId(null),
         });
     };
 
-    const getStatusBadge = (status) => {
-        switch (status) {
-            case 'submitted':
-                return <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">Submitted</span>;
-            case 'approved':
-                return <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">Approved</span>;
-            case 'rejected':
-                return <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800 border border-rose-200">Rejected</span>;
-            case 'pending':
-                return <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">Pending</span>;
-            default:
-                return <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">{status || 'Submitted'}</span>;
-        }
+    const getStatusBadge = (statusKey) => {
+        const styles = {
+            submitted: 'bg-blue-100 text-blue-800 border-blue-200',
+            approved: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+            rejected: 'bg-rose-100 text-rose-800 border-rose-200',
+            pending: 'bg-amber-100 text-amber-800 border-amber-200',
+        };
+
+        const currentStyle = styles[statusKey] || 'bg-gray-100 text-gray-800 border-gray-200';
+        const label = statusKey ? statusKey.charAt(0).toUpperCase() + statusKey.slice(1) : 'Submitted';
+
+        return (
+            <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${currentStyle}`}>
+                {label}
+            </span>
+        );
     };
 
     const getDownloadPdfUrl = () => {
@@ -75,8 +103,15 @@ export default function Index({ logs, filters = {} }) {
         return queryParams ? `${baseUrl}?${queryParams}` : baseUrl;
     };
 
-    // Hesabu ya jumla ya masaa yaliyopo kwenye page au dataset
-    const totalHoursCalculated = logs?.data?.reduce((sum, item) => sum + Number(item.hours_spent || 0), 0) || 0;
+    // Calculate total hours on current page
+    const totalHoursCalculated = useMemo(() => {
+        return logs?.data?.reduce((sum, item) => sum + Number(item.hours_spent || 0), 0) || 0;
+    }, [logs?.data]);
+
+    // Helper function to decode standard HTML entities safely for pagination
+    const formatPaginationLabel = (label) => {
+        return label.replace(/&laquo;/g, '«').replace(/&raquo;/g, '»');
+    };
 
     return (
         <AuthenticatedLayout
@@ -119,7 +154,7 @@ export default function Index({ logs, filters = {} }) {
 
                     {flash?.message && (
                         <div className="flex items-center rounded-md bg-emerald-50 p-4 border border-emerald-200 text-sm text-emerald-800 shadow-sm">
-                            <svg className="w-5 h-5 me-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5 me-2 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0" />
                             </svg>
                             {flash.message}
@@ -167,7 +202,7 @@ export default function Index({ logs, filters = {} }) {
                         </div>
                     </div>
 
-                    {/* SEHEMU YA FILTER FORM */}
+                    {/* FILTER FORM */}
                     <div className="bg-white p-4 shadow-sm sm:rounded-lg border border-gray-100">
                         <form onSubmit={handleFilter} className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
                             <div>
@@ -296,6 +331,7 @@ export default function Index({ logs, filters = {} }) {
                                                     </Link>
 
                                                     <button
+                                                        type="button"
                                                         onClick={() => setDeletingId(log.id)}
                                                         className="inline-flex items-center p-1.5 text-rose-600 hover:text-rose-900 hover:bg-rose-50 rounded-md transition"
                                                         title="Delete Log"
@@ -332,18 +368,23 @@ export default function Index({ logs, filters = {} }) {
                                                 <Link
                                                     key={index}
                                                     href={link.url}
-                                                    dangerouslySetInnerHTML={{ __html: link.label }}
-                                                    className={`px-3 py-1 text-xs rounded-md border ${link.active
-                                                        ? 'bg-indigo-600 text-white border-indigo-600'
-                                                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                                    preserveState
+                                                    preserveScroll
+                                                    className={`px-3 py-1 text-xs rounded-md border transition ${
+                                                        link.active
+                                                            ? 'bg-indigo-600 text-white border-indigo-600'
+                                                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                                                     }`}
-                                                />
+                                                >
+                                                    {formatPaginationLabel(link.label)}
+                                                </Link>
                                             ) : (
                                                 <span
                                                     key={index}
-                                                    dangerouslySetInnerHTML={{ __html: link.label }}
                                                     className="px-3 py-1 text-xs rounded-md border bg-white text-gray-400 border-gray-200 cursor-not-allowed opacity-50"
-                                                />
+                                                >
+                                                    {formatPaginationLabel(link.label)}
+                                                </span>
                                             )
                                         ))}
                                     </div>

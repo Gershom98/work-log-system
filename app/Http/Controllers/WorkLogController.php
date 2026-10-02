@@ -43,12 +43,8 @@ class WorkLogController extends Controller {
             $query->whereDate( 'log_date', '>=', $request->input( 'start_date' ) );
         }
 
-        if ( $request->filled( 'end_date' ) ) {
-            $query->whereDate( 'log_date', '<=', $request->input( 'end_date' ) );
-        }
-
-        // 5. Paginate na hifadhi query parameters kwenye pagination links
-        $perPage = in_array( $user->role, [ 'admin', 'supervisor' ] ) ? 10 : 10;
+        // 5. Paginate: Weka logs 5 pekee kwa kila ukurasa
+        $perPage = 5;
         
         $logs = $query->latest( 'log_date' )
                       ->paginate( $perPage )
