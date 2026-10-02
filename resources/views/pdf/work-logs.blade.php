@@ -6,12 +6,12 @@
     <title>Daily Work Log Report</title>
     <style>
     @page {
-        margin: 20px 25px 40px 25px;
+        margin: 25px 30px 45px 30px;
     }
 
     body {
         font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-        font-size: 11px;
+        font-size: 10px;
         color: #1f2937;
         line-height: 1.4;
     }
@@ -25,43 +25,54 @@
 
     .header h2 {
         color: #4f46e5;
-        margin: 0 0 5px 0;
+        margin: 0 0 4px 0;
         font-size: 18px;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
 
+    .header p {
+        margin: 0;
+        color: #6b7280;
+        font-size: 9px;
+    }
+
     .meta-table {
         width: 100%;
-        border: none;
-        margin-bottom: 10px;
+        border-collapse: collapse;
+        margin-bottom: 15px;
+        background-color: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        padding: 8px 12px;
     }
 
     .meta-table td {
         border: none;
-        padding: 2px 0;
-        font-size: 11px;
+        padding: 3px 5px;
+        font-size: 10px;
     }
 
     /* Data Table */
     table.data-table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 10px;
+        margin-top: 5px;
     }
 
     table.data-table th,
     table.data-table td {
-        border: 1px solid #d1d5db;
-        padding: 7px 9px;
+        border: 1px solid #e5e7eb;
+        padding: 8px 10px;
         text-align: left;
-        vertical-align: top;
+        vertical-align: middle;
     }
 
     table.data-table th {
         background-color: #4f46e5;
         color: #ffffff;
-        font-size: 10px;
+        font-size: 9px;
+        font-weight: bold;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
@@ -77,8 +88,8 @@
     /* Status Badges */
     .badge {
         display: inline-block;
-        padding: 2px 6px;
-        font-size: 9px;
+        padding: 3px 8px;
+        font-size: 8.5px;
         font-weight: bold;
         border-radius: 4px;
         text-transform: uppercase;
@@ -86,23 +97,27 @@
     }
 
     .badge-submitted {
-        background-color: #e0e7ff;
-        color: #3730a3;
+        background-color: #eff6ff;
+        color: #1d4ed8;
+        border: 1px solid #bfdbfe;
     }
 
     .badge-approved {
-        background-color: #def7ec;
-        color: #03543f;
+        background-color: #ecfdf5;
+        color: #047857;
+        border: 1px solid #a7f3d0;
     }
 
     .badge-pending {
         background-color: #fef3c7;
-        color: #92400e;
+        color: #b45309;
+        border: 1px solid #fde68a;
     }
 
     .badge-rejected {
-        background-color: #fde8e8;
-        color: #9b1c1c;
+        background-color: #fef2f2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
     }
 
     .text-center {
@@ -113,51 +128,44 @@
         text-align: right !important;
     }
 
-    /* Footer / Page Numbering */
-    footer {
-        position: fixed;
-        bottom: -20px;
-        left: 0px;
-        right: 0px;
-        height: 20px;
-        font-size: 9px;
-        color: #6b7280;
-        text-align: center;
-        border-top: 1px solid #e5e7eb;
-        padding-top: 5px;
+    .font-semibold {
+        font-weight: bold;
     }
     </style>
 </head>
 
 <body>
 
-    <!-- Script ya DomPDF kwa ajili ya kuonyesha Pagination ya Ukurasa (Page X of Y) -->
+    <!-- Script ya DomPDF kwa ajili ya Pagination -->
     <script type="text/php">
         if (isset($pdf)) {
             $text = "Daily Work Log Report — Generated automatically | Page {PAGE_NUM} of {PAGE_COUNT}";
             $font = $fontMetrics->get_font("Helvetica", "normal");
-            $size = 9;
-            $color = array(0.42, 0.45, 0.5); // Rangi sawa na #6b7280
-            
-            // Inaweka footer katikati chini kabisa ya kila ukurasa
-            $pdf->page_text(160, 815, $text, $font, $size, $color);
+            $size = 8;
+            $color = array(0.42, 0.45, 0.5);
+            $pdf->page_text(170, 815, $text, $font, $size, $color);
         }
     </script>
 
+    <!-- Header Section -->
     <div class="header">
         <h2>Daily Work Log Report</h2>
-        <table class="meta-table">
-            <tr>
-                <td><strong>Technician Name:</strong> {{ $user->name }}</td>
-                <td class="text-right"><strong>Generated Date:</strong> {{ date('d M, Y H:i') }}</td>
-            </tr>
-            <tr>
-                <td><strong>Email Address:</strong> {{ $user->email }}</td>
-                <td class="text-right"><strong>Total Logs Recorded:</strong> {{ $workLogs->count() }}</td>
-            </tr>
-        </table>
+        <p>Official Performance & Task Record Summary</p>
     </div>
 
+    <!-- Metadata Table -->
+    <table class="meta-table">
+        <tr>
+            <td style="width: 50%;"><strong>Technician Name:</strong> {{ $user->name ?? 'N/A' }}</td>
+            <td class="text-right" style="width: 50%;"><strong>Generated Date:</strong> {{ date('d M, Y H:i') }}</td>
+        </tr>
+        <tr>
+            <td><strong>Email Address:</strong> {{ $user->email ?? 'N/A' }}</td>
+            <td class="text-right"><strong>Total Logs Recorded:</strong> {{ $workLogs->count() }}</td>
+        </tr>
+    </table>
+
+    <!-- Main Work Logs Table -->
     <table class="data-table">
         <thead>
             <tr>
@@ -171,9 +179,9 @@
         <tbody>
             @forelse($workLogs as $index => $log)
             <tr>
-                <td class="text-center">{{ $index + 1 }}</td>
-                <td>{{ \Carbon\Carbon::parse($log->log_date)->format('d/m/Y') }}</td>
-                <td>{{ $log->requester_name }}</td>
+                <td class="text-center font-semibold" style="color: #6b7280;">{{ $index + 1 }}</td>
+                <td style="white-space: nowrap;">{{ \Carbon\Carbon::parse($log->log_date)->format('d/m/Y') }}</td>
+                <td><span class="font-semibold">{{ $log->requester_name }}</span></td>
                 <td><strong>{{ $log->title }}</strong></td>
                 <td class="text-center">
                     @if($log->status === 'submitted')
@@ -189,7 +197,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="5" class="text-center" style="padding: 15px; color: #6b7280;">
+                <td colspan="5" class="text-center" style="padding: 20px; color: #6b7280;">
                     No work log records found for this period.
                 </td>
             </tr>
