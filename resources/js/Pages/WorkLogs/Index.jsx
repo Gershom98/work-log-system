@@ -108,9 +108,14 @@ export default function Index({ logs, filters = {} }) {
         return logs?.data?.reduce((sum, item) => sum + Number(item.hours_spent || 0), 0) || 0;
     }, [logs?.data]);
 
-    // Helper function to decode standard HTML entities safely for pagination
+    // Format pagination label text safely
     const formatPaginationLabel = (label) => {
-        return label.replace(/&laquo;/g, '«').replace(/&raquo;/g, '»');
+        if (!label) return '';
+        return label
+            .replace(/&laquo;/g, '«')
+            .replace(/&raquo;/g, '»')
+            .replace(/Previous/g, '« Previous')
+            .replace(/Next/g, 'Next »');
     };
 
     return (
@@ -361,8 +366,9 @@ export default function Index({ logs, filters = {} }) {
                                     <span className="font-semibold text-gray-700">{logs?.total || logs?.data?.length || 0}</span> logs
                                 </div>
 
+                                {/* PAGINATION CONTROLS */}
                                 {logs?.links && logs.links.length > 3 && (
-                                    <div className="flex space-x-1">
+                                    <div className="flex flex-wrap items-center space-x-1">
                                         {logs.links.map((link, index) => (
                                             link.url ? (
                                                 <Link
@@ -372,7 +378,7 @@ export default function Index({ logs, filters = {} }) {
                                                     preserveScroll
                                                     className={`px-3 py-1 text-xs rounded-md border transition ${
                                                         link.active
-                                                            ? 'bg-indigo-600 text-white border-indigo-600'
+                                                            ? 'bg-indigo-600 text-white border-indigo-600 font-semibold'
                                                             : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                                                     }`}
                                                 >
