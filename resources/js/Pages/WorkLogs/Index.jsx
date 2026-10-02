@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
 export default function Index({ logs, filters = {} }) {
     const { flash, auth } = usePage().props;
@@ -48,7 +48,7 @@ export default function Index({ logs, filters = {} }) {
         }, 400);
 
         return () => clearTimeout(timer);
-    }, [search, status, startDate, endDate, applyFilters]);
+    }, [search, status, startDate, endDate]);
 
     // Manual Submit
     const handleFilter = (e) => {
@@ -314,7 +314,7 @@ export default function Index({ logs, filters = {} }) {
                                                     {log.title}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-center text-gray-600">
-                                                    {log.hours_spent} {log.hours_spent === 1 ? 'Hour' : 'Hours'}
+                                                    {log.hours_spent} {Number(log.hours_spent) === 1 ? 'Hour' : 'Hours'}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-center">
                                                     {getStatusBadge(log.status)}
