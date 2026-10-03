@@ -9,8 +9,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View;
 
-class WorkLogController extends Controller {
-
+class WorkLogController extends Controller 
+{
     public function index( Request $request ) {
         $user = $request->user();
 
@@ -38,12 +38,17 @@ class WorkLogController extends Controller {
             $query->where( 'status', $request->input( 'status' ) );
         }
 
-        // 4. Filter: Date Range
+        // 4. Filter: Date Range (Start Date)
         if ( $request->filled( 'start_date' ) ) {
             $query->whereDate( 'log_date', '>=', $request->input( 'start_date' ) );
         }
 
-        // 5. Paginate: Weka logs 5 pekee kwa kila ukurasa
+        // 4b. Filter: Date Range (End Date) - IMENGEZWENI HAPA
+        if ( $request->filled( 'end_date' ) ) {
+            $query->whereDate( 'log_date', '<=', $request->input( 'end_date' ) );
+        }
+
+        // 5. Paginate: Weka logs 5 pekee kwa kila ukurasa na hifadhi Parameters zote
         $perPage = 5;
         
         $logs = $query->latest( 'log_date' )
