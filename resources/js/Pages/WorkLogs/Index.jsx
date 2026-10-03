@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
 export default function Index({ logs, filters = {} }) {
     const { flash, auth } = usePage().props;
@@ -18,20 +18,22 @@ export default function Index({ logs, filters = {} }) {
     // Track initial render to skip automatic debounced fetch on mount
     const isFirstRender = useRef(true);
 
-    // Clean empty query parameters
-    const getCleanFilters = useCallback(() => {
-        const rawFilters = { search, status, start_date: startDate, end_date: endDate };
+    // Helper to get non-empty filter parameters
+    const getCleanFilters = useCallback((customFilters = null) => {
+        const rawFilters = customFilters || { search, status, start_date: startDate, end_date: endDate };
         return Object.fromEntries(
             Object.entries(rawFilters).filter(([_, val]) => val !== '' && val !== null && val !== undefined)
         );
     }, [search, status, startDate, endDate]);
 
     // Apply filters via Inertia
-    const applyFilters = useCallback(() => {
+    const applyFilters = useCallback((overrideFilters = null) => {
         const routeUrl = typeof route === 'function' ? route('work-logs.index') : '/work-logs';
+        const params = getCleanFilters(overrideFilters);
+
         router.get(
             routeUrl,
-            getCleanFilters(),
+            params,
             { preserveState: true, replace: true }
         );
     }, [getCleanFilters]);
@@ -48,7 +50,7 @@ export default function Index({ logs, filters = {} }) {
         }, 400);
 
         return () => clearTimeout(timer);
-    }, [search, status, startDate, endDate]);
+    }, [search, status, startDate, endDate, applyFilters]);
 
     // Manual Submit
     const handleFilter = (e) => {
@@ -56,7 +58,7 @@ export default function Index({ logs, filters = {} }) {
         applyFilters();
     };
 
-    // Reset Filters
+    // Reset Filters Correctly
     const handleReset = () => {
         setSearch('');
         setStatus('');
@@ -64,6 +66,7 @@ export default function Index({ logs, filters = {} }) {
         setEndDate('');
         
         const routeUrl = typeof route === 'function' ? route('work-logs.index') : '/work-logs';
+        // Pass empty object explicitly to clear query params in Inertia
         router.get(routeUrl, {}, { preserveState: true, replace: true });
     };
 
