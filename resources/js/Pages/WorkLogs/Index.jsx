@@ -12,14 +12,6 @@ export default function Index({ logs, filters = {} }) {
     const [startDate, setStartDate] = useState(filters.start_date || '');
     const [endDate, setEndDate] = useState(filters.end_date || '');
 
-    // Synchronize local filter state if props change
-    useEffect(() => {
-        setSearch(filters.search || '');
-        setStatus(filters.status || '');
-        setStartDate(filters.start_date || '');
-        setEndDate(filters.end_date || '');
-    }, [filters.search, filters.status, filters.start_date, filters.end_date]);
-
     // Delete Confirmation Modal State
     const [deletingId, setDeletingId] = useState(null);
 
@@ -66,14 +58,15 @@ export default function Index({ logs, filters = {} }) {
         applyFilters();
     };
 
-    // Reset Filters
+    // Reset Filters Correctly
     const handleReset = () => {
         setSearch('');
         setStatus('');
         setStartDate('');
         setEndDate('');
-
+        
         const routeUrl = typeof route === 'function' ? route('work-logs.index') : '/work-logs';
+        // Pass empty object explicitly to clear query params in Inertia
         router.get(routeUrl, {}, { preserveState: true, replace: true });
     };
 
@@ -81,24 +74,22 @@ export default function Index({ logs, filters = {} }) {
     const confirmDelete = () => {
         if (!deletingId) return;
         const deleteUrl = typeof route === 'function' ? route('work-logs.destroy', deletingId) : `/work-logs/${deletingId}`;
-
+        
         router.delete(deleteUrl, {
-            preserveScroll: true,
             onSuccess: () => setDeletingId(null),
         });
     };
 
-    // UPDATED: Status Badges setup matching ['submitted', 'no data', 'rejected', 'assigned']
     const getStatusBadge = (statusKey) => {
         const styles = {
             submitted: 'bg-blue-100 text-blue-800 border-blue-200',
-            'no data': 'bg-amber-100 text-amber-800 border-amber-200',
+            approved: 'bg-emerald-100 text-emerald-800 border-emerald-200',
             rejected: 'bg-rose-100 text-rose-800 border-rose-200',
-            assigned: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+            pending: 'bg-amber-100 text-amber-800 border-amber-200',
         };
 
         const currentStyle = styles[statusKey] || 'bg-gray-100 text-gray-800 border-gray-200';
-        const label = statusKey ? statusKey.toUpperCase() : 'SUBMITTED';
+        const label = statusKey ? statusKey.charAt(0).toUpperCase() + statusKey.slice(1) : 'Submitted';
 
         return (
             <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${currentStyle}`}>
@@ -228,19 +219,18 @@ export default function Index({ logs, filters = {} }) {
                                 />
                             </div>
 
-                            {/* UPDATED: Status select input options */}
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
                                 <select
                                     value={status}
                                     onChange={(e) => setStatus(e.target.value)}
-                                    className="w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 capitalize"
+                                    className="w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                 >
                                     <option value="">All Statuses</option>
+                                    <option value="pending">Pending</option>
                                     <option value="submitted">Submitted</option>
-                                    <option value="no data">No Data</option>
+                                    <option value="approved">Approved</option>
                                     <option value="rejected">Rejected</option>
-                                    <option value="assigned">Assigned</option>
                                 </select>
                             </div>
 
@@ -381,7 +371,6 @@ export default function Index({ logs, filters = {} }) {
                                                 <Link
                                                     key={index}
                                                     href={link.url}
-                                                    data={getCleanFilters()}
                                                     preserveState
                                                     preserveScroll
                                                     className={`px-3 py-1 text-xs rounded-md border transition ${
@@ -422,23 +411,21 @@ export default function Index({ logs, filters = {} }) {
                             </div>
                             <h3 className="text-lg font-bold text-gray-900">Delete Work Log</h3>
                         </div>
-
                         <p className="text-sm text-gray-600">
                             Are you sure you want to delete this work log? This action cannot be undone.
                         </p>
-
                         <div className="flex justify-end space-x-3 pt-2">
                             <button
                                 type="button"
                                 onClick={() => setDeletingId(null)}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition"
+                                className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200 transition"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="button"
                                 onClick={confirmDelete}
-                                className="px-4 py-2 text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 rounded-md shadow-sm transition"
+                                className="px-4 py-2 bg-rose-600 text-white text-sm font-medium rounded-md hover:bg-rose-700 transition"
                             >
                                 Delete
                             </button>
@@ -446,6 +433,7 @@ export default function Index({ logs, filters = {} }) {
                     </div>
                 </div>
             )}
+
         </AuthenticatedLayout>
     );
 }

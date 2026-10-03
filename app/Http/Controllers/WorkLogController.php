@@ -48,17 +48,23 @@ class WorkLogController extends Controller
             $query->whereDate( 'log_date', '<=', $request->input( 'end_date' ) );
         }
 
-        // 5. Paginate: Weka logs 5 pekee kwa kila ukurasa na hifadhi Parameters zote
+        // 5. Hesabu Active Requests (kazi zenye status ya 'assigned' au 'submitted')
+        // Unaweza kurekebisha array ya status hapa kulingana na unachochukulia kama 'active'
+        $activeRequestsQuery = clone $query;
+        $activeRequests = $activeRequestsQuery->whereIn('status', ['assigned', 'submitted'])->count();
+
+        // 6. Paginate: Weka logs 5 pekee kwa kila ukurasa na hifadhi Parameters zote
         $perPage = 5;
         
         $logs = $query->latest( 'log_date' )
                       ->paginate( $perPage )
                       ->withQueryString();
 
-        // 6. Tuma logs na filters kurudi React (Index.jsx)
+        // 7. Tuma logs, activeRequests na filters kurudi React (Index.jsx)
         return Inertia::render( 'WorkLogs/Index', [
-            'logs'    => $logs,
-            'filters' => $request->only( [ 'search', 'status', 'start_date', 'end_date' ] ),
+            'logs'           => $logs,
+            'activeRequests' => $activeRequests,
+            'filters'        => $request->only( [ 'search', 'status', 'start_date', 'end_date' ] ),
         ] );
     }
 
