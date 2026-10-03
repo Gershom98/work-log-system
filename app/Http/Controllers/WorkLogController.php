@@ -43,7 +43,7 @@ class WorkLogController extends Controller
             $query->whereDate( 'log_date', '>=', $request->input( 'start_date' ) );
         }
 
-        // 4b. Filter: Date Range (End Date) - IMENGEZWENI HAPA
+        // 4b. Filter: Date Range (End Date)
         if ( $request->filled( 'end_date' ) ) {
             $query->whereDate( 'log_date', '<=', $request->input( 'end_date' ) );
         }
@@ -70,9 +70,10 @@ class WorkLogController extends Controller
         $validated = $request->validate( [
             'requester_name' => 'required|string|max:255',
             'title'          => 'required|string|max:255',
+            'description'    => 'nullable|string',
             'log_date'       => 'required|date',
             'hours_spent'    => 'required|integer|min:1|max:24',
-            'status'         => 'required|in:submitted,pending,approved,rejected',
+            'status'         => 'required|in:submitted,no data,rejected,assigned',
         ] );
 
         $request->user()->workLogs()->create( $validated );
@@ -114,9 +115,10 @@ class WorkLogController extends Controller
         $validated = $request->validate( [
             'requester_name' => 'required|string|max:255',
             'title'          => 'required|string|max:255',
+            'description'    => 'nullable|string',
             'log_date'       => 'required|date',
             'hours_spent'    => 'required|integer|min:1|max:24',
-            'status'         => 'required|in:submitted,pending,approved,rejected',
+            'status'         => 'required|in:submitted,no data,rejected,assigned',
         ] );
 
         $workLog->update( $validated );

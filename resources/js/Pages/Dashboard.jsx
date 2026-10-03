@@ -15,16 +15,16 @@ export default function Dashboard({ stats = {}, recentLogs = [] }) {
         return '/work-logs/download-pdf';
     };
 
-    // Helper ya kutoa Status Badge
+    // Helper ya kutoa Status Badge mpya kulingana na enum: ['submitted', 'no data', 'rejected', 'assigned']
     const renderStatusBadge = (status) => {
         const normalizedStatus = status ? status.toLowerCase() : 'submitted';
 
         switch (normalizedStatus) {
-            case 'approved':
+            case 'assigned':
                 return (
                     <span className="inline-flex items-center gap-x-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
-                        Approved
+                        Assigned
                     </span>
                 );
             case 'rejected':
@@ -34,13 +34,14 @@ export default function Dashboard({ stats = {}, recentLogs = [] }) {
                         Rejected
                     </span>
                 );
-            case 'pending':
+            case 'no data':
                 return (
                     <span className="inline-flex items-center gap-x-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 ring-1 ring-inset ring-amber-600/20">
                         <span className="h-1.5 w-1.5 rounded-full bg-amber-600" />
-                        Pending
+                        No Data
                     </span>
                 );
+            case 'submitted':
             default:
                 return (
                     <span className="inline-flex items-center gap-x-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 ring-1 ring-inset ring-blue-700/10">
@@ -99,12 +100,12 @@ export default function Dashboard({ stats = {}, recentLogs = [] }) {
                             </div>
                         </div>
 
-                        {/* Approved Logs */}
+                        {/* Assigned Logs */}
                         <div className="overflow-hidden rounded-xl bg-white p-6 shadow-sm border border-gray-100 transition hover:shadow-md">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Approved Logs</p>
-                                    <p className="mt-2 text-3xl font-bold text-emerald-600">{stats?.approved_logs || 0}</p>
+                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned Logs</p>
+                                    <p className="mt-2 text-3xl font-bold text-emerald-600">{stats?.assigned_logs || 0}</p>
                                 </div>
                                 <div className="rounded-lg bg-emerald-50 p-3 text-emerald-600">
                                     <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -114,16 +115,16 @@ export default function Dashboard({ stats = {}, recentLogs = [] }) {
                             </div>
                         </div>
 
-                        {/* Pending Logs */}
+                        {/* Rejected Logs */}
                         <div className="overflow-hidden rounded-xl bg-white p-6 shadow-sm border border-gray-100 transition hover:shadow-md">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Pending Logs</p>
-                                    <p className="mt-2 text-3xl font-bold text-amber-600">{stats?.pending_logs || 0}</p>
+                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Rejected Logs</p>
+                                    <p className="mt-2 text-3xl font-bold text-rose-600">{stats?.rejected_logs || 0}</p>
                                 </div>
-                                <div className="rounded-lg bg-amber-50 p-3 text-amber-600">
+                                <div className="rounded-lg bg-rose-50 p-3 text-rose-600">
                                     <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </div>
                             </div>

@@ -13,9 +13,9 @@ export default function Edit({ workLog }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        
-        const targetUrl = typeof route === 'function' && workLog?.id 
-            ? route('work-logs.update', workLog.id) 
+
+        const targetUrl = typeof route === 'function' && workLog?.id
+            ? route('work-logs.update', workLog.id)
             : `/work-logs/${workLog?.id}`;
 
         put(targetUrl, {
@@ -63,9 +63,8 @@ export default function Edit({ workLog }) {
                                         value={data.requester_name}
                                         onChange={(e) => setData('requester_name', e.target.value)}
                                         placeholder="e.g. John Doe or Accounting Department"
-                                        className={`mt-1 block w-full rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500 transition ${
-                                            errors.requester_name ? 'border-rose-500 ring-1 ring-rose-500' : 'border-gray-300'
-                                        }`}
+                                        className={`mt-1 block w-full rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500 transition ${errors.requester_name ? 'border-rose-500 ring-1 ring-rose-500' : 'border-gray-300'
+                                            }`}
                                     />
                                     {errors.requester_name && (
                                         <p className="mt-1 text-xs text-rose-600">{errors.requester_name}</p>
@@ -82,9 +81,8 @@ export default function Edit({ workLog }) {
                                         value={data.title}
                                         onChange={(e) => setData('title', e.target.value)}
                                         placeholder="e.g. Printer Repair / Network Failure Resolution"
-                                        className={`mt-1 block w-full rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500 transition ${
-                                            errors.title ? 'border-rose-500 ring-1 ring-rose-500' : 'border-gray-300'
-                                        }`}
+                                        className={`mt-1 block w-full rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500 transition ${errors.title ? 'border-rose-500 ring-1 ring-rose-500' : 'border-gray-300'
+                                            }`}
                                     />
                                     {errors.title && (
                                         <p className="mt-1 text-xs text-rose-600">{errors.title}</p>
@@ -101,9 +99,8 @@ export default function Edit({ workLog }) {
                                             type="date"
                                             value={data.log_date}
                                             onChange={(e) => setData('log_date', e.target.value)}
-                                            className={`mt-1 block w-full rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500 transition ${
-                                                errors.log_date ? 'border-rose-500 ring-1 ring-rose-500' : 'border-gray-300'
-                                            }`}
+                                            className={`mt-1 block w-full rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500 transition ${errors.log_date ? 'border-rose-500 ring-1 ring-rose-500' : 'border-gray-300'
+                                                }`}
                                         />
                                         {errors.log_date && (
                                             <p className="mt-1 text-xs text-rose-600">{errors.log_date}</p>
@@ -120,9 +117,8 @@ export default function Edit({ workLog }) {
                                             max="24"
                                             value={data.hours_spent}
                                             onChange={(e) => setData('hours_spent', parseInt(e.target.value) || 1)}
-                                            className={`mt-1 block w-full rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500 transition ${
-                                                errors.hours_spent ? 'border-rose-500 ring-1 ring-rose-500' : 'border-gray-300'
-                                            }`}
+                                            className={`mt-1 block w-full rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500 transition ${errors.hours_spent ? 'border-rose-500 ring-1 ring-rose-500' : 'border-gray-300'
+                                                }`}
                                         />
                                         {errors.hours_spent && (
                                             <p className="mt-1 text-xs text-rose-600">{errors.hours_spent}</p>
@@ -136,14 +132,13 @@ export default function Edit({ workLog }) {
                                         <select
                                             value={data.status}
                                             onChange={(e) => setData('status', e.target.value)}
-                                            className={`mt-1 block w-full rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500 transition ${
-                                                errors.status ? 'border-rose-500 ring-1 ring-rose-500' : 'border-gray-300'
-                                            }`}
+                                            className={`mt-1 block w-full rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500 transition ${errors.status ? 'border-rose-500 ring-1 ring-rose-500' : 'border-gray-300'
+                                                }`}
                                         >
                                             <option value="submitted">Submitted</option>
-                                            <option value="pending">Pending</option>
-                                            <option value="approved">Approved</option>
+                                            <option value="no data">No Data</option>
                                             <option value="rejected">Rejected</option>
+                                            <option value="assigned">Assigned</option>
                                         </select>
                                         {errors.status && (
                                             <p className="mt-1 text-xs text-rose-600">{errors.status}</p>
@@ -161,9 +156,8 @@ export default function Edit({ workLog }) {
                                         value={data.description}
                                         onChange={(e) => setData('description', e.target.value)}
                                         placeholder="Provide details about the issue or steps taken to resolve it..."
-                                        className={`mt-1 block w-full rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500 transition ${
-                                            errors.description ? 'border-rose-500 ring-1 ring-rose-500' : 'border-gray-300'
-                                        }`}
+                                        className={`mt-1 block w-full rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500 transition ${errors.description ? 'border-rose-500 ring-1 ring-rose-500' : 'border-gray-300'
+                                            }`}
                                     />
                                     {errors.description && (
                                         <p className="mt-1 text-xs text-rose-600">{errors.description}</p>

@@ -85,7 +85,7 @@
         page-break-inside: avoid;
     }
 
-    /* Status Badges */
+    /* Status Badges - Upgraded for Enum ['submitted', 'no data', 'rejected', 'assigned'] */
     .badge {
         display: inline-block;
         padding: 3px 8px;
@@ -102,13 +102,13 @@
         border: 1px solid #bfdbfe;
     }
 
-    .badge-approved {
+    .badge-assigned {
         background-color: #ecfdf5;
         color: #047857;
         border: 1px solid #a7f3d0;
     }
 
-    .badge-pending {
+    .badge-nodata {
         background-color: #fef3c7;
         color: #b45309;
         border: 1px solid #fde68a;
@@ -184,14 +184,14 @@
                 <td><span class="font-semibold">{{ $log->requester_name }}</span></td>
                 <td><strong>{{ $log->title }}</strong></td>
                 <td class="text-center">
-                    @if($log->status === 'submitted')
-                    <span class="badge badge-submitted">Submitted</span>
-                    @elseif($log->status === 'approved')
-                    <span class="badge badge-approved">Approved</span>
-                    @elseif($log->status === 'pending')
-                    <span class="badge badge-pending">Pending</span>
-                    @else
+                    @if($log->status === 'assigned')
+                    <span class="badge badge-assigned">Assigned</span>
+                    @elseif($log->status === 'no data')
+                    <span class="badge badge-nodata">No Data</span>
+                    @elseif($log->status === 'rejected')
                     <span class="badge badge-rejected">Rejected</span>
+                    @else
+                    <span class="badge badge-submitted">Submitted</span>
                     @endif
                 </td>
             </tr>

@@ -13,11 +13,11 @@ export default function Show({ workLog }) {
 
     const getStatusBadge = (status) => {
         switch (status) {
-            case 'approved':
+            case 'assigned':
                 return (
                     <span className="inline-flex items-center gap-x-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
-                        Approved
+                        Assigned
                     </span>
                 );
             case 'rejected':
@@ -27,13 +27,14 @@ export default function Show({ workLog }) {
                         Rejected
                     </span>
                 );
-            case 'pending':
+            case 'no data':
                 return (
                     <span className="inline-flex items-center gap-x-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-inset ring-amber-600/20">
                         <span className="h-1.5 w-1.5 rounded-full bg-amber-600" />
-                        Pending
+                        No Data
                     </span>
                 );
+            case 'submitted':
             default:
                 return (
                     <span className="inline-flex items-center gap-x-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 ring-1 ring-inset ring-blue-700/10">

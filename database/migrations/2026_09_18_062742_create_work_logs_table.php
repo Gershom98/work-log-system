@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->integer('hours_spent');
-            $table->enum('status', ['submitted','pending', 'approved', 'rejected'])->default('submitted');
+            $table->enum('status', ['submitted', 'no data', 'rejected', 'assigned'])->default('submitted');
             $table->text('supervisor_comment')->nullable();
             $table->timestamps();
         });

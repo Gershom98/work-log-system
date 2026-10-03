@@ -47,7 +47,7 @@ export default function Create() {
                                 {/* Requester Name */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">
-                                        Requester Name / Department <span className="text-rose-500">*</span>
+                                        Requester Name <span className="text-rose-500">*</span>
                                     </label>
                                     <input
                                         type="text"
@@ -132,9 +132,9 @@ export default function Create() {
                                             }`}
                                         >
                                             <option value="submitted">Submitted</option>
-                                            <option value="pending">Pending</option>
-                                            <option value="approved">Approved</option>
+                                            <option value="no data">No Data</option>
                                             <option value="rejected">Rejected</option>
+                                            <option value="assigned">Assigned</option>
                                         </select>
                                         {errors.status && (
                                             <p className="mt-1 text-xs text-rose-600">{errors.status}</p>
