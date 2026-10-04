@@ -5,7 +5,7 @@ export default function Edit({ workLog }) {
     const { auth } = usePage().props;
     const isAdmin = auth?.user?.role === 'admin';
 
-    const { data, setData, put, processing, errors } = useForm({
+    const { data, setData, post, processing, errors } = useForm({
         _method: 'put',
         requester_name: workLog?.requester_name || '',
         title: workLog?.title || '',
@@ -20,7 +20,6 @@ export default function Edit({ workLog }) {
         setData((prevData) => ({
             ...prevData,
             status: newStatus,
-            // Safisha sababu ya kukataliwa ikiwa status sio 'rejected'
             rejection_reason: newStatus === 'rejected' ? prevData.rejection_reason : '',
         }));
     };
@@ -32,10 +31,10 @@ export default function Edit({ workLog }) {
             ? route('work-logs.update', workLog.id)
             : `/work-logs/${workLog?.id}`;
 
-        put(targetUrl, {
+        post(targetUrl, {
             preserveScroll: true,
             onError: (err) => {
-                console.error('Validation / Update Error:', err);
+                console.error('Validation Errors:', JSON.stringify(err, null, 2));
             },
         });
     };
