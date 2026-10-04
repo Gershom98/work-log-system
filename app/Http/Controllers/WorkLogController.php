@@ -49,7 +49,6 @@ class WorkLogController extends Controller
         }
 
         // 5. Hesabu Active Requests (kazi zenye status ya 'assigned' au 'submitted')
-        // Unaweza kurekebisha array ya status hapa kulingana na unachochukulia kama 'active'
         $activeRequestsQuery = clone $query;
         $activeRequests = $activeRequestsQuery->whereIn('status', ['assigned', 'submitted'])->count();
 
@@ -73,16 +72,40 @@ class WorkLogController extends Controller
     }
 
     public function store( Request $request ) {
-        $validated = $request->validate( [
+        $user = $request->user();
+
+        $rules = [
             'requester_name' => 'required|string|max:255',
             'title'          => 'required|string|max:255',
             'description'    => 'nullable|string',
             'log_date'       => 'required|date',
             'hours_spent'    => 'required|integer|min:1|max:24',
-            'status'         => 'required|in:submitted,no data,rejected,assigned',
-        ] );
+        ];
 
-        $request->user()->workLogs()->create( $validated );
+        // Status restriction na rejection_reason validation kwa Admin/Supervisor
+        if ( in_array( $user->role, [ 'admin', 'supervisor' ] ) ) {
+            $rules['status'] = 'required|in:submitted,no data,rejected,assigned';
+
+            if ( $request->input('status') === 'rejected' ) {
+                $rules['rejection_reason'] = 'required|string|min:5|max:1000';
+            } else {
+                $rules['rejection_reason'] = 'nullable|string';
+            }
+        }
+
+        $validated = $request->validate( $rules );
+
+        // Ikiwa mtumiaji si admin/supervisor, tumia status ya msingi na futa rejection_reason
+        if ( !in_array( $user->role, [ 'admin', 'supervisor' ] ) ) {
+            $validated['status'] = 'submitted';
+            unset( $validated['rejection_reason'] );
+        } else {
+            if ( ($validated['status'] ?? null) !== 'rejected' ) {
+                $validated['rejection_reason'] = null;
+            }
+        }
+
+        $user->workLogs()->create( $validated );
 
         return redirect()->route( 'work-logs.index' )->with( 'message', 'Work log created successfully!' );
     }
@@ -118,14 +141,37 @@ class WorkLogController extends Controller
             abort( 403, 'Huna ruhusa ya kusasisha log hii.' );
         }
 
-        $validated = $request->validate( [
+        $rules = [
             'requester_name' => 'required|string|max:255',
             'title'          => 'required|string|max:255',
             'description'    => 'nullable|string',
             'log_date'       => 'required|date',
             'hours_spent'    => 'required|integer|min:1|max:24',
-            'status'         => 'required|in:submitted,no data,rejected,assigned',
-        ] );
+        ];
+
+        // Status na Rejection Reason validation kwa Admin au Supervisor
+        if ( in_array( $user->role, [ 'admin', 'supervisor' ] ) ) {
+            $rules['status'] = 'required|in:submitted,no data,rejected,assigned';
+
+            // Ikiwa status ni 'rejected', rejection_reason inakuwa lazima
+            if ( $request->input('status') === 'rejected' ) {
+                $rules['rejection_reason'] = 'required|string|min:5|max:1000';
+            } else {
+                $rules['rejection_reason'] = 'nullable|string';
+            }
+        }
+
+        $validated = $request->validate( $rules );
+
+        // Ikiwa mtumiaji si Admin/Supervisor, zuia ubadilishaji wa status na rejection_reason
+        if ( !in_array( $user->role, [ 'admin', 'supervisor' ] ) ) {
+            unset( $validated['status'], $validated['rejection_reason'] );
+        } else {
+            // Kama status ikibadilishwa na kuwa tofauti na 'rejected', futa/weka null rejection_reason
+            if ( ($validated['status'] ?? null) !== 'rejected' ) {
+                $validated['rejection_reason'] = null;
+            }
+        }
 
         $workLog->update( $validated );
 

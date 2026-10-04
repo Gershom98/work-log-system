@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 export default function Index({ logs, filters = {} }) {
     const { flash, auth } = usePage().props;
@@ -83,9 +83,9 @@ export default function Index({ logs, filters = {} }) {
     const getStatusBadge = (statusKey) => {
         const styles = {
             submitted: 'bg-blue-100 text-blue-800 border-blue-200',
-            approved: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+            assigned: 'bg-emerald-100 text-emerald-800 border-emerald-200',
             rejected: 'bg-rose-100 text-rose-800 border-rose-200',
-            pending: 'bg-amber-100 text-amber-800 border-amber-200',
+            'no data': 'bg-gray-100 text-gray-800 border-gray-200',
         };
 
         const currentStyle = styles[statusKey] || 'bg-gray-100 text-gray-800 border-gray-200';
@@ -106,15 +106,13 @@ export default function Index({ logs, filters = {} }) {
         return queryParams ? `${baseUrl}?${queryParams}` : baseUrl;
     };
 
-    // Calculate total hours on current page
-    const totalHoursCalculated = useMemo(() => {
-        return logs?.data?.reduce((sum, item) => sum + Number(item.hours_spent || 0), 0) || 0;
-    }, [logs?.data]);
-
     // Helper function to decode standard HTML entities safely for pagination
     const formatPaginationLabel = (label) => {
         return label.replace(/&laquo;/g, '«').replace(/&raquo;/g, '»');
     };
+
+    const activeFilterCount = Object.keys(getCleanFilters()).length;
+    const totalRecords = logs?.total || logs?.data?.length || 0;
 
     return (
         <AuthenticatedLayout
@@ -164,44 +162,49 @@ export default function Index({ logs, filters = {} }) {
                         </div>
                     )}
 
-                    {/* METRICS CARDS */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-100 flex items-center justify-between">
-                            <div>
-                                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Records</p>
-                                <p className="text-2xl font-bold text-gray-900 mt-1">{logs?.total || logs?.data?.length || 0}</p>
+                    {/* MODERN METRICS CARDS */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        {/* Card 1: Total Records */}
+                        <div className="relative overflow-hidden bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Records</p>
+                                    <h3 className="text-3xl font-extrabold text-gray-900 mt-2 tracking-tight">{totalRecords}</h3>
+                                    <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                                        Matching filter criteria
+                                    </p>
+                                </div>
+                                <div className="p-3.5 bg-indigo-50 text-indigo-600 rounded-2xl border border-indigo-100/50">
+                                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </div>
                             </div>
-                            <div className="p-3 bg-indigo-50 text-indigo-600 rounded-lg">
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                </svg>
-                            </div>
+                            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-indigo-300" />
                         </div>
 
-                        <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-100 flex items-center justify-between">
-                            <div>
-                                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Page Hours Logged</p>
-                                <p className="text-2xl font-bold text-gray-900 mt-1">{totalHoursCalculated} {totalHoursCalculated === 1 ? 'Hour' : 'Hours'}</p>
+                        {/* Card 2: Active Filters */}
+                        <div className="relative overflow-hidden bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Active Filters</p>
+                                    <h3 className="text-3xl font-extrabold text-gray-900 mt-2 tracking-tight">{activeFilterCount}</h3>
+                                    <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                                        {activeFilterCount > 0 ? (
+                                            <span className="text-amber-600 font-medium">Parameters applied</span>
+                                        ) : (
+                                            <span className="text-gray-400">Showing all data</span>
+                                        )}
+                                    </p>
+                                </div>
+                                <div className="p-3.5 bg-blue-50 text-blue-600 rounded-2xl border border-blue-100/50">
+                                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                    </svg>
+                                </div>
                             </div>
-                            <div className="p-3 bg-emerald-50 text-emerald-600 rounded-lg">
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                        </div>
-
-                        <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-100 flex items-center justify-between">
-                            <div>
-                                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Active Filter</p>
-                                <p className="text-sm font-semibold text-indigo-600 mt-1">
-                                    {status ? status.toUpperCase() : 'ALL STATUSES'}
-                                </p>
-                            </div>
-                            <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                                </svg>
-                            </div>
+                            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-sky-300" />
                         </div>
                     </div>
 
@@ -227,10 +230,10 @@ export default function Index({ logs, filters = {} }) {
                                     className="w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                 >
                                     <option value="">All Statuses</option>
-                                    <option value="pending">Pending</option>
                                     <option value="submitted">Submitted</option>
-                                    <option value="approved">Approved</option>
+                                    <option value="assigned">Assigned</option>
                                     <option value="rejected">Rejected</option>
+                                    <option value="no data">No Data</option>
                                 </select>
                             </div>
 
@@ -286,7 +289,6 @@ export default function Index({ logs, filters = {} }) {
                                         )}
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Requester / Client</th>
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Task Title</th>
-                                        <th className="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Hours</th>
                                         <th className="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                                         <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                                     </tr>
@@ -315,9 +317,6 @@ export default function Index({ logs, filters = {} }) {
                                                 </td>
                                                 <td className="px-6 py-4 text-gray-800 max-w-xs truncate" title={log.title}>
                                                     {log.title}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-center text-gray-600">
-                                                    {log.hours_spent} {Number(log.hours_spent) === 1 ? 'Hour' : 'Hours'}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-center">
                                                     {getStatusBadge(log.status)}
@@ -348,7 +347,7 @@ export default function Index({ logs, filters = {} }) {
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan={isAdmin ? 7 : 6} className="px-6 py-10 text-center text-gray-500">
+                                            <td colSpan={isAdmin ? 6 : 5} className="px-6 py-10 text-center text-gray-500">
                                                 No work logs recorded matching your filters.
                                             </td>
                                         </tr>

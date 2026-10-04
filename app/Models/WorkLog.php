@@ -13,7 +13,8 @@ class WorkLog extends Model  {
         'description',
         'hours_spent',
         'status',
-        'supervisor_comment'
+        'supervisor_comment',
+        'rejection_reason'
     ];
 
     // Status Constants
