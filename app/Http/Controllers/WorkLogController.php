@@ -79,7 +79,7 @@ class WorkLogController extends Controller
             'title'          => 'required|string|max:255',
             'description'    => 'nullable|string',
             'log_date'       => 'required|date',
-            'hours_spent'    => 'required|integer|min:1|max:24',
+            // 'hours_spent'    => 'required|integer|min:1|max:24',
         ];
 
         // Status restriction na rejection_reason validation kwa Admin/Supervisor
