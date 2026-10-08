@@ -11,7 +11,7 @@ class WorkLog extends Model  {
         'log_date',
         'title',
         'description',
-        'hours_spent',
+        // 'hours_spent',
         'status',
         'supervisor_comment',
         'rejection_reason'
