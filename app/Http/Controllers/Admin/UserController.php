@@ -3,107 +3,108 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreUserRequest;
+use App\Http\Requests\Admin\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rules;
-use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of users.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::latest()->paginate(10);
+        $search = trim((string) $request->query('search', ''));
+        $role = $request->query('role');
+
+        $filters = [
+            'search' => $search,
+            'role' => in_array($role, User::getRoles(), true) ? $role : null,
+        ];
+
+        $users = User::query()
+            ->when($search !== '', function ($query) use ($search) {
+                $term = '%'.addcslashes($search, '\\%_').'%';
+
+                $query->where(fn ($inner) => $inner
+                    ->where('name', 'like', $term)
+                    ->orWhere('email', 'like', $term));
+            })
+            ->when($filters['role'], fn ($query, $role) => $query->where('role', $role))
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
 
         return Inertia::render('Admin/Users/Index', [
             'users' => $users,
+            'filters' => $filters,
         ]);
     }
 
-    /**
-     * Show the form for creating a new user.
-     */
     public function create()
     {
-        return Inertia::render('Admin/Users/Create');
+        return Inertia::render('Admin/Users/Create', [
+            'roles' => User::getRoles(),
+        ]);
     }
 
-    /**
-     * Store a newly created user in storage.
-     */
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => ['required', Rules\Password::defaults()],
-            'is_admin' => 'boolean',
-        ]);
+        User::create($request->validated());
 
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'is_admin' => $request->is_admin ?? false,
-        ]);
-
-        return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
+        return redirect()
+            ->route('admin.users.index')
+            ->with('message', 'User created successfully.');
     }
 
-    /**
-     * Show the form for editing the specified user.
-     */
     public function edit(User $user)
     {
         return Inertia::render('Admin/Users/Edit', [
-            'user' => $user,
+            'user' => $user->only(['id', 'name', 'email', 'role', 'created_at']),
+            'roles' => User::getRoles(),
         ]);
     }
 
-    /**
-     * Update the specified user in storage.
-     */
-    public function update(Request $request, User $user)
+    public function update(UpdateUserRequest $request, User $user)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'is_admin' => 'boolean',
-        ]);
+        $data = $request->validated();
 
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'is_admin' => $request->is_admin,
-        ]);
-
-        if ($request->filled('password')) {
-            $request->validate([
-                'password' => ['nullable', Rules\Password::defaults()],
-            ]);
-            $user->update([
-                'password' => Hash::make($request->password),
-            ]);
+        if ($request->user()->id === $user->id && $data['role'] !== User::ROLE_ADMIN) {
+            return back()->with('error', 'You cannot remove your own admin role.');
         }
 
-        return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
+        if (
+            $user->isAdmin()
+            && $data['role'] !== User::ROLE_ADMIN
+            && User::where('role', User::ROLE_ADMIN)->count() <= 1
+        ) {
+            return back()->with('error', 'At least one admin account must remain.');
+        }
+
+        if (blank($data['password'] ?? null)) {
+            unset($data['password']);
+        }
+
+        $user->update($data);
+
+        return redirect()
+            ->route('admin.users.index')
+            ->with('message', 'User updated successfully.');
     }
 
-    /**
-     * Remove the specified user from storage.
-     */
-    public function destroy(User $user)
+    public function destroy(Request $request, User $user)
     {
-        // Prevent admin from deleting their own account
-        if (auth()->id() === $user->id) {
+        if ($request->user()->id === $user->id) {
             return back()->with('error', 'You cannot delete your own account.');
+        }
+
+        if ($user->isAdmin() && User::where('role', User::ROLE_ADMIN)->count() <= 1) {
+            return back()->with('error', 'At least one admin account must remain.');
         }
 
         $user->delete();
 
-        return redirect()->route('admin.users.index')->with('success', 'User deleted successfully.');
+        return redirect()
+            ->route('admin.users.index')
+            ->with('message', 'User deleted successfully.');
     }
 }

@@ -1,122 +1,93 @@
 import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
+import FlashMessage from '@/Components/ui/FlashMessage';
+import RoleBadge from '@/Components/ui/RoleBadge';
+import { initials } from '@/utils/format';
 import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 
 export default function AuthenticatedLayout({ header, children }) {
-    const user = usePage().props.auth.user;
+    const user = usePage().props.auth?.user;
+    const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
 
-    const [showingNavigationDropdown, setShowingNavigationDropdown] =
-        useState(false);
+    const isAdmin = user?.role === 'admin';
+    const isManager = isAdmin || user?.role === 'supervisor';
 
-    // Check if current user is an Admin
-    const isAdmin = user?.is_admin || user?.role === 'admin';
-
-    // Helper to get Download PDF URL safely
-    const getDownloadPdfUrl = () => {
-        if (typeof route === 'function') {
-            try {
-                return route('work-logs.downloadPdf');
-            } catch (e) {
-                return '/work-logs/download-pdf';
-            }
-        }
-        return '/work-logs/download-pdf';
-    };
+    const navigation = [
+        ...(isManager
+            ? [{ label: 'Dashboard', href: route('dashboard'), active: route().current('dashboard') }]
+            : []),
+        {
+            label: 'Daily Work Logs',
+            href: route('work-logs.index'),
+            active: route().current('work-logs.*'),
+        },
+        ...(isAdmin
+            ? [{ label: 'Users', href: route('admin.users.index'), active: route().current('admin.users.*') }]
+            : []),
+    ];
 
     return (
-        <div className="min-h-screen bg-gray-100">
-            <nav className="border-b border-gray-100 bg-white">
+        <div className="min-h-screen bg-slate-50">
+            <nav className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 justify-between">
-                        <div className="flex">
-                            {/* Brand Logo - Redirects to Daily Work Logs */}
+                        <div className="flex min-w-0">
                             <div className="flex shrink-0 items-center">
-                                <Link href={typeof route === 'function' ? route('work-logs.index') : '/work-logs'}>
-                                    <div className="flex items-center space-x-2">
-                                        <div className="h-9 w-9 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-white text-base shadow-sm">
-                                            TL
-                                        </div>
-                                        <span className="text-xl font-bold text-gray-900 tracking-tight">
-                                            Task<span className="text-indigo-600">Log</span>
-                                        </span>
-                                    </div>
+                                <Link href={route('work-logs.index')} className="flex items-center gap-2.5">
+                                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-sm font-bold text-white shadow-sm">
+                                        TL
+                                    </span>
+                                    <span className="text-lg font-bold tracking-tight text-slate-900">
+                                        Task<span className="text-indigo-600">Log</span>
+                                    </span>
                                 </Link>
                             </div>
 
-                            {/* Desktop Navigation Links */}
                             <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                
-                                {/* DASHBOARD LINK: Visible to ADMIN only */}
-                                {isAdmin && (
-                                    <NavLink
-                                        href={typeof route === 'function' ? route('dashboard') : '/dashboard'}
-                                        active={typeof route === 'function' ? route().current('dashboard') : false}
-                                    >
-                                        Dashboard
+                                {navigation.map((item) => (
+                                    <NavLink key={item.label} href={item.href} active={item.active}>
+                                        {item.label}
                                     </NavLink>
-                                )}
-
-                                {/* USER MANAGEMENT LINK: Visible to ADMIN only */}
-                                {isAdmin && (
-                                    <NavLink
-                                        href={typeof route === 'function' ? route('admin.users.index') : '/admin/users'}
-                                        active={typeof route === 'function' ? route().current('admin.users.*') : false}
-                                    >
-                                        Users
-                                    </NavLink>
-                                )}
-
-                                {/* DAILY WORK LOGS LINK: Accessible to all users */}
-                                <NavLink
-                                    href={typeof route === 'function' ? route('work-logs.index') : '/work-logs'}
-                                    active={typeof route === 'function' ? route().current('work-logs.*') : false}
-                                >
-                                    Daily Work Logs
-                                </NavLink>
+                                ))}
                             </div>
                         </div>
 
-                        {/* User Profile Dropdown */}
                         <div className="hidden sm:ms-6 sm:flex sm:items-center">
                             <div className="relative ms-3">
                                 <Dropdown>
                                     <Dropdown.Trigger>
-                                        <span className="inline-flex rounded-md">
-                                            <button
-                                                type="button"
-                                                className="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
-                                            >
-                                                {user?.name}
-
-                                                <svg
-                                                    className="-me-0.5 ms-2 h-4 w-4"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                >
-                                                    <path
-                                                        fillRule="evenodd"
-                                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                        clipRule="evenodd"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </span>
+                                        <button
+                                            type="button"
+                                            className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-white px-2 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                        >
+                                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-700">
+                                                {initials(user?.name)}
+                                            </span>
+                                            <span className="flex flex-col items-start leading-tight">
+                                                <span className="max-w-[140px] truncate">{user?.name}</span>
+                                                <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                                                    {user?.role}
+                                                </span>
+                                            </span>
+                                            <svg className="h-4 w-4 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                <path
+                                                    fillRule="evenodd"
+                                                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                                    clipRule="evenodd"
+                                                />
+                                            </svg>
+                                        </button>
                                     </Dropdown.Trigger>
 
                                     <Dropdown.Content>
-                                        <Dropdown.Link
-                                            href={typeof route === 'function' ? route('profile.edit') : '/profile'}
-                                        >
-                                            Profile
-                                        </Dropdown.Link>
-                                        <Dropdown.Link
-                                            href={typeof route === 'function' ? route('logout') : '/logout'}
-                                            method="post"
-                                            as="button"
-                                        >
+                                        <div className="border-b border-slate-100 px-4 py-3">
+                                            <p className="truncate text-sm font-semibold text-slate-900">{user?.name}</p>
+                                            <p className="truncate text-xs text-slate-500">{user?.email}</p>
+                                        </div>
+                                        <Dropdown.Link href={route('profile.edit')}>Profile</Dropdown.Link>
+                                        <Dropdown.Link href={route('logout')} method="post" as="button">
                                             Log Out
                                         </Dropdown.Link>
                                     </Dropdown.Content>
@@ -124,39 +95,23 @@ export default function AuthenticatedLayout({ header, children }) {
                             </div>
                         </div>
 
-                        {/* Mobile Hamburger Button */}
                         <div className="-me-2 flex items-center sm:hidden">
                             <button
-                                onClick={() =>
-                                    setShowingNavigationDropdown(
-                                        (previousState) => !previousState,
-                                    )
-                                }
-                                className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:bg-gray-100 focus:text-gray-500 focus:outline-none"
+                                onClick={() => setShowingNavigationDropdown((previousState) => !previousState)}
+                                className="inline-flex items-center justify-center rounded-md p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                aria-label="Toggle navigation"
+                                aria-expanded={showingNavigationDropdown}
                             >
-                                <svg
-                                    className="h-6 w-6"
-                                    stroke="currentColor"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
+                                <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                                     <path
-                                        className={
-                                            !showingNavigationDropdown
-                                                ? 'inline-flex'
-                                                : 'hidden'
-                                        }
+                                        className={!showingNavigationDropdown ? 'inline-flex' : 'hidden'}
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
                                         strokeWidth="2"
                                         d="M4 6h16M4 12h16M4 18h16"
                                     />
                                     <path
-                                        className={
-                                            showingNavigationDropdown
-                                                ? 'inline-flex'
-                                                : 'hidden'
-                                        }
+                                        className={showingNavigationDropdown ? 'inline-flex' : 'hidden'}
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
                                         strokeWidth="2"
@@ -168,61 +123,32 @@ export default function AuthenticatedLayout({ header, children }) {
                     </div>
                 </div>
 
-                {/* Mobile Navigation Menu */}
-                <div
-                    className={
-                        (showingNavigationDropdown ? 'block' : 'hidden') +
-                        ' sm:hidden'
-                    }
-                >
+                <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' border-t border-slate-100 sm:hidden'}>
                     <div className="space-y-1 pb-3 pt-2">
-                        {/* Dashboard for Admin on Mobile */}
-                        {isAdmin && (
-                            <ResponsiveNavLink
-                                href={typeof route === 'function' ? route('dashboard') : '/dashboard'}
-                                active={typeof route === 'function' ? route().current('dashboard') : false}
-                            >
-                                Dashboard
+                        {navigation.map((item) => (
+                            <ResponsiveNavLink key={item.label} href={item.href} active={item.active}>
+                                {item.label}
                             </ResponsiveNavLink>
-                        )}
-
-                        {/* User Management for Admin on Mobile */}
-                        {isAdmin && (
-                            <ResponsiveNavLink
-                                href={typeof route === 'function' ? route('admin.users.index') : '/admin/users'}
-                                active={typeof route === 'function' ? route().current('admin.users.*') : false}
-                            >
-                                Users
-                            </ResponsiveNavLink>
-                        )}
-
-                        <ResponsiveNavLink
-                            href={typeof route === 'function' ? route('work-logs.index') : '/work-logs'}
-                            active={typeof route === 'function' ? route().current('work-logs.*') : false}
-                        >
-                            Daily Work Logs
-                        </ResponsiveNavLink>
+                        ))}
                     </div>
 
-                    <div className="border-t border-gray-200 pb-1 pt-4">
-                        <div className="px-4">
-                            <div className="text-base font-medium text-gray-800">
-                                {user?.name}
+                    <div className="border-t border-slate-200 pb-1 pt-4">
+                        <div className="flex items-center gap-3 px-4">
+                            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700">
+                                {initials(user?.name)}
+                            </span>
+                            <div className="min-w-0">
+                                <div className="truncate text-sm font-semibold text-slate-800">{user?.name}</div>
+                                <div className="truncate text-xs text-slate-500">{user?.email}</div>
                             </div>
-                            <div className="text-sm font-medium text-gray-500">
-                                {user?.email}
+                            <div className="ms-auto">
+                                <RoleBadge role={user?.role} />
                             </div>
                         </div>
 
                         <div className="mt-3 space-y-1">
-                            <ResponsiveNavLink href={typeof route === 'function' ? route('profile.edit') : '/profile'}>
-                                Profile
-                            </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                method="post"
-                                href={typeof route === 'function' ? route('logout') : '/logout'}
-                                as="button"
-                            >
+                            <ResponsiveNavLink href={route('profile.edit')}>Profile</ResponsiveNavLink>
+                            <ResponsiveNavLink method="post" href={route('logout')} as="button">
                                 Log Out
                             </ResponsiveNavLink>
                         </div>
@@ -230,11 +156,11 @@ export default function AuthenticatedLayout({ header, children }) {
                 </div>
             </nav>
 
+            <FlashMessage />
+
             {header && (
-                <header className="bg-white shadow">
-                    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-                        {header}
-                    </div>
+                <header className="border-b border-slate-200/80 bg-white">
+                    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{header}</div>
                 </header>
             )}
 

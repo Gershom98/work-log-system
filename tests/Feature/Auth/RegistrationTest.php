@@ -26,6 +26,7 @@ class RegistrationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertRedirect(route('work-logs.index', absolute: false));
+        $this->assertSame(\App\Models\User::ROLE_USER, \App\Models\User::where('email', 'test@example.com')->firstOrFail()->role);
     }
 }

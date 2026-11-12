@@ -1,438 +1,475 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import ConfirmDialog from '@/Components/ui/ConfirmDialog';
+import EmptyState from '@/Components/ui/EmptyState';
+import PageHeader from '@/Components/ui/PageHeader';
+import Pagination from '@/Components/ui/Pagination';
+import StatCard from '@/Components/ui/StatCard';
+import StatusBadge from '@/Components/ui/StatusBadge';
+import { STATUS_OPTIONS, formatDate, inputClass, isoDateOffset, todayInputValue } from '@/utils/format';
+import { Head, Link, router } from '@inertiajs/react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-export default function Index({ logs, filters = {} }) {
-    const { flash, auth } = usePage().props;
-    const isAdmin = auth?.user?.role === 'admin';
+const DEFAULT_PER_PAGE = 10;
 
-    // Filter States
+export default function Index({ logs, summary = {}, filters = {}, perPageOptions = [5, 10, 25, 50], canManageStatus }) {
     const [search, setSearch] = useState(filters.search || '');
     const [status, setStatus] = useState(filters.status || '');
     const [startDate, setStartDate] = useState(filters.start_date || '');
     const [endDate, setEndDate] = useState(filters.end_date || '');
+    const [sort, setSort] = useState(filters.sort || 'newest');
+    const [perPage, setPerPage] = useState(Number(filters.per_page) || DEFAULT_PER_PAGE);
 
-    // Delete Confirmation Modal State
-    const [deletingId, setDeletingId] = useState(null);
+    const [deletingLog, setDeletingLog] = useState(null);
+    const [deleting, setDeleting] = useState(false);
 
-    // Track initial render to skip automatic debounced fetch on mount
     const isFirstRender = useRef(true);
+    const skipDebounce = useRef(false);
 
-    // Helper to get non-empty filter parameters
-    const getCleanFilters = useCallback((customFilters = null) => {
-        const rawFilters = customFilters || { search, status, start_date: startDate, end_date: endDate };
+    const buildParams = useCallback((values) => {
+        const params = {
+            search: (values.search || '').trim(),
+            status: values.status || '',
+            start_date: values.start_date || '',
+            end_date: values.end_date || '',
+            sort: values.sort === 'oldest' ? 'oldest' : '',
+            per_page: Number(values.per_page) !== DEFAULT_PER_PAGE ? values.per_page : '',
+        };
+
         return Object.fromEntries(
-            Object.entries(rawFilters).filter(([_, val]) => val !== '' && val !== null && val !== undefined)
+            Object.entries(params).filter(([, value]) => value !== '' && value !== null && value !== undefined),
         );
-    }, [search, status, startDate, endDate]);
+    }, []);
 
-    // Apply filters via Inertia
-    const applyFilters = useCallback((overrideFilters = null) => {
-        const routeUrl = typeof route === 'function' ? route('work-logs.index') : '/work-logs';
-        const params = getCleanFilters(overrideFilters);
+    const applyFilters = useCallback(
+        (overrides = {}) => {
+            const merged = {
+                search,
+                status,
+                start_date: startDate,
+                end_date: endDate,
+                sort,
+                per_page: perPage,
+                ...overrides,
+            };
 
-        router.get(
-            routeUrl,
-            params,
-            { preserveState: true, replace: true }
-        );
-    }, [getCleanFilters]);
+            router.get(route('work-logs.index'), buildParams(merged), {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            });
+        },
+        [search, status, startDate, endDate, sort, perPage, buildParams],
+    );
 
-    // Debounced filter execution on input change
     useEffect(() => {
         if (isFirstRender.current) {
             isFirstRender.current = false;
             return;
         }
 
-        const timer = setTimeout(() => {
-            applyFilters();
-        }, 400);
+        if (skipDebounce.current) {
+            skipDebounce.current = false;
+            return;
+        }
+
+        const timer = setTimeout(() => applyFilters(), 450);
 
         return () => clearTimeout(timer);
-    }, [search, status, startDate, endDate, applyFilters]);
+    }, [search, startDate, endDate, applyFilters]);
 
-    // Manual Submit
-    const handleFilter = (e) => {
-        if (e) e.preventDefault();
-        applyFilters();
+    const applyImmediately = (overrides, { skip = false } = {}) => {
+        if (skip) {
+            skipDebounce.current = true;
+        }
+        applyFilters(overrides);
     };
 
-    // Reset Filters Correctly
+    const handleStatusChange = (value) => {
+        setStatus(value);
+        applyImmediately({ status: value });
+    };
+
+    const handleSortChange = (value) => {
+        setSort(value);
+        applyImmediately({ sort: value });
+    };
+
+    const handlePerPageChange = (value) => {
+        setPerPage(value);
+        applyImmediately({ per_page: value });
+    };
+
+    const handlePreset = (preset) => {
+        const today = todayInputValue();
+        let range = { start_date: '', end_date: '' };
+
+        if (preset === 'today') {
+            range = { start_date: today, end_date: today };
+        } else if (preset === 'week') {
+            range = { start_date: isoDateOffset(-6), end_date: today };
+        } else if (preset === 'month') {
+            const now = new Date();
+            const first = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+            range = { start_date: first, end_date: today };
+        }
+
+        setStartDate(range.start_date);
+        setEndDate(range.end_date);
+        applyImmediately(range, { skip: true });
+    };
+
     const handleReset = () => {
         setSearch('');
         setStatus('');
         setStartDate('');
         setEndDate('');
-        
-        const routeUrl = typeof route === 'function' ? route('work-logs.index') : '/work-logs';
-        // Pass empty object explicitly to clear query params in Inertia
-        router.get(routeUrl, {}, { preserveState: true, replace: true });
+        setSort('newest');
+        setPerPage(DEFAULT_PER_PAGE);
+        skipDebounce.current = true;
+
+        router.get(route('work-logs.index'), {}, { preserveState: true, preserveScroll: true, replace: true });
     };
 
-    // Confirm Delete Action
     const confirmDelete = () => {
-        if (!deletingId) return;
-        const deleteUrl = typeof route === 'function' ? route('work-logs.destroy', deletingId) : `/work-logs/${deletingId}`;
-        
-        router.delete(deleteUrl, {
-            onSuccess: () => setDeletingId(null),
+        if (!deletingLog) {
+            return;
+        }
+
+        setDeleting(true);
+        router.delete(route('work-logs.destroy', deletingLog.id), {
+            preserveScroll: true,
+            onFinish: () => {
+                setDeleting(false);
+                setDeletingLog(null);
+            },
         });
     };
 
-    const getStatusBadge = (statusKey) => {
-        const styles = {
-            submitted: 'bg-blue-100 text-blue-800 border-blue-200',
-            assigned: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-            rejected: 'bg-rose-100 text-rose-800 border-rose-200',
-            'no data': 'bg-gray-100 text-gray-800 border-gray-200',
-        };
+    const downloadPdfUrl = () => {
+        const params = buildParams({ search, status, start_date: startDate, end_date: endDate, sort, per_page: perPage });
+        const query = new URLSearchParams(params).toString();
 
-        const currentStyle = styles[statusKey] || 'bg-gray-100 text-gray-800 border-gray-200';
-        const label = statusKey ? statusKey.charAt(0).toUpperCase() + statusKey.slice(1) : 'Submitted';
-
-        return (
-            <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${currentStyle}`}>
-                {label}
-            </span>
-        );
+        return query ? `${route('work-logs.downloadPdf')}?${query}` : route('work-logs.downloadPdf');
     };
 
-    const getDownloadPdfUrl = () => {
-        const activeFilters = getCleanFilters();
-        const queryParams = new URLSearchParams(activeFilters).toString();
-        const baseUrl = typeof route === 'function' ? route('work-logs.downloadPdf') : '/work-logs/download-pdf';
+    const activeChips = [
+        search && { key: 'search', label: `Search: “${search}”`, clear: () => { setSearch(''); applyImmediately({ search: '' }, { skip: true }); } },
+        status && { key: 'status', label: STATUS_OPTIONS.find((option) => option.value === status)?.label, clear: () => { setStatus(''); applyImmediately({ status: '' }); } },
+        startDate && { key: 'start', label: `From ${formatDate(startDate)}`, clear: () => { setStartDate(''); applyImmediately({ start_date: '' }, { skip: true }); } },
+        endDate && { key: 'end', label: `To ${formatDate(endDate)}`, clear: () => { setEndDate(''); applyImmediately({ end_date: '' }, { skip: true }); } },
+    ].filter(Boolean);
 
-        return queryParams ? `${baseUrl}?${queryParams}` : baseUrl;
-    };
-
-    // Helper function to decode standard HTML entities safely for pagination
-    const formatPaginationLabel = (label) => {
-        return label.replace(/&laquo;/g, '«').replace(/&raquo;/g, '»');
-    };
-
-    const activeFilterCount = Object.keys(getCleanFilters()).length;
-    const totalRecords = logs?.total || logs?.data?.length || 0;
+    const total = summary.total ?? 0;
 
     return (
         <AuthenticatedLayout
             header={
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                        Work Logs List
-                    </h2>
-
-                    <div className="flex items-center space-x-3">
-                        <a
-                            href={getDownloadPdfUrl()}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 focus:outline-none transition ease-in-out duration-150"
-                        >
-                            <svg className="me-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            Download Report (PDF)
-                        </a>
-
-                        <Link
-                            href={typeof route === 'function' ? route('work-logs.create') : '/work-logs/create'}
-                            className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none transition ease-in-out duration-150"
-                        >
-                            <svg className="me-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-                            </svg>
-                            Add New Log
-                        </Link>
-                    </div>
-                </div>
+                <PageHeader
+                    title="Daily Work Logs"
+                    description={
+                        canManageStatus
+                            ? 'Review every submitted log, track statuses and export filtered reports.'
+                            : 'Keep a record of your daily work and follow the review status of each log.'
+                    }
+                    actions={
+                        <>
+                            <a
+                                href={downloadPdfUrl()}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                            >
+                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Export PDF
+                            </a>
+                            <Link href={route('work-logs.create')} className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700">
+                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                                </svg>
+                                New Log
+                            </Link>
+                        </>
+                    }
+                />
             }
         >
-            <Head title="Work Logs List" />
+            <Head title="Daily Work Logs" />
 
             <div className="py-8">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-6">
-
-                    {flash?.message && (
-                        <div className="flex items-center rounded-md bg-emerald-50 p-4 border border-emerald-200 text-sm text-emerald-800 shadow-sm">
-                            <svg className="w-5 h-5 me-2 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0" />
-                            </svg>
-                            {flash.message}
-                        </div>
-                    )}
-
-                    {/* MODERN METRICS CARDS */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        {/* Card 1: Total Records */}
-                        <div className="relative overflow-hidden bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Records</p>
-                                    <h3 className="text-3xl font-extrabold text-gray-900 mt-2 tracking-tight">{totalRecords}</h3>
-                                    <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-                                        Matching filter criteria
-                                    </p>
-                                </div>
-                                <div className="p-3.5 bg-indigo-50 text-indigo-600 rounded-2xl border border-indigo-100/50">
-                                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                </div>
-                            </div>
-                            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-indigo-300" />
-                        </div>
-
-                        {/* Card 2: Active Filters */}
-                        <div className="relative overflow-hidden bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Active Filters</p>
-                                    <h3 className="text-3xl font-extrabold text-gray-900 mt-2 tracking-tight">{activeFilterCount}</h3>
-                                    <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                                        {activeFilterCount > 0 ? (
-                                            <span className="text-amber-600 font-medium">Parameters applied</span>
-                                        ) : (
-                                            <span className="text-gray-400">Showing all data</span>
-                                        )}
-                                    </p>
-                                </div>
-                                <div className="p-3.5 bg-blue-50 text-blue-600 rounded-2xl border border-blue-100/50">
-                                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                                    </svg>
-                                </div>
-                            </div>
-                            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-sky-300" />
-                        </div>
+                <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                        <StatCard label="Matching logs" value={total} hint="Based on current filters" tone="indigo" icon={<DocumentIcon />} />
+                        <StatCard label="Active" value={summary.active ?? 0} hint="Submitted or assigned" tone="blue" icon={<ActivityIcon />} />
+                        <StatCard label="Rejected" value={summary.rejected ?? 0} hint="Needs attention" tone="rose" icon={<RejectIcon />} />
+                        <StatCard label="No data" value={summary.no_data ?? 0} hint="Awaiting information" tone="amber" icon={<NoDataIcon />} />
                     </div>
 
-                    {/* FILTER FORM */}
-                    <div className="bg-white p-4 shadow-sm sm:rounded-lg border border-gray-100">
-                        <form onSubmit={handleFilter} className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Search Keyword</label>
-                                <input
-                                    type="text"
-                                    placeholder="Task title or client..."
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    className="w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                />
+                    <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm sm:p-5">
+                        <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
+                            <div className="grid flex-1 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                                <div>
+                                    <label htmlFor="search" className="mb-1 block text-xs font-medium text-slate-600">Search</label>
+                                    <input
+                                        id="search"
+                                        type="text"
+                                        placeholder="Task title or requester"
+                                        value={search}
+                                        onChange={(event) => setSearch(event.target.value)}
+                                        className={inputClass}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label htmlFor="status" className="mb-1 block text-xs font-medium text-slate-600">Status</label>
+                                    <select id="status" value={status} onChange={(event) => handleStatusChange(event.target.value)} className={inputClass}>
+                                        <option value="">All statuses</option>
+                                        {STATUS_OPTIONS.map((option) => (
+                                            <option key={option.value} value={option.value}>{option.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label htmlFor="start_date" className="mb-1 block text-xs font-medium text-slate-600">From</label>
+                                    <input id="start_date" type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} className={inputClass} />
+                                </div>
+
+                                <div>
+                                    <label htmlFor="end_date" className="mb-1 block text-xs font-medium text-slate-600">To</label>
+                                    <input id="end_date" type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} className={inputClass} />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4 md:flex-row md:items-center md:justify-between">
+                            <div className="flex flex-wrap items-center gap-2">
+                                <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Quick range</span>
+                                <button type="button" onClick={() => handlePreset('all')} className="rounded-full border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600 transition hover:border-indigo-300 hover:text-indigo-700">All time</button>
+                                <button type="button" onClick={() => handlePreset('today')} className="rounded-full border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600 transition hover:border-indigo-300 hover:text-indigo-700">Today</button>
+                                <button type="button" onClick={() => handlePreset('week')} className="rounded-full border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600 transition hover:border-indigo-300 hover:text-indigo-700">Last 7 days</button>
+                                <button type="button" onClick={() => handlePreset('month')} className="rounded-full border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600 transition hover:border-indigo-300 hover:text-indigo-700">This month</button>
                             </div>
 
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
-                                <select
-                                    value={status}
-                                    onChange={(e) => setStatus(e.target.value)}
-                                    className="w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                >
-                                    <option value="">All Statuses</option>
-                                    <option value="submitted">Submitted</option>
-                                    <option value="assigned">Assigned</option>
-                                    <option value="rejected">Rejected</option>
-                                    <option value="no data">No Data</option>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <select aria-label="Sort by date" value={sort} onChange={(event) => handleSortChange(event.target.value)} className="rounded-lg border-slate-300 text-xs text-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <option value="newest">Newest first</option>
+                                    <option value="oldest">Oldest first</option>
                                 </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Start Date</label>
-                                <input
-                                    type="date"
-                                    value={startDate}
-                                    onChange={(e) => setStartDate(e.target.value)}
-                                    className="w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">End Date</label>
-                                <input
-                                    type="date"
-                                    value={endDate}
-                                    onChange={(e) => setEndDate(e.target.value)}
-                                    className="w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                />
-                            </div>
-
-                            <div className="flex space-x-2">
-                                <button
-                                    type="submit"
-                                    className="w-full inline-flex justify-center items-center px-4 py-2 bg-indigo-600 text-white text-sm rounded-md font-medium hover:bg-indigo-700 transition"
-                                >
-                                    Filter
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={handleReset}
-                                    className="px-4 py-2 bg-gray-100 text-gray-700 text-sm rounded-md font-medium hover:bg-gray-200 transition"
-                                >
+                                <select aria-label="Rows per page" value={perPage} onChange={(event) => handlePerPageChange(Number(event.target.value))} className="rounded-lg border-slate-300 text-xs text-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    {perPageOptions.map((option) => (
+                                        <option key={option} value={option}>{option} / page</option>
+                                    ))}
+                                </select>
+                                <button type="button" onClick={handleReset} className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50">
                                     Reset
                                 </button>
                             </div>
-                        </form>
+                        </div>
+
+                        {activeChips.length > 0 && (
+                            <div className="mt-3 flex flex-wrap items-center gap-2">
+                                {activeChips.map((chip) => (
+                                    <button
+                                        key={chip.key}
+                                        type="button"
+                                        onClick={chip.clear}
+                                        className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700 transition hover:bg-indigo-100"
+                                    >
+                                        {chip.label}
+                                        <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
-                    {/* TABLE */}
-                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg border border-gray-100">
-                        <div className="p-6 text-gray-900 overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
+                    <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+                        <div className="hidden md:block">
+                            <table className="min-w-full divide-y divide-slate-200">
+                                <thead className="bg-slate-50">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-                                        {isAdmin && (
-                                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                                Submitted By
-                                            </th>
+                                        <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">Date</th>
+                                        {canManageStatus && (
+                                            <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">Submitted by</th>
                                         )}
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Requester / Client</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Task Title</th>
-                                        <th className="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                                        <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">Requester</th>
+                                        <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">Task</th>
+                                        <th className="px-6 py-3 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Status</th>
+                                        <th className="px-6 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-slate-500">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="bg-white divide-y divide-gray-200 text-sm">
-                                    {logs?.data && logs.data.length > 0 ? (
+                                <tbody className="divide-y divide-slate-100 text-sm">
+                                    {logs?.data?.length > 0 ? (
                                         logs.data.map((log) => (
-                                            <tr key={log.id} className="hover:bg-gray-50/80 transition-colors">
-                                                <td className="px-6 py-4 whitespace-nowrap text-gray-600">
-                                                    {log.log_date}
-                                                </td>
-
-                                                {isAdmin && (
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className="font-medium text-gray-900">
-                                                            {log.user?.name || 'N/A'}
-                                                        </div>
-                                                        <div className="text-xs text-gray-500">
-                                                            {log.user?.email || ''}
+                                            <tr key={log.id} className="transition hover:bg-slate-50/70">
+                                                <td className="whitespace-nowrap px-6 py-4 text-xs font-medium text-slate-500">{formatDate(log.log_date)}</td>
+                                                {canManageStatus && (
+                                                    <td className="whitespace-nowrap px-6 py-4">
+                                                        <div className="flex items-center gap-2.5">
+                                                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-50 text-[11px] font-bold text-indigo-700">
+                                                                {(log.user?.name || 'U').charAt(0).toUpperCase()}
+                                                            </span>
+                                                            <div className="min-w-0">
+                                                                <div className="truncate text-xs font-semibold text-slate-800">{log.user?.name || 'N/A'}</div>
+                                                                <div className="truncate text-[11px] text-slate-400">{log.user?.email || ''}</div>
+                                                            </div>
                                                         </div>
                                                     </td>
                                                 )}
-
-                                                <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-                                                    {log.requester_name}
-                                                </td>
-                                                <td className="px-6 py-4 text-gray-800 max-w-xs truncate" title={log.title}>
-                                                    {log.title}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-center">
-                                                    {getStatusBadge(log.status)}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-right space-x-2">
-                                                    <Link
-                                                        href={typeof route === 'function' ? route('work-logs.edit', log.id) : `/work-logs/${log.id}/edit`}
-                                                        className="inline-flex items-center p-1.5 text-indigo-600 hover:text-indigo-900 hover:bg-indigo-50 rounded-md transition"
-                                                        title="Edit Log"
-                                                    >
-                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                        </svg>
+                                                <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-slate-800">{log.requester_name}</td>
+                                                <td className="max-w-xs px-6 py-4">
+                                                    <Link href={route('work-logs.show', log.id)} className="block truncate text-sm font-medium text-slate-800 hover:text-indigo-700" title={log.title}>
+                                                        {log.title}
                                                     </Link>
-
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setDeletingId(log.id)}
-                                                        className="inline-flex items-center p-1.5 text-rose-600 hover:text-rose-900 hover:bg-rose-50 rounded-md transition"
-                                                        title="Delete Log"
-                                                    >
-                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                        </svg>
-                                                    </button>
+                                                </td>
+                                                <td className="whitespace-nowrap px-6 py-4 text-center"><StatusBadge status={log.status} /></td>
+                                                <td className="whitespace-nowrap px-6 py-4">
+                                                    <div className="flex items-center justify-end gap-1">
+                                                        <IconLink href={route('work-logs.show', log.id)} label="View log">
+                                                            <EyeIcon />
+                                                        </IconLink>
+                                                        <IconLink href={route('work-logs.edit', log.id)} label="Edit log">
+                                                            <PencilIcon />
+                                                        </IconLink>
+                                                        <button type="button" onClick={() => setDeletingLog(log)} className="rounded-lg p-2 text-rose-500 transition hover:bg-rose-50 hover:text-rose-700" aria-label="Delete log">
+                                                            <TrashIcon />
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan={isAdmin ? 6 : 5} className="px-6 py-10 text-center text-gray-500">
-                                                No work logs recorded matching your filters.
+                                            <td colSpan={canManageStatus ? 6 : 5}>
+                                                <EmptyState
+                                                    title="No work logs found"
+                                                    description="Try adjusting the filters, or create a new work log to get started."
+                                                    action={<Link href={route('work-logs.create')} className="text-sm font-semibold text-indigo-600 hover:text-indigo-800">Create a work log →</Link>}
+                                                />
                                             </td>
                                         </tr>
                                     )}
                                 </tbody>
                             </table>
+                        </div>
 
-                            {/* Counter & Pagination Container */}
-                            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-gray-100 pt-4">
-                                <div className="text-xs text-gray-500">
-                                    Showing <span className="font-semibold text-gray-700">{logs?.from || (logs?.data?.length ? 1 : 0)}</span> to{' '}
-                                    <span className="font-semibold text-gray-700">{logs?.to || logs?.data?.length || 0}</span> of{' '}
-                                    <span className="font-semibold text-gray-700">{logs?.total || logs?.data?.length || 0}</span> logs
-                                </div>
-
-                                {logs?.links && logs.links.length > 3 && (
-                                    <div className="flex space-x-1">
-                                        {logs.links.map((link, index) => (
-                                            link.url ? (
-                                                <Link
-                                                    key={index}
-                                                    href={link.url}
-                                                    preserveState
-                                                    preserveScroll
-                                                    className={`px-3 py-1 text-xs rounded-md border transition ${
-                                                        link.active
-                                                            ? 'bg-indigo-600 text-white border-indigo-600'
-                                                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                                                    }`}
-                                                >
-                                                    {formatPaginationLabel(link.label)}
+                        <div className="divide-y divide-slate-100 md:hidden">
+                            {logs?.data?.length > 0 ? (
+                                logs.data.map((log) => (
+                                    <div key={log.id} className="p-4">
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="min-w-0">
+                                                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{formatDate(log.log_date)}</p>
+                                                <Link href={route('work-logs.show', log.id)} className="mt-1 block truncate text-sm font-semibold text-slate-900">
+                                                    {log.title}
                                                 </Link>
-                                            ) : (
-                                                <span
-                                                    key={index}
-                                                    className="px-3 py-1 text-xs rounded-md border bg-white text-gray-400 border-gray-200 cursor-not-allowed opacity-50"
-                                                >
-                                                    {formatPaginationLabel(link.label)}
-                                                </span>
-                                            )
-                                        ))}
+                                                <p className="mt-0.5 text-xs text-slate-500">Requester: {log.requester_name}</p>
+                                                {canManageStatus && log.user && (
+                                                    <p className="text-xs text-slate-400">By {log.user.name}</p>
+                                                )}
+                                            </div>
+                                            <StatusBadge status={log.status} />
+                                        </div>
+                                        <div className="mt-3 flex items-center justify-end gap-2">
+                                            <Link href={route('work-logs.show', log.id)} className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600">View</Link>
+                                            <Link href={route('work-logs.edit', log.id)} className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600">Edit</Link>
+                                            <button type="button" onClick={() => setDeletingLog(log)} className="rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600">Delete</button>
+                                        </div>
                                     </div>
-                                )}
-                            </div>
+                                ))
+                            ) : (
+                                <EmptyState
+                                    title="No work logs found"
+                                    description="Try adjusting the filters, or create a new work log to get started."
+                                />
+                            )}
+                        </div>
 
+                        <div className="px-4 pb-4 sm:px-6">
+                            <Pagination paginator={logs} label="logs" />
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* DELETE CONFIRMATION MODAL */}
-            {deletingId && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm p-4">
-                    <div className="bg-white rounded-lg p-6 max-w-sm w-full shadow-xl transform transition-all space-y-4">
-                        <div className="flex items-center space-x-3 text-rose-600">
-                            <div className="p-2 bg-rose-100 rounded-full">
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                </svg>
-                            </div>
-                            <h3 className="text-lg font-bold text-gray-900">Delete Work Log</h3>
-                        </div>
-                        <p className="text-sm text-gray-600">
-                            Are you sure you want to delete this work log? This action cannot be undone.
-                        </p>
-                        <div className="flex justify-end space-x-3 pt-2">
-                            <button
-                                type="button"
-                                onClick={() => setDeletingId(null)}
-                                className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200 transition"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="button"
-                                onClick={confirmDelete}
-                                className="px-4 py-2 bg-rose-600 text-white text-sm font-medium rounded-md hover:bg-rose-700 transition"
-                            >
-                                Delete
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
+            <ConfirmDialog
+                open={Boolean(deletingLog)}
+                title="Delete work log"
+                description={deletingLog ? `“${deletingLog.title}” will be permanently deleted. This action cannot be undone.` : ''}
+                confirmLabel="Delete log"
+                processing={deleting}
+                onConfirm={confirmDelete}
+                onClose={() => setDeletingLog(null)}
+            />
         </AuthenticatedLayout>
+    );
+}
+
+function IconLink({ href, label, children }) {
+    return (
+        <Link href={href} className="rounded-lg p-2 text-slate-500 transition hover:bg-indigo-50 hover:text-indigo-700" aria-label={label} title={label}>
+            {children}
+        </Link>
+    );
+}
+
+function DocumentIcon() {
+    return (
+        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+    );
+}
+
+function ActivityIcon() {
+    return (
+        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+        </svg>
+    );
+}
+
+function RejectIcon() {
+    return (
+        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+    );
+}
+
+function NoDataIcon() {
+    return (
+        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M12 9v2m0 4h.01M5.062 20h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+    );
+}
+
+function EyeIcon() {
+    return (
+        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        </svg>
+    );
+}
+
+function PencilIcon() {
+    return (
+        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        </svg>
+    );
+}
+
+function TrashIcon() {
+    return (
+        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
     );
 }

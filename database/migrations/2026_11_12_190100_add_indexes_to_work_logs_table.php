@@ -1,0 +1,26 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('work_logs', function (Blueprint $table) {
+            $table->index('status');
+            $table->index('log_date');
+            $table->index(['user_id', 'log_date']);
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('work_logs', function (Blueprint $table) {
+            $table->dropIndex(['status']);
+            $table->dropIndex(['log_date']);
+            $table->dropIndex(['user_id', 'log_date']);
+        });
+    }
+};

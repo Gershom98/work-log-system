@@ -1,244 +1,288 @@
-import React from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import PageHeader from '@/Components/ui/PageHeader';
+import StatCard from '@/Components/ui/StatCard';
+import StatusBadge from '@/Components/ui/StatusBadge';
+import RoleBadge from '@/Components/ui/RoleBadge';
+import { STATUS_META, formatDate, initials } from '@/utils/format';
 import { Head, Link } from '@inertiajs/react';
 
-export default function Dashboard({ stats = {}, recentLogs = [] }) {
-    // Helper ya kupata URL ya Download PDF
-    const getDownloadPdfUrl = () => {
-        if (typeof route === 'function') {
-            try {
-                return route('work-logs.downloadPdf');
-            } catch (e) {
-                return '/work-logs/download-pdf';
-            }
-        }
-        return '/work-logs/download-pdf';
-    };
+export default function Dashboard({ stats = {}, recentLogs = [], topContributors = [] }) {
+    const statusRows = [
+        { key: 'submitted', label: 'Submitted', count: stats.submitted_logs || 0, filter: 'submitted' },
+        { key: 'assigned', label: 'Assigned', count: stats.assigned_logs || 0, filter: 'assigned' },
+        { key: 'rejected', label: 'Rejected', count: stats.rejected_logs || 0, filter: 'rejected' },
+        { key: 'no data', label: 'No Data', count: stats.no_data_logs || 0, filter: 'no data' },
+    ];
 
-    // Helper ya kutoa Status Badge mpya kulingana na enum: ['submitted', 'no data', 'rejected', 'assigned']
-    const renderStatusBadge = (status) => {
-        const normalizedStatus = status ? status.toLowerCase() : 'submitted';
-
-        switch (normalizedStatus) {
-            case 'assigned':
-                return (
-                    <span className="inline-flex items-center gap-x-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
-                        Assigned
-                    </span>
-                );
-            case 'rejected':
-                return (
-                    <span className="inline-flex items-center gap-x-1.5 rounded-full bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700 ring-1 ring-inset ring-rose-600/20">
-                        <span className="h-1.5 w-1.5 rounded-full bg-rose-600" />
-                        Rejected
-                    </span>
-                );
-            case 'no data':
-                return (
-                    <span className="inline-flex items-center gap-x-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 ring-1 ring-inset ring-amber-600/20">
-                        <span className="h-1.5 w-1.5 rounded-full bg-amber-600" />
-                        No Data
-                    </span>
-                );
-            case 'submitted':
-            default:
-                return (
-                    <span className="inline-flex items-center gap-x-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 ring-1 ring-inset ring-blue-700/10">
-                        <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
-                        Submitted
-                    </span>
-                );
-        }
-    };
+    const totalLogs = stats.total_logs || 0;
+    const maxCount = Math.max(...statusRows.map((row) => row.count), 1);
 
     return (
         <AuthenticatedLayout
             header={
-                <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                        Admin Dashboard
-                    </h2>
-                </div>
+                <PageHeader
+                    title="Dashboard"
+                    description="A quick overview of team activity, statuses and the latest submissions."
+                    actions={
+                        <>
+                            <a
+                                href={route('work-logs.downloadPdf')}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                            >
+                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Export PDF
+                            </a>
+                            <Link href={route('work-logs.index')} className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700">
+                                View all logs
+                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </Link>
+                        </>
+                    }
+                />
             }
         >
-            <Head title="Admin Dashboard" />
+            <Head title="Dashboard" />
 
             <div className="py-8">
-                <div className="mx-auto max-w-7xl space-y-8 sm:px-6 lg:px-8">
-
-                    {/* Stats Cards Section */}
-                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-
-                        {/* Total Logs */}
-                        <div className="overflow-hidden rounded-xl bg-white p-6 shadow-sm border border-gray-100 transition hover:shadow-md">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Work Logs</p>
-                                    <p className="mt-2 text-3xl font-bold text-gray-900">{stats?.total_logs || 0}</p>
-                                </div>
-                                <div className="rounded-lg bg-indigo-50 p-3 text-indigo-600">
-                                    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Submitted Logs */}
-                        <div className="overflow-hidden rounded-xl bg-white p-6 shadow-sm border border-gray-100 transition hover:shadow-md">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted Logs</p>
-                                    <p className="mt-2 text-3xl font-bold text-blue-600">{stats?.submitted_logs || 0}</p>
-                                </div>
-                                <div className="rounded-lg bg-blue-50 p-3 text-blue-600">
-                                    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Assigned Logs */}
-                        <div className="overflow-hidden rounded-xl bg-white p-6 shadow-sm border border-gray-100 transition hover:shadow-md">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned Logs</p>
-                                    <p className="mt-2 text-3xl font-bold text-emerald-600">{stats?.assigned_logs || 0}</p>
-                                </div>
-                                <div className="rounded-lg bg-emerald-50 p-3 text-emerald-600">
-                                    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Rejected Logs */}
-                        <div className="overflow-hidden rounded-xl bg-white p-6 shadow-sm border border-gray-100 transition hover:shadow-md">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Rejected Logs</p>
-                                    <p className="mt-2 text-3xl font-bold text-rose-600">{stats?.rejected_logs || 0}</p>
-                                </div>
-                                <div className="rounded-lg bg-rose-50 p-3 text-rose-600">
-                                    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-
+                <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+                        <StatCard
+                            label="Total logs"
+                            value={totalLogs}
+                            hint="All recorded work"
+                            tone="indigo"
+                            href={route('work-logs.index')}
+                            icon={<LogsIcon />}
+                        />
+                        <StatCard
+                            label="Submitted"
+                            value={stats.submitted_logs || 0}
+                            hint="Awaiting review"
+                            tone="blue"
+                            href={route('work-logs.index', { status: 'submitted' })}
+                            icon={<SendIcon />}
+                        />
+                        <StatCard
+                            label="Assigned"
+                            value={stats.assigned_logs || 0}
+                            hint="In progress"
+                            tone="emerald"
+                            href={route('work-logs.index', { status: 'assigned' })}
+                            icon={<CheckIcon />}
+                        />
+                        <StatCard
+                            label="Rejected"
+                            value={stats.rejected_logs || 0}
+                            hint="Needs follow-up"
+                            tone="rose"
+                            href={route('work-logs.index', { status: 'rejected' })}
+                            icon={<RejectIcon />}
+                        />
+                        <StatCard
+                            label="Team members"
+                            value={stats.total_users || 0}
+                            hint="Registered users"
+                            tone="slate"
+                            icon={<UsersIcon />}
+                        />
                     </div>
 
-                    {/* Recent Work Activity Table */}
-                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-xl border border-gray-100">
-                        <div className="p-6">
-                            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                        <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm lg:col-span-2">
+                            <div className="flex items-center justify-between">
                                 <div>
-                                    <h3 className="text-lg font-bold text-gray-900">Recent Work Activity</h3>
-                                    <p className="text-xs text-gray-500 mt-0.5">Overview of the latest submitted work activities.</p>
+                                    <h3 className="text-base font-semibold text-slate-900">Status distribution</h3>
+                                    <p className="text-xs text-slate-500">Share of logs by current status.</p>
                                 </div>
-                                <div className="flex items-center space-x-3">
-                                    <a
-                                        href={getDownloadPdfUrl()}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center rounded-lg bg-rose-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-rose-700 transition focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
-                                    >
-                                        <svg className="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                        </svg>
-                                        Export PDF Report
-                                    </a>
-                                    <Link
-                                        href={typeof route === 'function' ? route('work-logs.index') : '/work-logs'}
-                                        className="inline-flex items-center text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition"
-                                    >
-                                        View All Logs
-                                        <svg className="ml-1 h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    </Link>
-                                </div>
+                                <Link href={route('work-logs.index')} className="text-xs font-semibold text-indigo-600 hover:text-indigo-800">View logs →</Link>
                             </div>
 
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200">
-                                    <thead>
-                                        <tr className="bg-gray-50/50 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                            <th className="px-6 py-3">Date</th>
-                                            <th className="px-6 py-3">Submitted By</th>
-                                            <th className="px-6 py-3">Requester / Client</th>
-                                            <th className="px-6 py-3">Task Title</th>
-                                            <th className="px-6 py-3 text-center">Status</th>
-                                            <th className="px-6 py-3 text-right">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-100 bg-white text-sm">
-                                        {recentLogs && recentLogs.length > 0 ? (
-                                            recentLogs.map((log) => (
-                                                <tr key={log.id} className="hover:bg-gray-50/80 transition">
-                                                    <td className="px-6 py-4 whitespace-nowrap text-gray-600 font-medium text-xs">
-                                                        {log.log_date}
-                                                    </td>
+                            <div className="mt-5 space-y-4">
+                                {statusRows.map((row) => {
+                                    const percent = totalLogs > 0 ? Math.round((row.count / totalLogs) * 100) : 0;
+                                    const barWidth = totalLogs > 0 ? Math.max((row.count / maxCount) * 100, row.count > 0 ? 4 : 0) : 0;
+                                    const meta = STATUS_META[row.key];
 
-                                                    {/* User Details */}
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="h-8 w-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs uppercase">
-                                                                {log.user?.name ? log.user.name.charAt(0) : 'U'}
-                                                            </div>
-                                                            <div>
-                                                                <div className="font-semibold text-gray-900 text-xs">
-                                                                    {log.user?.name || 'N/A'}
-                                                                </div>
-                                                                <div className="text-[11px] text-gray-500">
-                                                                    {log.user?.email || ''}
-                                                                </div>
-                                                            </div>
+                                    return (
+                                        <Link key={row.key} href={route('work-logs.index', { status: row.filter })} className="block rounded-lg p-1 transition hover:bg-slate-50">
+                                            <div className="flex items-center justify-between text-sm">
+                                                <span className="flex items-center gap-2 font-medium text-slate-700">
+                                                    <span className={`h-2 w-2 rounded-full ${meta.dot}`} />
+                                                    {row.label}
+                                                </span>
+                                                <span className="text-xs text-slate-500">
+                                                    <span className="font-semibold text-slate-700">{row.count}</span> · {percent}%
+                                                </span>
+                                            </div>
+                                            <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100">
+                                                <div className={`h-full rounded-full ${meta.bar}`} style={{ width: `${barWidth}%` }} />
+                                            </div>
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+
+                            {totalLogs === 0 && (
+                                <p className="mt-5 rounded-lg bg-slate-50 p-3 text-xs text-slate-500">
+                                    No work logs yet. Create the first one from the Work Logs page.
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+                            <h3 className="text-base font-semibold text-slate-900">Top contributors</h3>
+                            <p className="text-xs text-slate-500">Users with the most work logs.</p>
+
+                            <div className="mt-4 space-y-3">
+                                {topContributors.length > 0 ? (
+                                    topContributors.map((contributor, index) => (
+                                        <div key={contributor.id} className="flex items-center gap-3">
+                                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-xs font-bold text-indigo-700">
+                                                {initials(contributor.name)}
+                                            </span>
+                                            <div className="min-w-0 flex-1">
+                                                <p className="truncate text-sm font-semibold text-slate-800">{contributor.name}</p>
+                                                <p className="truncate text-xs text-slate-400">{contributor.email}</p>
+                                            </div>
+                                            <div className="flex flex-col items-end gap-1">
+                                                <span className="text-sm font-bold text-slate-700">{contributor.work_logs_count}</span>
+                                                <RoleBadge role={contributor.role} />
+                                            </div>
+                                            <span className="sr-only">Rank {index + 1}</span>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="text-sm text-slate-500">No contributors yet.</p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+                        <div className="flex flex-col gap-2 border-b border-slate-100 p-6 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <h3 className="text-base font-semibold text-slate-900">Recent activity</h3>
+                                <p className="text-xs text-slate-500">The latest six work logs.</p>
+                            </div>
+                            <Link href={route('work-logs.index')} className="text-xs font-semibold text-indigo-600 hover:text-indigo-800">View all →</Link>
+                        </div>
+
+                        <div className="hidden overflow-x-auto md:block">
+                            <table className="min-w-full divide-y divide-slate-200">
+                                <thead className="bg-slate-50">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">Date</th>
+                                        <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">Submitted by</th>
+                                        <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">Requester</th>
+                                        <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">Task</th>
+                                        <th className="px-6 py-3 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Status</th>
+                                        <th className="px-6 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-slate-500">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100 text-sm">
+                                    {recentLogs.length > 0 ? (
+                                        recentLogs.map((log) => (
+                                            <tr key={log.id} className="transition hover:bg-slate-50/70">
+                                                <td className="whitespace-nowrap px-6 py-4 text-xs font-medium text-slate-500">{formatDate(log.log_date)}</td>
+                                                <td className="whitespace-nowrap px-6 py-4">
+                                                    <div className="flex items-center gap-2.5">
+                                                        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-50 text-[11px] font-bold text-indigo-700">
+                                                            {initials(log.user?.name)}
+                                                        </span>
+                                                        <div className="min-w-0">
+                                                            <p className="truncate text-xs font-semibold text-slate-800">{log.user?.name || 'N/A'}</p>
+                                                            <p className="truncate text-[11px] text-slate-400">{log.user?.email}</p>
                                                         </div>
-                                                    </td>
-
-                                                    <td className="px-6 py-4 whitespace-nowrap text-gray-800 font-medium text-xs">
-                                                        {log.requester_name}
-                                                    </td>
-                                                    <td className="px-6 py-4 text-gray-700 max-w-xs truncate text-xs font-medium">
+                                                    </div>
+                                                </td>
+                                                <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-slate-800">{log.requester_name}</td>
+                                                <td className="max-w-xs px-6 py-4">
+                                                    <Link href={route('work-logs.show', log.id)} className="block truncate text-sm font-medium text-slate-800 hover:text-indigo-700">
                                                         {log.title}
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                                                        {renderStatusBadge(log.status)}
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-right text-xs font-medium">
-                                                        <Link
-                                                            href={typeof route === 'function' && log?.id ? route('work-logs.show', log.id) : `/work-logs/${log?.id}`}
-                                                            className="text-indigo-600 hover:text-indigo-900 font-semibold inline-flex items-center gap-1"
-                                                        >
-                                                            View
-                                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                                                            </svg>
-                                                        </Link>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        ) : (
-                                            <tr>
-                                                <td colSpan={6} className="px-6 py-10 text-center text-gray-500 text-sm">
-                                                    No recent work activity found.
+                                                    </Link>
+                                                </td>
+                                                <td className="whitespace-nowrap px-6 py-4 text-center"><StatusBadge status={log.status} /></td>
+                                                <td className="whitespace-nowrap px-6 py-4 text-right">
+                                                    <Link href={route('work-logs.show', log.id)} className="text-xs font-semibold text-indigo-600 hover:text-indigo-800">View</Link>
                                                 </td>
                                             </tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="6" className="px-6 py-10 text-center text-sm text-slate-500">No recent activity.</td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
 
+                        <div className="divide-y divide-slate-100 md:hidden">
+                            {recentLogs.length > 0 ? (
+                                recentLogs.map((log) => (
+                                    <Link key={log.id} href={route('work-logs.show', log.id)} className="block p-4 transition hover:bg-slate-50">
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="min-w-0">
+                                                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{formatDate(log.log_date)}</p>
+                                                <p className="mt-1 truncate text-sm font-semibold text-slate-900">{log.title}</p>
+                                                <p className="text-xs text-slate-500">{log.user?.name || 'N/A'} · {log.requester_name}</p>
+                                            </div>
+                                            <StatusBadge status={log.status} />
+                                        </div>
+                                    </Link>
+                                ))
+                            ) : (
+                                <p className="p-6 text-center text-sm text-slate-500">No recent activity.</p>
+                            )}
                         </div>
                     </div>
-
                 </div>
             </div>
         </AuthenticatedLayout>
+    );
+}
+
+function LogsIcon() {
+    return (
+        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+    );
+}
+
+function SendIcon() {
+    return (
+        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+        </svg>
+    );
+}
+
+function CheckIcon() {
+    return (
+        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+    );
+}
+
+function RejectIcon() {
+    return (
+        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+    );
+}
+
+function UsersIcon() {
+    return (
+        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
     );
 }

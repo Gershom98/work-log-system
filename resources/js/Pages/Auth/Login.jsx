@@ -29,16 +29,10 @@ export default function Login({ status, canResetPassword }) {
             <Head title="Log in - Daily Work Log System" />
 
             {/* Header Section */}
-            <div className="mb-6 text-center">
-                <div className="mx-auto mb-3 h-12 w-12 rounded-2xl bg-blue-600 flex items-center justify-center font-bold text-white text-xl shadow-md shadow-blue-200">
-                    WL
-                </div>
-                <h2 className="text-2xl font-bold tracking-tight text-gray-900">
+            <div className="mb-3 text-center">
+                <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-gray-900">
                     Welcome Back
                 </h2>
-                <p className="mt-1 text-xs text-gray-500">
-                    Log in to access your Daily Work Log System
-                </p>
             </div>
 
             {/* Status Message */}
@@ -48,7 +42,7 @@ export default function Login({ status, canResetPassword }) {
                 </div>
             )}
 
-            <form onSubmit={submit} className="space-y-4">
+            <form onSubmit={submit} className="space-y-3">
                 {/* Email Field */}
                 <div>
                     <InputLabel htmlFor="email" value="Email Address" className="text-gray-700 text-xs font-semibold" />
@@ -64,7 +58,7 @@ export default function Login({ status, canResetPassword }) {
                             type="email"
                             name="email"
                             value={data.email}
-                            className="pl-9 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600 text-sm"
+                            className="pl-9 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600 text-sm py-1.5 sm:py-2"
                             autoComplete="username"
                             isFocused={true}
                             onChange={(e) => setData('email', e.target.value)}
@@ -91,7 +85,7 @@ export default function Login({ status, canResetPassword }) {
                             type={showPassword ? 'text' : 'password'}
                             name="password"
                             value={data.password}
-                            className="pl-9 pr-10 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600 text-sm"
+                            className="pl-9 pr-10 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600 text-sm py-1.5 sm:py-2"
                             autoComplete="current-password"
                             onChange={(e) => setData('password', e.target.value)}
                             placeholder="••••••••"
@@ -120,7 +114,7 @@ export default function Login({ status, canResetPassword }) {
                 </div>
 
                 {/* Remember Me & Forgot Password */}
-                <div className="flex items-center justify-between pt-1">
+                <div className="flex items-center justify-between">
                     <label className="flex items-center cursor-pointer">
                         <Checkbox
                             name="remember"
@@ -144,9 +138,9 @@ export default function Login({ status, canResetPassword }) {
                 </div>
 
                 {/* Submit Action */}
-                <div className="pt-2">
+                <div>
                     <PrimaryButton
-                        className="w-full justify-center py-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold shadow-md shadow-blue-100 transition"
+                        className="w-full justify-center py-2 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold shadow-md shadow-blue-100 transition"
                         disabled={processing}
                     >
                         {processing ? 'Logging in...' : 'Log in'}
@@ -154,7 +148,7 @@ export default function Login({ status, canResetPassword }) {
                 </div>
 
                 {/* Footer Navigation */}
-                <div className="mt-5 flex items-center justify-between border-t border-gray-100 pt-4 text-xs">
+                <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-3 text-xs">
                     <Link
                         href="/"
                         className="flex items-center gap-1 font-medium text-gray-500 hover:text-blue-600 transition"

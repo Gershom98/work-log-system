@@ -11,6 +11,12 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    public const ROLE_ADMIN = 'admin';
+
+    public const ROLE_SUPERVISOR = 'supervisor';
+
+    public const ROLE_USER = 'user';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -59,7 +65,15 @@ class User extends Authenticatable
      */
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->role === self::ROLE_ADMIN;
+    }
+
+    /**
+     * Helper Method: Angalia kama mtumiaji ni Supervisor
+     */
+    public function isSupervisor(): bool
+    {
+        return $this->role === self::ROLE_SUPERVISOR;
     }
 
     /**
@@ -67,6 +81,11 @@ class User extends Authenticatable
      */
     public function isSupervisorOrAdmin(): bool
     {
-        return in_array($this->role, ['admin', 'supervisor']);
+        return in_array($this->role, [self::ROLE_ADMIN, self::ROLE_SUPERVISOR], true);
+    }
+
+    public static function getRoles(): array
+    {
+        return [self::ROLE_ADMIN, self::ROLE_SUPERVISOR, self::ROLE_USER];
     }
 }

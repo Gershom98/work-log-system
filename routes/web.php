@@ -41,7 +41,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // 🔒 Admin Only Routes (User Management CRUD)
     Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function () {
-        Route::resource('users', UserController::class);
+        Route::resource('users', UserController::class)->except(['show']);
     });
 });
 

@@ -40,19 +40,13 @@ export default function Register() {
             <Head title="Register - Daily Work Log System" />
 
             {/* Header Section */}
-            <div className="mb-6 text-center">
-                <div className="mx-auto mb-3 h-12 w-12 rounded-2xl bg-blue-600 flex items-center justify-center font-bold text-white text-xl shadow-md shadow-blue-200">
-                    WL
-                </div>
-                <h2 className="text-2xl font-bold tracking-tight text-gray-900">
+            <div className="mb-4 text-center">
+                <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-gray-900">
                     Create Account
                 </h2>
-                <p className="mt-1 text-xs text-gray-500">
-                    Get started with your Daily Work Log account
-                </p>
             </div>
 
-            <form onSubmit={submit} className="space-y-4">
+            <form onSubmit={submit} className="space-y-2">
                 {/* Full Name */}
                 <div>
                     <InputLabel htmlFor="name" value="Full Name" className="text-gray-700 text-xs font-semibold" />
@@ -67,7 +61,7 @@ export default function Register() {
                             id="name"
                             name="name"
                             value={data.name}
-                            className="pl-9 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600 text-sm"
+                            className="pl-9 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600 text-sm py-1 sm:py-2"
                             autoComplete="name"
                             isFocused={true}
                             onChange={(e) => setData('name', e.target.value)}
@@ -94,7 +88,7 @@ export default function Register() {
                             type="email"
                             name="email"
                             value={data.email}
-                            className="pl-9 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600 text-sm"
+                            className="pl-9 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600 text-sm py-1 sm:py-2"
                             autoComplete="username"
                             onChange={(e) => setData('email', e.target.value)}
                             placeholder="name@example.com"
@@ -105,9 +99,24 @@ export default function Register() {
                     <InputError message={errors.email} className="mt-1.5" />
                 </div>
 
-                {/* Password Field */}
+                {/* Password Fields */}
+                <div className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-3 items-start">
                 <div>
-                    <InputLabel htmlFor="password" value="Password" className="text-gray-700 text-xs font-semibold" />
+                    <div className="flex items-center justify-between gap-2">
+                        <InputLabel htmlFor="password" value="Password" className="text-gray-700 text-xs font-semibold" />
+
+                        {/* Password Strength Indicator */}
+                        {data.password && (
+                            <div className="flex items-center gap-1.5">
+                                <div className="w-14 h-1 bg-gray-100 rounded-full overflow-hidden">
+                                    <div className={`h-full transition-all duration-300 ${strength.color.split(' ')[0]} ${data.password.length < 6 ? 'w-1/3' : data.password.length < 10 ? 'w-2/3' : 'w-full'}`}></div>
+                                </div>
+                                <span className={`text-[9px] font-bold ${strength.color.split(' ')[1]}`}>
+                                    {strength.label}
+                                </span>
+                            </div>
+                        )}
+                    </div>
 
                     <div className="relative mt-1">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
@@ -120,7 +129,7 @@ export default function Register() {
                             type={showPassword ? 'text' : 'password'}
                             name="password"
                             value={data.password}
-                            className="pl-9 pr-10 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600 text-sm"
+                            className="pl-9 pr-10 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600 text-sm py-1 sm:py-2"
                             autoComplete="new-password"
                             onChange={(e) => setData('password', e.target.value)}
                             placeholder="••••••••"
@@ -144,18 +153,6 @@ export default function Register() {
                         </button>
                     </div>
 
-                    {/* Password Strength Indicator */}
-                    {data.password && (
-                        <div className="mt-2 flex items-center gap-2">
-                            <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                <div className={`h-full transition-all duration-300 ${strength.color.split(' ')[0]} ${data.password.length < 6 ? 'w-1/3' : data.password.length < 10 ? 'w-2/3' : 'w-full'}`}></div>
-                            </div>
-                            <span className={`text-[10px] font-bold ${strength.color.split(' ')[1]}`}>
-                                {strength.label}
-                            </span>
-                        </div>
-                    )}
-
                     <InputError message={errors.password} className="mt-1.5" />
                 </div>
 
@@ -174,7 +171,7 @@ export default function Register() {
                             type={showConfirmPassword ? 'text' : 'password'}
                             name="password_confirmation"
                             value={data.password_confirmation}
-                            className="pl-9 pr-10 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600 text-sm"
+                            className="pl-9 pr-10 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600 text-sm py-1 sm:py-2"
                             autoComplete="new-password"
                             onChange={(e) => setData('password_confirmation', e.target.value)}
                             placeholder="••••••••"
@@ -200,11 +197,12 @@ export default function Register() {
 
                     <InputError message={errors.password_confirmation} className="mt-1.5" />
                 </div>
+                </div>
 
                 {/* Submit Action */}
-                <div className="pt-2">
+                <div>
                     <PrimaryButton
-                        className="w-full justify-center py-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold shadow-md shadow-blue-100 transition"
+                        className="w-full justify-center py-2 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold shadow-md shadow-blue-100 transition"
                         disabled={processing}
                     >
                         {processing ? 'Registering...' : 'Register'}
@@ -212,7 +210,7 @@ export default function Register() {
                 </div>
 
                 {/* Footer Navigation */}
-                <div className="mt-5 flex items-center justify-between border-t border-gray-100 pt-4 text-xs">
+                <div className="mt-2 flex items-center justify-between border-t border-gray-100 pt-2 text-xs">
                     <Link
                         href="/"
                         className="flex items-center gap-1 font-medium text-gray-500 hover:text-blue-600 transition"

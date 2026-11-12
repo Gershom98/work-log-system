@@ -2,39 +2,51 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\WorkLog;
 use App\Models\User;
+use App\Models\WorkLog;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class DashboardController extends Controller {
-    public function index( Request $request ) {
+class DashboardController extends Controller
+{
+    public function index(Request $request)
+    {
         $user = $request->user();
 
-        // Kama mtumiaji sio Admin au Supervisor, mpeleke kwenye ukurasa wa Work Logs
-        if ( !in_array( $user->role, [ 'admin', 'supervisor' ] ) ) {
-            return redirect()->route( 'work-logs.index' );
+        if (! $user->isSupervisorOrAdmin()) {
+            return redirect()->route('work-logs.index');
         }
 
-        // Mahesabu ya Takwimu ( Metrics ) kwa ajili ya Admin Dashboard
+        $counts = WorkLog::query()
+            ->selectRaw('status, COUNT(*) as aggregate')
+            ->groupBy('status')
+            ->pluck('aggregate', 'status');
+
         $stats = [
-            'total_users'     => User::count(),
-            'total_logs'      => WorkLog::count(),
-            'submitted_logs'  => WorkLog::where( 'status', 'submitted' )->count(),
-            'no_data_logs'    => WorkLog::where( 'status', 'no data' )->count(),
-            'rejected_logs'   => WorkLog::where( 'status', 'rejected' )->count(),
-            'assigned_logs'   => WorkLog::where( 'status', 'assigned' )->count(),
+            'total_users' => User::count(),
+            'total_logs' => (int) $counts->sum(),
+            'submitted_logs' => (int) ($counts[WorkLog::STATUS_SUBMITTED] ?? 0),
+            'no_data_logs' => (int) ($counts[WorkLog::STATUS_NO_DATA] ?? 0),
+            'rejected_logs' => (int) ($counts[WorkLog::STATUS_REJECTED] ?? 0),
+            'assigned_logs' => (int) ($counts[WorkLog::STATUS_ASSIGNED] ?? 0),
         ];
 
-        // Logs za hivi karibuni 5
-        $recentLogs = WorkLog::with( 'user:id,name,email' )
-        ->latest( 'log_date' )
-        ->take( 5 )
-        ->get();
+        $recentLogs = WorkLog::query()
+            ->with('user:id,name,email')
+            ->sorted('newest')
+            ->take(6)
+            ->get();
 
-        return Inertia::render( 'Dashboard', [
-            'stats'      => $stats,
+        $topContributors = User::query()
+            ->withCount('workLogs')
+            ->orderByDesc('work_logs_count')
+            ->take(5)
+            ->get(['id', 'name', 'email', 'role']);
+
+        return Inertia::render('Dashboard', [
+            'stats' => $stats,
             'recentLogs' => $recentLogs,
-        ] );
+            'topContributors' => $topContributors,
+        ]);
     }
 }
