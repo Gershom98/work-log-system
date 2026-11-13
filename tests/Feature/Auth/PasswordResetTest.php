@@ -70,4 +70,44 @@ class PasswordResetTest extends TestCase
             return true;
         });
     }
+
+    public function test_dev_reset_url_is_flashed_when_mail_is_only_logged_locally(): void
+    {
+        Notification::fake();
+        $this->app['env'] = 'local';
+        config(['mail.default' => 'log']);
+
+        $user = User::factory()->create();
+
+        $this->get('/forgot-password');
+        $csrf = session()->token();
+
+        $this->from('/forgot-password')
+            ->post('/forgot-password', ['_token' => $csrf, 'email' => $user->email])
+            ->assertSessionHas('status')
+            ->assertSessionHas('dev_reset_url');
+
+        $this->get('/forgot-password')->assertInertia(fn ($page) => $page
+            ->component('Auth/ForgotPassword')
+            ->where('dev_reset_url', fn ($url) => str_contains($url, '/reset-password/')));
+    }
+
+    public function test_dev_reset_url_is_not_exposed_outside_local_env(): void
+    {
+        Notification::fake();
+        $this->app['env'] = 'production';
+        config(['mail.default' => 'log']);
+
+        $user = User::factory()->create();
+
+        $this->get('/forgot-password');
+        $csrf = session()->token();
+
+        $this->from('/forgot-password')
+            ->post('/forgot-password', ['_token' => $csrf, 'email' => $user->email])
+            ->assertSessionHas('status');
+
+        $this->get('/forgot-password')->assertInertia(fn ($page) => $page
+            ->where('dev_reset_url', null));
+    }
 }

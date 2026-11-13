@@ -3,7 +3,7 @@ import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 
 export default function ResetPassword({ token, email }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -25,52 +25,55 @@ export default function ResetPassword({ token, email }) {
         <GuestLayout>
             <Head title="Reset Password" />
 
-            <form onSubmit={submit}>
+            <div className="mb-3 text-center">
+                <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-gray-900">
+                    Reset Password
+                </h2>
+            </div>
+
+            <form onSubmit={submit} className="space-y-2">
                 <div>
-                    <InputLabel htmlFor="email" value="Email" />
+                    <InputLabel htmlFor="email" value="Email Address" className="text-gray-700 text-xs font-semibold" />
 
                     <TextInput
                         id="email"
                         type="email"
                         name="email"
                         value={data.email}
-                        className="mt-1 block w-full"
+                        className="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600 text-sm px-3 py-1 sm:py-2"
                         autoComplete="username"
                         onChange={(e) => setData('email', e.target.value)}
                     />
 
-                    <InputError message={errors.email} className="mt-2" />
+                    <InputError message={errors.email} className="mt-1.5" />
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
+                <div>
+                    <InputLabel htmlFor="password" value="New Password" className="text-gray-700 text-xs font-semibold" />
 
                     <TextInput
                         id="password"
                         type="password"
                         name="password"
                         value={data.password}
-                        className="mt-1 block w-full"
+                        className="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600 text-sm px-3 py-1 sm:py-2"
                         autoComplete="new-password"
                         isFocused={true}
                         onChange={(e) => setData('password', e.target.value)}
                     />
 
-                    <InputError message={errors.password} className="mt-2" />
+                    <InputError message={errors.password} className="mt-1.5" />
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel
-                        htmlFor="password_confirmation"
-                        value="Confirm Password"
-                    />
+                <div>
+                    <InputLabel htmlFor="password_confirmation" value="Confirm Password" className="text-gray-700 text-xs font-semibold" />
 
                     <TextInput
                         type="password"
                         id="password_confirmation"
                         name="password_confirmation"
                         value={data.password_confirmation}
-                        className="mt-1 block w-full"
+                        className="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600 text-sm px-3 py-1 sm:py-2"
                         autoComplete="new-password"
                         onChange={(e) =>
                             setData('password_confirmation', e.target.value)
@@ -79,16 +82,33 @@ export default function ResetPassword({ token, email }) {
 
                     <InputError
                         message={errors.password_confirmation}
-                        className="mt-2"
+                        className="mt-1.5"
                     />
                 </div>
 
-                <div className="mt-4 flex items-center justify-end">
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Reset Password
-                    </PrimaryButton>
-                </div>
+                <PrimaryButton
+                    className="w-full justify-center py-2 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold shadow-md shadow-blue-100 transition"
+                    disabled={processing}
+                >
+                    {processing ? 'Resetting...' : 'Reset Password'}
+                </PrimaryButton>
             </form>
+
+            <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-3 text-xs">
+                <Link
+                    href={route('login')}
+                    className="flex items-center gap-1 font-medium text-gray-500 hover:text-blue-600 transition"
+                >
+                    &larr; Back to login
+                </Link>
+
+                <Link
+                    href="/"
+                    className="flex items-center gap-1 font-semibold text-blue-600 hover:text-blue-800 transition"
+                >
+                    Home
+                </Link>
+            </div>
         </GuestLayout>
     );
 }
