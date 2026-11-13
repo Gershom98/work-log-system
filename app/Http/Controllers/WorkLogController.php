@@ -87,7 +87,11 @@ class WorkLogController extends Controller
         $this->authorize('view', $workLog);
 
         if (blank(config('services.gemini.key'))) {
-            return back()->with('error', 'AI solutions are not configured yet. Add GEMINI_API_KEY to the environment.');
+            $hint = app()->configurationIsCached()
+                ? 'Add GEMINI_API_KEY to the server environment, then run "php artisan config:clear".'
+                : 'Add GEMINI_API_KEY to the .env file on the server.';
+
+            return back()->with('error', 'AI solutions are not configured yet. '.$hint);
         }
 
         try {

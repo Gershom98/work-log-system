@@ -58,7 +58,7 @@ class WorkLogAiSolutionsTest extends TestCase
         $this->actingAs($user)
             ->post(route('work-logs.solutions', $workLog))
             ->assertRedirect()
-            ->assertSessionHas('error');
+            ->assertSessionHas('error', fn ($message) => str_contains($message, 'GEMINI_API_KEY'));
 
         $this->assertNull($workLog->fresh()->ai_solutions);
         Http::assertNothingSent();
