@@ -36,6 +36,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/work-logs', [WorkLogController::class, 'store'])->name('work-logs.store');
     Route::get('/work-logs/{workLog}', [WorkLogController::class, 'show'])->name('work-logs.show');
     Route::get('/work-logs/{workLog}/edit', [WorkLogController::class, 'edit'])->name('work-logs.edit');
+    Route::post('/work-logs/{workLog}/solutions', [WorkLogController::class, 'generateSolutions'])
+        ->name('work-logs.solutions')
+        ->middleware('throttle:10,1');
     Route::put('/work-logs/{workLog}', [WorkLogController::class, 'update'])->name('work-logs.update');
     Route::delete('/work-logs/{workLog}', [WorkLogController::class, 'destroy'])->name('work-logs.destroy');
 

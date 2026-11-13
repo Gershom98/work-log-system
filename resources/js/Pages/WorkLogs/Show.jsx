@@ -9,6 +9,15 @@ import { useState } from 'react';
 export default function Show({ workLog, canManageStatus }) {
     const [confirmingDelete, setConfirmingDelete] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    const [generating, setGenerating] = useState(false);
+
+    const generateSolutions = () => {
+        setGenerating(true);
+        router.post(route('work-logs.solutions', workLog.id), {}, {
+            preserveScroll: true,
+            onFinish: () => setGenerating(false),
+        });
+    };
 
     const handleDelete = () => {
         setDeleting(true);
@@ -106,6 +115,41 @@ export default function Show({ workLog, canManageStatus }) {
                                     <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-indigo-800">{workLog.supervisor_comment}</p>
                                 </div>
                             )}
+
+                            <div className="rounded-xl border border-violet-200 bg-violet-50/50 p-4">
+                                <div className="flex flex-wrap items-start justify-between gap-3">
+                                    <div>
+                                        <h2 className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-violet-700">
+                                            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 3l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                                            </svg>
+                                            AI solutions
+                                        </h2>
+                                        <p className="mt-0.5 text-xs text-slate-500">
+                                            Suggested fixes based on this log's title and description.
+                                        </p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={generateSolutions}
+                                        disabled={generating}
+                                        className="inline-flex items-center gap-1.5 rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-60"
+                                    >
+                                        {generating ? 'Generating…' : workLog.ai_solutions ? 'Regenerate' : 'Generate'}
+                                    </button>
+                                </div>
+
+                                {workLog.ai_solutions ? (
+                                    <div className="mt-3 rounded-lg bg-white/80 p-3">
+                                        <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{workLog.ai_solutions}</p>
+                                        <p className="mt-2 text-[11px] text-slate-400">
+                                            Generated {formatDateTime(workLog.ai_solutions_generated_at)} · Review before acting on it.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <p className="mt-3 text-sm text-slate-500">No suggestions yet.</p>
+                                )}
+                            </div>
 
                             <div className="flex items-center gap-3 border-t border-slate-100 pt-5">
                                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-700">

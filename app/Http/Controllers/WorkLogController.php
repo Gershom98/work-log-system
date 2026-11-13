@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreWorkLogRequest;
 use App\Http\Requests\UpdateWorkLogRequest;
 use App\Models\WorkLog;
+use App\Services\GeminiSolutionService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use DateTimeImmutable;
 use Illuminate\Http\Request;
@@ -77,6 +78,30 @@ class WorkLogController extends Controller
             'workLog' => $workLog->load('user:id,name,email'),
             'canManageStatus' => $request->user()->isSupervisorOrAdmin(),
         ]);
+    }
+
+    public function generateSolutions(WorkLog $workLog, GeminiSolutionService $solutions)
+    {
+        $this->authorize('view', $workLog);
+
+        if (blank(config('services.gemini.key'))) {
+            return back()->with('error', 'AI solutions are not configured yet. Add GEMINI_API_KEY to the environment.');
+        }
+
+        try {
+            $text = $solutions->generate($workLog);
+        } catch (\Throwable $exception) {
+            Log::error('AI solution generation failed: '.$exception->getMessage());
+
+            return back()->with('error', 'The AI service could not generate solutions. Please try again.');
+        }
+
+        $workLog->forceFill([
+            'ai_solutions' => $text,
+            'ai_solutions_generated_at' => now(),
+        ])->save();
+
+        return back()->with('message', 'AI solutions generated.');
     }
 
     public function edit(Request $request, WorkLog $workLog)
