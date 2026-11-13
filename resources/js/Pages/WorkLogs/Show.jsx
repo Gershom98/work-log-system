@@ -126,7 +126,7 @@ export default function Show({ workLog, canManageStatus }) {
                                             AI solutions
                                         </h2>
                                         <p className="mt-0.5 text-xs text-slate-500">
-                                            Suggested fixes based on this log's title and description.
+                                            Resolution note written from the supervisor's perspective.
                                         </p>
                                     </div>
                                     <button

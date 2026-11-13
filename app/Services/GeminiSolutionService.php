@@ -36,15 +36,19 @@ class GeminiSolutionService
         $description = $workLog->description ?: 'No further details were provided.';
 
         return <<<PROMPT
-        You are an experienced operations supervisor helping resolve a reported work issue.
+        You are the supervisor who handled this work issue. Write the resolution note
+        the way you would describe it yourself after fixing it.
 
         Issue title: {$workLog->title}
-        Details: {$description}
+        Reported details: {$description}
 
-        Propose 3 to 4 practical solutions. Rank them from quickest to most thorough.
-        Reply in plain text as a numbered list. For each item give a bold-free one-line heading
-        followed by one or two sentences explaining how to apply it. Do not add introductions,
-        closing remarks, or markdown.
+        Write in the first person and past tense, as actions you carried out. For example:
+        "I solved this problem by connecting the cable, and the network came back up."
+
+        Open with one short sentence saying what you found and how you fixed it. Then list
+        2 to 4 numbered steps you took, each one sentence. Close with the outcome.
+        Keep the whole note under 150 words. Use complete sentences with correct
+        capitalization and punctuation. Plain text only: no markdown, no bold, no headings.
         PROMPT;
     }
 
