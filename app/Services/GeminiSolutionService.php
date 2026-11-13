@@ -13,7 +13,8 @@ class GeminiSolutionService
 
     public function generate(WorkLog $workLog): string
     {
-        $response = Http::timeout(30)
+        $response = Http::timeout(25)
+            ->retry(2, 300)
             ->withHeaders(['x-goog-api-key' => (string) config('services.gemini.key')])
             ->post(sprintf(self::ENDPOINT, config('services.gemini.model')), [
                 'contents' => [[
@@ -21,7 +22,8 @@ class GeminiSolutionService
                 ]],
                 'generationConfig' => [
                     'temperature' => 0.4,
-                    'maxOutputTokens' => 800,
+                    'maxOutputTokens' => 1200,
+                    'thinkingConfig' => ['thinkingBudget' => 0],
                 ],
             ])
             ->throw();
@@ -48,12 +50,14 @@ class GeminiSolutionService
 
     private function textFrom(Response $response): string
     {
-        $text = data_get($response->json(), 'candidates.0.content.parts.0.text');
+        $parts = data_get($response->json(), 'candidates.0.content.parts', []);
 
-        if (! is_string($text) || trim($text) === '') {
-            throw new RuntimeException('The AI service returned an empty response.');
+        foreach ((array) $parts as $part) {
+            if (empty($part['thought']) && filled($part['text'] ?? null)) {
+                return trim($part['text']);
+            }
         }
 
-        return trim($text);
+        throw new RuntimeException('The AI service returned an empty response.');
     }
 }
