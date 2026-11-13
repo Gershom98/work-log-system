@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 const tones = {
     danger: {
@@ -22,20 +22,35 @@ export default function ConfirmDialog({
     onConfirm,
     onClose,
 }) {
+    const cancelRef = useRef(null);
+    const previouslyFocusedRef = useRef(null);
+    const processingRef = useRef(processing);
+    processingRef.current = processing;
+
     useEffect(() => {
         if (!open) {
             return;
         }
 
+        previouslyFocusedRef.current = document.activeElement;
+        cancelRef.current?.focus();
+
         const onKeyDown = (event) => {
-            if (event.key === 'Escape') {
+            if (event.key === 'Escape' && !processingRef.current) {
                 onClose();
             }
         };
 
         document.addEventListener('keydown', onKeyDown);
 
-        return () => document.removeEventListener('keydown', onKeyDown);
+        return () => {
+            document.removeEventListener('keydown', onKeyDown);
+
+            const previous = previouslyFocusedRef.current;
+            if (previous instanceof HTMLElement && document.contains(previous)) {
+                previous.focus();
+            }
+        };
     }, [open, onClose]);
 
     if (!open) {
@@ -46,11 +61,16 @@ export default function ConfirmDialog({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
+            <div
+                className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+                onClick={processing ? undefined : onClose}
+                aria-hidden="true"
+            />
             <div
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="confirm-dialog-title"
+                aria-describedby={description ? 'confirm-dialog-description' : undefined}
                 className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
             >
                 <div className="flex items-start gap-4">
@@ -68,16 +88,21 @@ export default function ConfirmDialog({
                         <h3 id="confirm-dialog-title" className="text-lg font-semibold text-slate-900">
                             {title}
                         </h3>
-                        {description && <p className="mt-1 text-sm text-slate-600">{description}</p>}
+                        {description && (
+                            <p id="confirm-dialog-description" className="mt-1 text-sm text-slate-600">
+                                {description}
+                            </p>
+                        )}
                     </div>
                 </div>
 
                 <div className="mt-6 flex justify-end gap-3">
                     <button
+                        ref={cancelRef}
                         type="button"
                         onClick={onClose}
                         disabled={processing}
-                        className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-60"
+                        className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 disabled:opacity-60"
                     >
                         {cancelLabel}
                     </button>

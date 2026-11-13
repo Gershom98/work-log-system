@@ -8,7 +8,7 @@ export default function Welcome({ auth }) {
 
     return (
         <>
-            <Head title="Welcome - Daily Work Log System" />
+            <Head title="Welcome" />
             <div className="min-h-screen bg-gray-50 text-gray-800 flex flex-col selection:bg-indigo-500 selection:text-white">
 
                 {/* Header Navigation */}

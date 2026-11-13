@@ -246,4 +246,97 @@ class WorkLogTest extends TestCase
         $response->assertOk();
         $this->assertStringContainsString('application/pdf', $response->headers->get('content-type'));
     }
+
+    public function test_regular_user_cannot_update_a_log_once_it_is_assigned(): void
+    {
+        $user = User::factory()->create();
+        $log = WorkLog::factory()->for($user)->assigned()->create();
+
+        $this->actingAs($user)->get(route('work-logs.edit', $log))->assertForbidden();
+
+        $this->actingAs($user)
+            ->put(route('work-logs.update', $log), [
+                'requester_name' => $log->requester_name,
+                'title' => 'Updated title',
+                'log_date' => $log->log_date->toDateString(),
+            ])
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('work_logs', [
+            'id' => $log->id,
+            'title' => $log->title,
+        ]);
+    }
+
+    public function test_regular_user_can_update_their_rejected_log(): void
+    {
+        $user = User::factory()->create();
+        $log = WorkLog::factory()->for($user)->rejected()->create();
+
+        $this->actingAs($user)
+            ->put(route('work-logs.update', $log), [
+                'requester_name' => $log->requester_name,
+                'title' => 'Fixed the details',
+                'log_date' => $log->log_date->toDateString(),
+            ])
+            ->assertRedirect(route('work-logs.index'));
+
+        $this->assertDatabaseHas('work_logs', [
+            'id' => $log->id,
+            'title' => 'Fixed the details',
+        ]);
+    }
+
+    public function test_regular_user_cannot_delete_an_assigned_log(): void
+    {
+        $user = User::factory()->create();
+        $log = WorkLog::factory()->for($user)->assigned()->create();
+
+        $this->actingAs($user)->delete(route('work-logs.destroy', $log))->assertForbidden();
+
+        $this->assertDatabaseHas('work_logs', ['id' => $log->id]);
+    }
+
+    public function test_supervisor_can_update_someone_elses_log(): void
+    {
+        $supervisor = User::factory()->supervisor()->create();
+        $log = WorkLog::factory()->assigned()->create();
+
+        $this->actingAs($supervisor)
+            ->put(route('work-logs.update', $log), [
+                'requester_name' => $log->requester_name,
+                'title' => 'Reviewed by supervisor',
+                'log_date' => $log->log_date->toDateString(),
+                'status' => $log->status,
+            ])
+            ->assertRedirect(route('work-logs.index'));
+
+        $this->assertDatabaseHas('work_logs', [
+            'id' => $log->id,
+            'title' => 'Reviewed by supervisor',
+        ]);
+    }
+
+    public function test_index_exposes_per_log_abilities(): void
+    {
+        $user = User::factory()->create();
+        $submitted = WorkLog::factory()->for($user)->create([
+            'status' => WorkLog::STATUS_SUBMITTED,
+            'log_date' => '2026-11-12',
+        ]);
+        $assigned = WorkLog::factory()->for($user)->assigned()->create([
+            'log_date' => '2026-11-12',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('work-logs.index', ['sort' => 'id', 'per_page' => 10]))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('logs.data.0.id', $assigned->id)
+                ->where('logs.data.0.can.update', false)
+                ->where('logs.data.0.can.delete', false)
+                ->where('logs.data.1.id', $submitted->id)
+                ->where('logs.data.1.can.update', true)
+                ->where('logs.data.1.can.delete', true));
+    }
 }

@@ -5,7 +5,7 @@ import PageHeader from '@/Components/ui/PageHeader';
 import Pagination from '@/Components/ui/Pagination';
 import StatCard from '@/Components/ui/StatCard';
 import StatusBadge from '@/Components/ui/StatusBadge';
-import { STATUS_OPTIONS, formatDate, inputClass, isoDateOffset, todayInputValue } from '@/utils/format';
+import { STATUS_OPTIONS, formatDate, inputClass, isoDateOffset, monthStartInputValue, todayInputValue } from '@/utils/format';
 import { Head, Link, router } from '@inertiajs/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -61,6 +61,9 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
         [search, status, startDate, endDate, sort, perPage, buildParams],
     );
 
+    const applyFiltersRef = useRef(applyFilters);
+    applyFiltersRef.current = applyFilters;
+
     useEffect(() => {
         if (isFirstRender.current) {
             isFirstRender.current = false;
@@ -72,10 +75,10 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
             return;
         }
 
-        const timer = setTimeout(() => applyFilters(), 450);
+        const timer = setTimeout(() => applyFiltersRef.current(), 450);
 
         return () => clearTimeout(timer);
-    }, [search, startDate, endDate, applyFilters]);
+    }, [search, startDate, endDate]);
 
     const applyImmediately = (overrides, { skip = false } = {}) => {
         if (skip) {
@@ -86,17 +89,17 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
 
     const handleStatusChange = (value) => {
         setStatus(value);
-        applyImmediately({ status: value });
+        applyFilters({ status: value });
     };
 
     const handleSortChange = (value) => {
         setSort(value);
-        applyImmediately({ sort: value });
+        applyFilters({ sort: value });
     };
 
     const handlePerPageChange = (value) => {
         setPerPage(value);
-        applyImmediately({ per_page: value });
+        applyFilters({ per_page: value });
     };
 
     const handlePreset = (preset) => {
@@ -108,9 +111,7 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
         } else if (preset === 'week') {
             range = { start_date: isoDateOffset(-6), end_date: today };
         } else if (preset === 'month') {
-            const now = new Date();
-            const first = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
-            range = { start_date: first, end_date: today };
+            range = { start_date: monthStartInputValue(), end_date: today };
         }
 
         setStartDate(range.start_date);
@@ -332,12 +333,16 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
                                                         <IconLink href={route('work-logs.show', log.id)} label="View log">
                                                             <EyeIcon />
                                                         </IconLink>
-                                                        <IconLink href={route('work-logs.edit', log.id)} label="Edit log">
-                                                            <PencilIcon />
-                                                        </IconLink>
-                                                        <button type="button" onClick={() => setDeletingLog(log)} className="rounded-lg p-2 text-rose-500 transition hover:bg-rose-50 hover:text-rose-700" aria-label="Delete log">
-                                                            <TrashIcon />
-                                                        </button>
+                                                        {log.can?.update && (
+                                                            <IconLink href={route('work-logs.edit', log.id)} label="Edit log">
+                                                                <PencilIcon />
+                                                            </IconLink>
+                                                        )}
+                                                        {log.can?.delete && (
+                                                            <button type="button" onClick={() => setDeletingLog(log)} className="rounded-lg p-2 text-rose-500 transition hover:bg-rose-50 hover:text-rose-700" aria-label="Delete log">
+                                                                <TrashIcon />
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 </td>
                                             </tr>
@@ -376,8 +381,12 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
                                         </div>
                                         <div className="mt-3 flex items-center justify-end gap-2">
                                             <Link href={route('work-logs.show', log.id)} className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600">View</Link>
-                                            <Link href={route('work-logs.edit', log.id)} className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600">Edit</Link>
-                                            <button type="button" onClick={() => setDeletingLog(log)} className="rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600">Delete</button>
+                                            {log.can?.update && (
+                                                <Link href={route('work-logs.edit', log.id)} className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600">Edit</Link>
+                                            )}
+                                            {log.can?.delete && (
+                                                <button type="button" onClick={() => setDeletingLog(log)} className="rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600">Delete</button>
+                                            )}
                                         </div>
                                     </div>
                                 ))

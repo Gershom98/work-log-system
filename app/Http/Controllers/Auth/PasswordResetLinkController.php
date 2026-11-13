@@ -59,7 +59,11 @@ class PasswordResetLinkController extends Controller
      */
     private function localResetUrl(string $email): ?string
     {
-        if (! app()->environment('local') || config('mail.default') !== 'log') {
+        if (
+            ! config('app.password_reset_dev_link')
+            || ! app()->environment('local')
+            || config('mail.default') !== 'log'
+        ) {
             return null;
         }
 

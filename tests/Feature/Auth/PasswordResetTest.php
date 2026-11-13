@@ -75,7 +75,10 @@ class PasswordResetTest extends TestCase
     {
         Notification::fake();
         $this->app['env'] = 'local';
-        config(['mail.default' => 'log']);
+        config([
+            'mail.default' => 'log',
+            'app.password_reset_dev_link' => true,
+        ]);
 
         $user = User::factory()->create();
 
@@ -92,11 +95,34 @@ class PasswordResetTest extends TestCase
             ->where('dev_reset_url', fn ($url) => str_contains($url, '/reset-password/')));
     }
 
+    public function test_dev_reset_url_is_not_exposed_when_the_flag_is_disabled(): void
+    {
+        Notification::fake();
+        $this->app['env'] = 'local';
+        config([
+            'mail.default' => 'log',
+            'app.password_reset_dev_link' => false,
+        ]);
+
+        $user = User::factory()->create();
+
+        $this->get('/forgot-password');
+        $csrf = session()->token();
+
+        $this->from('/forgot-password')
+            ->post('/forgot-password', ['_token' => $csrf, 'email' => $user->email])
+            ->assertSessionHas('status')
+            ->assertSessionMissing('dev_reset_url');
+    }
+
     public function test_dev_reset_url_is_not_exposed_outside_local_env(): void
     {
         Notification::fake();
         $this->app['env'] = 'production';
-        config(['mail.default' => 'log']);
+        config([
+            'mail.default' => 'log',
+            'app.password_reset_dev_link' => true,
+        ]);
 
         $user = User::factory()->create();
 

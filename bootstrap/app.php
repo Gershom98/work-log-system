@@ -11,8 +11,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Kuamini proxy zote za Render kuzuia matatizo ya HTTP/HTTPS na Mixed Content
-        $middleware->trustProxies(at: '*');
+        // Trusting every proxy lets clients spoof X-Forwarded-For and defeat
+        // the login throttle, so only trust what the operator explicitly lists.
+        $proxies = env('TRUSTED_PROXIES');
+
+        if (filled($proxies)) {
+            $middleware->trustProxies(
+                at: $proxies === '*' ? '*' : array_map('trim', explode(',', $proxies))
+            );
+        }
 
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,

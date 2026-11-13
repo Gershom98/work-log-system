@@ -30,6 +30,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Password Reset Link Fallback
+    |--------------------------------------------------------------------------
+    |
+    | When the log mailer is used locally there is no inbox to open, so the
+    | forgot-password screen may expose the reset link directly. This exposes
+    | a token to whoever makes the request, so it must stay opt-in and off in
+    | every environment except local development.
+    |
+    */
+
+    'password_reset_dev_link' => (bool) env('PASSWORD_RESET_DEV_LINK', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Debug Mode
     |--------------------------------------------------------------------------
     |

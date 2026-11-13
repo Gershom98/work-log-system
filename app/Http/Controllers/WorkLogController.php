@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreWorkLogRequest;
 use App\Http\Requests\UpdateWorkLogRequest;
+use App\Models\User;
 use App\Models\WorkLog;
 use App\Services\GeminiSolutionService;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -33,7 +34,8 @@ class WorkLogController extends Controller
             ->with('user:id,name,email')
             ->sorted($filters['sort'])
             ->paginate($filters['per_page'])
-            ->withQueryString();
+            ->withQueryString()
+            ->through(fn (WorkLog $log) => $this->withAbilities($user, $log));
 
         return Inertia::render('WorkLogs/Index', [
             'logs' => $logs,
@@ -75,7 +77,7 @@ class WorkLogController extends Controller
         $this->authorize('view', $workLog);
 
         return Inertia::render('WorkLogs/Show', [
-            'workLog' => $workLog->load('user:id,name,email'),
+            'workLog' => $this->withAbilities($request->user(), $workLog->load('user:id,name,email')),
             'canManageStatus' => $request->user()->isSupervisorOrAdmin(),
         ]);
     }
@@ -168,8 +170,8 @@ class WorkLogController extends Controller
                 ->setPaper('a4', 'portrait')
                 ->setOptions([
                     'isHtml5ParserEnabled' => true,
-                    'isRemoteEnabled' => true,
-                    'chroot' => base_path(),
+                    'isRemoteEnabled' => false,
+                    'chroot' => public_path(),
                     'tempDir' => sys_get_temp_dir(),
                 ])
                 ->download($fileName);
@@ -207,5 +209,19 @@ class WorkLogController extends Controller
         $date = DateTimeImmutable::createFromFormat('Y-m-d', $value);
 
         return $date && $date->format('Y-m-d') === $value ? $value : null;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function withAbilities(User $user, WorkLog $workLog): array
+    {
+        return [
+            ...$workLog->toArray(),
+            'can' => [
+                'update' => $user->can('update', $workLog),
+                'delete' => $user->can('delete', $workLog),
+            ],
+        ];
     }
 }

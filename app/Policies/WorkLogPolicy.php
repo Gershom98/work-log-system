@@ -24,12 +24,21 @@ class WorkLogPolicy
 
     public function update(User $user, WorkLog $workLog): bool
     {
-        return $this->view($user, $workLog);
+        if ($user->isSupervisorOrAdmin()) {
+            return true;
+        }
+
+        return $workLog->user_id === $user->id
+            && in_array($workLog->status, [WorkLog::STATUS_SUBMITTED, WorkLog::STATUS_REJECTED], true);
     }
 
     public function delete(User $user, WorkLog $workLog): bool
     {
-        return $this->view($user, $workLog);
+        if ($user->isSupervisorOrAdmin()) {
+            return true;
+        }
+
+        return $workLog->user_id === $user->id && $workLog->status === WorkLog::STATUS_SUBMITTED;
     }
 
     public function manageStatus(User $user): bool

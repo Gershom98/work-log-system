@@ -37,10 +37,10 @@ export default function AuthenticatedLayout({ header, children }) {
                             <div className="flex shrink-0 items-center">
                                 <Link href={route('work-logs.index')} className="flex items-center gap-2.5">
                                     <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-sm font-bold text-white shadow-sm">
-                                        TL
+                                        WL
                                     </span>
                                     <span className="text-lg font-bold tracking-tight text-slate-900">
-                                        Task<span className="text-indigo-600">Log</span>
+                                        Work<span className="text-indigo-600">Log</span>
                                     </span>
                                 </Link>
                             </div>
@@ -101,6 +101,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                 className="inline-flex items-center justify-center rounded-md p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 aria-label="Toggle navigation"
                                 aria-expanded={showingNavigationDropdown}
+                                aria-controls="mobile-navigation"
                             >
                                 <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                                     <path
@@ -123,10 +124,15 @@ export default function AuthenticatedLayout({ header, children }) {
                     </div>
                 </div>
 
-                <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' border-t border-slate-100 sm:hidden'}>
+                <div id="mobile-navigation" className={(showingNavigationDropdown ? 'block' : 'hidden') + ' border-t border-slate-100 sm:hidden'}>
                     <div className="space-y-1 pb-3 pt-2">
                         {navigation.map((item) => (
-                            <ResponsiveNavLink key={item.label} href={item.href} active={item.active}>
+                            <ResponsiveNavLink
+                                key={item.label}
+                                href={item.href}
+                                active={item.active}
+                                onClick={() => setShowingNavigationDropdown(false)}
+                            >
                                 {item.label}
                             </ResponsiveNavLink>
                         ))}
@@ -147,8 +153,10 @@ export default function AuthenticatedLayout({ header, children }) {
                         </div>
 
                         <div className="mt-3 space-y-1">
-                            <ResponsiveNavLink href={route('profile.edit')}>Profile</ResponsiveNavLink>
-                            <ResponsiveNavLink method="post" href={route('logout')} as="button">
+                            <ResponsiveNavLink href={route('profile.edit')} onClick={() => setShowingNavigationDropdown(false)}>
+                                Profile
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink method="post" href={route('logout')} as="button" onClick={() => setShowingNavigationDropdown(false)}>
                                 Log Out
                             </ResponsiveNavLink>
                         </div>
