@@ -26,8 +26,9 @@ class RegistrationTest extends TestCase
             'password_confirmation' => 'password',
         ]);
 
-        $this->assertAuthenticated();
-        $response->assertRedirect(route('work-logs.index', absolute: false));
+        $this->assertGuest();
+        $response->assertRedirect(route('login', absolute: false));
+        $response->assertSessionHas('status', __('Account created. Please sign in.'));
         $this->assertSame(User::ROLE_USER, User::where('email', 'test@example.com')->firstOrFail()->role);
     }
 }

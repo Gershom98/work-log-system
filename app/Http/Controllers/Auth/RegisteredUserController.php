@@ -7,7 +7,6 @@ use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
@@ -45,12 +44,8 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        Auth::login($user);
-
-        // Safisha na uishe session mpya kwa mtumiaji mpya aliyejisajili
-        $request->session()->regenerate();
-
-        // Elekeza mtumiaji mpya kwenye work-logs.index
-        return redirect()->route('work-logs.index');
+        return redirect()
+            ->route('login')
+            ->with('status', __('Account created. Please sign in.'));
     }
 }
