@@ -247,17 +247,39 @@ class WorkLogTest extends TestCase
         $this->assertStringContainsString('application/pdf', $response->headers->get('content-type'));
     }
 
-    public function test_regular_user_cannot_update_a_log_once_it_is_assigned(): void
+    public function test_regular_user_can_update_their_assigned_log(): void
     {
         $user = User::factory()->create();
         $log = WorkLog::factory()->for($user)->assigned()->create();
+
+        $this->actingAs($user)->get(route('work-logs.edit', $log))->assertOk();
+
+        $this->actingAs($user)
+            ->put(route('work-logs.update', $log), [
+                'requester_name' => $log->requester_name,
+                'title' => 'Added progress notes',
+                'log_date' => $log->log_date->toDateString(),
+            ])
+            ->assertRedirect(route('work-logs.index'));
+
+        $this->assertDatabaseHas('work_logs', [
+            'id' => $log->id,
+            'title' => 'Added progress notes',
+            'status' => WorkLog::STATUS_ASSIGNED,
+        ]);
+    }
+
+    public function test_regular_user_cannot_update_a_rejected_log(): void
+    {
+        $user = User::factory()->create();
+        $log = WorkLog::factory()->for($user)->rejected()->create();
 
         $this->actingAs($user)->get(route('work-logs.edit', $log))->assertForbidden();
 
         $this->actingAs($user)
             ->put(route('work-logs.update', $log), [
                 'requester_name' => $log->requester_name,
-                'title' => 'Updated title',
+                'title' => 'Fixed the details',
                 'log_date' => $log->log_date->toDateString(),
             ])
             ->assertForbidden();
@@ -268,10 +290,12 @@ class WorkLogTest extends TestCase
         ]);
     }
 
-    public function test_regular_user_can_update_their_rejected_log(): void
+    public function test_regular_user_cannot_update_a_no_data_log(): void
     {
         $user = User::factory()->create();
-        $log = WorkLog::factory()->for($user)->rejected()->create();
+        $log = WorkLog::factory()->for($user)->noData()->create();
+
+        $this->actingAs($user)->get(route('work-logs.edit', $log))->assertForbidden();
 
         $this->actingAs($user)
             ->put(route('work-logs.update', $log), [
@@ -279,12 +303,7 @@ class WorkLogTest extends TestCase
                 'title' => 'Fixed the details',
                 'log_date' => $log->log_date->toDateString(),
             ])
-            ->assertRedirect(route('work-logs.index'));
-
-        $this->assertDatabaseHas('work_logs', [
-            'id' => $log->id,
-            'title' => 'Fixed the details',
-        ]);
+            ->assertForbidden();
     }
 
     public function test_regular_user_cannot_delete_an_assigned_log(): void
@@ -333,7 +352,7 @@ class WorkLogTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->where('logs.data.0.id', $assigned->id)
-                ->where('logs.data.0.can.update', false)
+                ->where('logs.data.0.can.update', true)
                 ->where('logs.data.0.can.delete', false)
                 ->where('logs.data.1.id', $submitted->id)
                 ->where('logs.data.1.can.update', true)

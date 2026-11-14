@@ -29,7 +29,7 @@ class WorkLogPolicy
         }
 
         return $workLog->user_id === $user->id
-            && in_array($workLog->status, [WorkLog::STATUS_SUBMITTED, WorkLog::STATUS_REJECTED], true);
+            && in_array($workLog->status, [WorkLog::STATUS_SUBMITTED, WorkLog::STATUS_ASSIGNED], true);
     }
 
     public function delete(User $user, WorkLog $workLog): bool
