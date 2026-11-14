@@ -3,7 +3,7 @@ export default function InputError({ message, className = '', ...props }) {
         <p
             {...props}
             role="alert"
-            className={'text-sm text-red-600 ' + className}
+            className={'text-sm text-rose-600 ' + className}
         >
             {message}
         </p>

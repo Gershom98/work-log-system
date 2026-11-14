@@ -3,62 +3,70 @@ import { Link } from '@inertiajs/react';
 
 export default function GuestLayout({ children }) {
     return (
-        <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-white to-blue-100/50 font-sans antialiased selection:bg-blue-600 selection:text-white relative overflow-hidden">
-            {/* Background Decorative Elements */}
-            <div className="absolute top-0 right-1/4 -mt-20 w-96 h-96 bg-blue-300/30 rounded-full blur-3xl pointer-events-none"></div>
-            <div className="absolute bottom-0 left-1/4 -mb-20 w-96 h-96 bg-blue-200/40 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="relative flex min-h-screen flex-col overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-slate-100 font-sans antialiased selection:bg-indigo-600 selection:text-white">
+            <div className="pointer-events-none absolute -top-24 right-1/4 h-72 w-72 rounded-full bg-indigo-300/30 blur-3xl sm:h-96 sm:w-96"></div>
+            <div className="pointer-events-none absolute -bottom-24 left-1/4 h-72 w-72 rounded-full bg-violet-200/40 blur-3xl sm:h-96 sm:w-96"></div>
 
-            {/* Top Navigation Bar */}
-            <header className="bg-blue-600 text-white px-4 sm:px-6 py-1.5 sm:py-3 flex items-center justify-between shadow-md z-20">
-                <div className="flex items-center gap-2 font-bold tracking-wide">
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white text-blue-600 flex items-center justify-center font-extrabold text-sm sm:text-base shadow-sm">
-                        WL
+            <header className="z-20 border-b border-slate-200/70 bg-white/80 px-4 py-2 backdrop-blur sm:px-6 sm:py-3">
+                <div className="mx-auto flex w-full max-w-5xl items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-extrabold text-white shadow-sm">
+                            WL
+                        </div>
+                        <span className="text-sm font-semibold tracking-wide text-slate-800">WorkLog</span>
                     </div>
-                    <span className="text-white font-semibold tracking-wider text-sm">WorkLog</span>
+                    <Link
+                        href="/"
+                        className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+                    >
+                        <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        Back to home
+                    </Link>
                 </div>
-                <Link href="/" className="hover:text-white transition-colors flex items-center gap-1 text-[11px] sm:text-xs font-medium text-blue-100">
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                    </svg>
-                    Back to Home
-                </Link>
             </header>
 
             {/* Main Content Area: Centered Card Layout */}
-            <main className="flex-1 flex items-center justify-center p-2 sm:p-6 z-10">
-                <div className="w-full max-w-lg bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-blue-100 overflow-hidden">
-                    
-                    {/* Card Header (Branding Banner) */}
-                    <div className="bg-blue-600 text-white px-4 py-1.5 sm:p-7 text-center relative overflow-hidden">
-                        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-40 h-40 bg-blue-500 rounded-full blur-2xl opacity-50 pointer-events-none"></div>
-                        
-                        <div className="relative z-10 flex flex-col items-center">
-                            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-700/80 border border-blue-400/40 text-white text-[10px] font-medium mb-1">
-                                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
-                                Daily Work & Task Tracking System
-                            </div>
+            <main className="z-10 flex flex-1 items-center justify-center p-3 sm:p-6">
+                <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lift sm:rounded-3xl">
 
-                            <h1 className="text-sm sm:text-xl font-black tracking-[0.18em] text-white">
+                    {/* Card Header (Branding Banner) */}
+                    <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-indigo-600 to-violet-600 px-4 py-3 text-center sm:px-7 sm:py-6">
+                        <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-white/15 blur-2xl"></div>
+
+                        <div className="relative z-10 flex flex-col items-center gap-1.5">
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/15 px-2.5 py-0.5 text-[10px] font-medium text-white">
+                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-300"></span>
+                                Daily Work &amp; Task Tracking System
+                            </span>
+
+                            <h1 className="text-sm font-black tracking-[0.18em] text-white sm:text-xl">
                                 WORKLOG PORTAL
                             </h1>
                         </div>
                     </div>
 
                     {/* Card Body (Form Container) */}
-                    <div className="p-3 sm:p-7 bg-white">
+                    <div className="bg-white p-3 sm:p-7">
                         {children}
                     </div>
 
                     {/* Card Footer Info */}
-                    <div className="hidden sm:flex bg-gray-50/80 px-6 py-2.5 border-t border-gray-100 text-[11px] text-gray-500 justify-between items-center">
+                    <div className="hidden items-center justify-between border-t border-slate-100 bg-slate-50/80 px-6 py-2.5 text-[11px] text-slate-500 sm:flex">
                         <span>WorkLog Portal v1.0</span>
-                        <span>High Security • Encrypted Data</span>
+                        <span className="inline-flex items-center gap-1">
+                            <svg className="h-3 w-3 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622C17.176 19.29 21 14.591 21 9c0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                            Secure sign-in
+                        </span>
                     </div>
                 </div>
             </main>
 
             {/* Bottom Footer Bar */}
-            <footer className="hidden sm:block bg-white text-blue-600 text-[10px] py-2 px-6 text-center border-t border-blue-100 font-medium z-10">
+            <footer className="z-10 hidden border-t border-slate-200/70 bg-white/70 py-2 text-center text-[10px] font-medium text-slate-500 backdrop-blur sm:block">
                 &copy; {new Date().getFullYear()} WorkLog System. All rights reserved.
             </footer>
         </div>

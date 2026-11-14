@@ -1,9 +1,9 @@
 export const STATUS_META = {
     submitted: {
         label: 'Submitted',
-        badge: 'bg-blue-50 text-blue-700 ring-blue-600/20',
-        dot: 'bg-blue-600',
-        bar: 'bg-blue-500',
+        badge: 'bg-sky-50 text-sky-700 ring-sky-600/20',
+        dot: 'bg-sky-600',
+        bar: 'bg-sky-500',
     },
     assigned: {
         label: 'Assigned',

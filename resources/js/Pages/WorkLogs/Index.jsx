@@ -21,6 +21,7 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
 
     const [deletingLog, setDeletingLog] = useState(null);
     const [deleting, setDeleting] = useState(false);
+    const [showFilters, setShowFilters] = useState(false);
 
     const isFirstRender = useRef(true);
     const skipDebounce = useRef(false);
@@ -161,6 +162,7 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
     ].filter(Boolean);
 
     const total = summary.total ?? 0;
+    const activeFilterCount = [search, status, startDate, endDate].filter(Boolean).length;
 
     return (
         <AuthenticatedLayout
@@ -202,14 +204,39 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
                 <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                         <StatCard label="Matching logs" value={total} hint="Based on current filters" tone="indigo" icon={<DocumentIcon />} />
-                        <StatCard label="Active" value={summary.active ?? 0} hint="Submitted or assigned" tone="blue" icon={<ActivityIcon />} />
+                        <StatCard label="Active" value={summary.active ?? 0} hint="Submitted or assigned" tone="sky" icon={<ActivityIcon />} />
                         <StatCard label="Rejected" value={summary.rejected ?? 0} hint="Needs attention" tone="rose" icon={<RejectIcon />} />
                         <StatCard label="No data" value={summary.no_data ?? 0} hint="Awaiting information" tone="amber" icon={<NoDataIcon />} />
                     </div>
 
-                    <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm sm:p-5">
-                        <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
-                            <div className="grid flex-1 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-card sm:p-5">
+                        <div className="md:hidden">
+                            <button
+                                type="button"
+                                onClick={() => setShowFilters((value) => !value)}
+                                aria-expanded={showFilters}
+                                aria-controls="log-filters"
+                                className="inline-flex w-full items-center justify-between gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                            >
+                                <span className="inline-flex items-center gap-2">
+                                    <svg className="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L14 14.414V19a1 1 0 01-.553.894l-4 2A1 1 0 018 21v-6.586L3.293 6.707A1 1 0 013 6V4z" />
+                                    </svg>
+                                    Filters
+                                    {activeFilterCount > 0 && (
+                                        <span className="rounded-full bg-indigo-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
+                                            {activeFilterCount}
+                                        </span>
+                                    )}
+                                </span>
+                                <svg className={`h-4 w-4 text-slate-400 transition ${showFilters ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div id="log-filters" className={(showFilters ? 'mt-4 block' : 'hidden') + ' md:mt-0 md:block'}>
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                                 <div>
                                     <label htmlFor="search" className="mb-1 block text-xs font-medium text-slate-600">Search</label>
                                     <input
@@ -242,31 +269,32 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
                                     <input id="end_date" type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} className={inputClass} />
                                 </div>
                             </div>
+
+                            <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-4">
+                                <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Quick range</span>
+                                <button type="button" onClick={() => handlePreset('all')} className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-indigo-300 hover:text-indigo-700">All time</button>
+                                <button type="button" onClick={() => handlePreset('today')} className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-indigo-300 hover:text-indigo-700">Today</button>
+                                <button type="button" onClick={() => handlePreset('week')} className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-indigo-300 hover:text-indigo-700">Last 7 days</button>
+                                <button type="button" onClick={() => handlePreset('month')} className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-indigo-300 hover:text-indigo-700">This month</button>
+                            </div>
                         </div>
 
-                        <div className="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4 md:flex-row md:items-center md:justify-between">
+                        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-4">
                             <div className="flex flex-wrap items-center gap-2">
-                                <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Quick range</span>
-                                <button type="button" onClick={() => handlePreset('all')} className="rounded-full border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600 transition hover:border-indigo-300 hover:text-indigo-700">All time</button>
-                                <button type="button" onClick={() => handlePreset('today')} className="rounded-full border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600 transition hover:border-indigo-300 hover:text-indigo-700">Today</button>
-                                <button type="button" onClick={() => handlePreset('week')} className="rounded-full border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600 transition hover:border-indigo-300 hover:text-indigo-700">Last 7 days</button>
-                                <button type="button" onClick={() => handlePreset('month')} className="rounded-full border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600 transition hover:border-indigo-300 hover:text-indigo-700">This month</button>
-                            </div>
-
-                            <div className="flex flex-wrap items-center gap-2">
-                                <select aria-label="Sort by date" value={sort} onChange={(event) => handleSortChange(event.target.value)} className="rounded-lg border-slate-300 text-xs text-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <select aria-label="Sort by date" value={sort} onChange={(event) => handleSortChange(event.target.value)} className="rounded-lg border-slate-300 py-1.5 text-xs text-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                     <option value="newest">Newest first</option>
                                     <option value="oldest">Oldest first</option>
                                 </select>
-                                <select aria-label="Rows per page" value={perPage} onChange={(event) => handlePerPageChange(Number(event.target.value))} className="rounded-lg border-slate-300 text-xs text-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <select aria-label="Rows per page" value={perPage} onChange={(event) => handlePerPageChange(Number(event.target.value))} className="rounded-lg border-slate-300 py-1.5 text-xs text-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                     {perPageOptions.map((option) => (
                                         <option key={option} value={option}>{option} / page</option>
                                     ))}
                                 </select>
-                                <button type="button" onClick={handleReset} className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50">
-                                    Reset
-                                </button>
                             </div>
+
+                            <button type="button" onClick={handleReset} className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50">
+                                Reset
+                            </button>
                         </div>
 
                         {activeChips.length > 0 && (
@@ -288,7 +316,7 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
                         )}
                     </div>
 
-                    <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+                    <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-card">
                         <div className="hidden md:block">
                             <table className="min-w-full divide-y divide-slate-200">
                                 <thead className="bg-slate-50">
@@ -380,12 +408,12 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
                                             <StatusBadge status={log.status} />
                                         </div>
                                         <div className="mt-3 flex items-center justify-end gap-2">
-                                            <Link href={route('work-logs.show', log.id)} className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600">View</Link>
+                                            <Link href={route('work-logs.show', log.id)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">View</Link>
                                             {log.can?.update && (
-                                                <Link href={route('work-logs.edit', log.id)} className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600">Edit</Link>
+                                                <Link href={route('work-logs.edit', log.id)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">Edit</Link>
                                             )}
                                             {log.can?.delete && (
-                                                <button type="button" onClick={() => setDeletingLog(log)} className="rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600">Delete</button>
+                                                <button type="button" onClick={() => setDeletingLog(log)} className="rounded-lg border border-rose-200 px-3 py-2 text-xs font-semibold text-rose-600 transition hover:bg-rose-50">Delete</button>
                                             )}
                                         </div>
                                     </div>

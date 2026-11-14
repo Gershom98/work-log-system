@@ -47,7 +47,7 @@ export default function Create({ roles = ['admin', 'supervisor', 'user'] }) {
 
             <div className="py-8">
                 <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
-                    <form onSubmit={submit} className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+                    <form onSubmit={submit} className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-card">
                         <div className="space-y-6 p-6 sm:p-8">
                             <Field label="Full name" htmlFor="name" required error={errors.name}>
                                 <input id="name" type="text" value={data.name} onChange={(event) => setData('name', event.target.value)} className={fieldClass('name')} required autoFocus />

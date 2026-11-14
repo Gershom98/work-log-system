@@ -2,7 +2,7 @@ import { Link } from '@inertiajs/react';
 
 const toneStyles = {
     indigo: { icon: 'bg-indigo-50 text-indigo-600 border-indigo-100', value: 'text-slate-900', accent: 'from-indigo-500 to-indigo-300' },
-    blue: { icon: 'bg-blue-50 text-blue-600 border-blue-100', value: 'text-slate-900', accent: 'from-blue-500 to-sky-300' },
+    sky: { icon: 'bg-sky-50 text-sky-600 border-sky-100', value: 'text-slate-900', accent: 'from-sky-500 to-sky-300' },
     emerald: { icon: 'bg-emerald-50 text-emerald-600 border-emerald-100', value: 'text-emerald-600', accent: 'from-emerald-500 to-emerald-300' },
     rose: { icon: 'bg-rose-50 text-rose-600 border-rose-100', value: 'text-rose-600', accent: 'from-rose-500 to-rose-300' },
     amber: { icon: 'bg-amber-50 text-amber-600 border-amber-100', value: 'text-amber-600', accent: 'from-amber-500 to-amber-300' },
@@ -13,7 +13,7 @@ export default function StatCard({ label, value, hint, icon, tone = 'indigo', hr
     const styles = toneStyles[tone] ?? toneStyles.indigo;
 
     const content = (
-        <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:shadow-md">
+        <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-card transition duration-300 ease-soft hover:-translate-y-0.5 hover:shadow-lift">
             <div className="flex items-start justify-between gap-3">
                 <div>
                     <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{label}</p>

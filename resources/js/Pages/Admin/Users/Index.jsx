@@ -108,7 +108,7 @@ export default function Index({ users, filters = {} }) {
 
             <div className="py-8">
                 <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-                    <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm sm:p-5">
+                    <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-card sm:p-5">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
                             <div className="flex-1">
                                 <label htmlFor="user-search" className="mb-1 block text-xs font-medium text-slate-600">Search users</label>
@@ -135,7 +135,7 @@ export default function Index({ users, filters = {} }) {
                         </div>
                     </div>
 
-                    <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+                    <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-card">
                         <div className="hidden md:block">
                             <table className="min-w-full divide-y divide-slate-200">
                                 <thead className="bg-slate-50">

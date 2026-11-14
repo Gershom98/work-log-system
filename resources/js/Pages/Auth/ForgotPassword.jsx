@@ -21,7 +21,7 @@ export default function ForgotPassword({ status, dev_reset_url }) {
             <Head title="Forgot Password" />
 
             <div className="mb-3 text-center">
-                <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-gray-900">
+                <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-slate-900">
                     Forgot Password?
                 </h2>
             </div>
@@ -34,7 +34,7 @@ export default function ForgotPassword({ status, dev_reset_url }) {
                     </p>
                     <Link
                         href={dev_reset_url}
-                        className="mt-1.5 inline-flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1 text-xs font-semibold text-white hover:bg-blue-700 transition"
+                        className="mt-1.5 inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-3 py-1 text-xs font-semibold text-white hover:bg-indigo-700 transition"
                     >
                         Reset password
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -52,10 +52,10 @@ export default function ForgotPassword({ status, dev_reset_url }) {
 
             <form onSubmit={submit} className="space-y-3">
                 <div>
-                    <InputLabel htmlFor="email" value="Email Address" className="text-gray-700 text-xs font-semibold" />
+                    <InputLabel htmlFor="email" value="Email Address" className="text-slate-700 text-xs font-semibold" />
 
                     <div className="relative mt-1">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                             </svg>
@@ -65,7 +65,7 @@ export default function ForgotPassword({ status, dev_reset_url }) {
                             type="email"
                             name="email"
                             value={data.email}
-                            className="pl-9 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600 text-sm py-1.5 sm:py-2"
+                            className="pl-9 block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1.5 sm:py-2"
                             autoComplete="username"
                             isFocused={true}
                             onChange={(e) => setData('email', e.target.value)}
@@ -78,24 +78,24 @@ export default function ForgotPassword({ status, dev_reset_url }) {
                 </div>
 
                 <PrimaryButton
-                    className="w-full justify-center py-2 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold shadow-md shadow-blue-100 transition"
+                    className="w-full justify-center py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold shadow-md shadow-indigo-100 transition"
                     disabled={processing}
                 >
                     {processing ? 'Sending...' : 'Email Password Reset Link'}
                 </PrimaryButton>
             </form>
 
-            <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-3 text-xs">
+            <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
                 <Link
                     href={route('login')}
-                    className="flex items-center gap-1 font-medium text-gray-500 hover:text-blue-600 transition"
+                    className="flex items-center gap-1 font-medium text-slate-500 hover:text-indigo-600 transition"
                 >
                     &larr; Back to login
                 </Link>
 
                 <Link
                     href="/"
-                    className="flex items-center gap-1 font-semibold text-blue-600 hover:text-blue-800 transition"
+                    className="flex items-center gap-1 font-semibold text-indigo-600 hover:text-indigo-800 transition"
                 >
                     Home
                 </Link>

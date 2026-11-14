@@ -30,7 +30,7 @@ export default function Login({ status, canResetPassword }) {
 
             {/* Header Section */}
             <div className="mb-3 text-center">
-                <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-gray-900">
+                <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-slate-900">
                     Welcome Back
                 </h2>
             </div>
@@ -45,10 +45,10 @@ export default function Login({ status, canResetPassword }) {
             <form onSubmit={submit} className="space-y-3">
                 {/* Email Field */}
                 <div>
-                    <InputLabel htmlFor="email" value="Email Address" className="text-gray-700 text-xs font-semibold" />
+                    <InputLabel htmlFor="email" value="Email Address" className="text-slate-700 text-xs font-semibold" />
 
                     <div className="relative mt-1">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                             </svg>
@@ -58,7 +58,7 @@ export default function Login({ status, canResetPassword }) {
                             type="email"
                             name="email"
                             value={data.email}
-                            className="pl-9 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600 text-sm py-1.5 sm:py-2"
+                            className="pl-9 block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1.5 sm:py-2"
                             autoComplete="username"
                             isFocused={true}
                             onChange={(e) => setData('email', e.target.value)}
@@ -72,10 +72,10 @@ export default function Login({ status, canResetPassword }) {
 
                 {/* Password Field */}
                 <div>
-                    <InputLabel htmlFor="password" value="Password" className="text-gray-700 text-xs font-semibold" />
+                    <InputLabel htmlFor="password" value="Password" className="text-slate-700 text-xs font-semibold" />
 
                     <div className="relative mt-1">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
@@ -85,7 +85,7 @@ export default function Login({ status, canResetPassword }) {
                             type={showPassword ? 'text' : 'password'}
                             name="password"
                             value={data.password}
-                            className="pl-9 pr-10 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600 text-sm py-1.5 sm:py-2"
+                            className="pl-9 pr-10 block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm py-1.5 sm:py-2"
                             autoComplete="current-password"
                             onChange={(e) => setData('password', e.target.value)}
                             placeholder="••••••••"
@@ -98,7 +98,7 @@ export default function Login({ status, canResetPassword }) {
                             aria-label={showPassword ? 'Hide password' : 'Show password'}
                             aria-pressed={showPassword}
                             aria-controls="password"
-                            className="absolute inset-y-0 right-0 flex items-center rounded pr-3 text-gray-400 hover:text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1"
+                            className="absolute inset-y-0 right-0 flex items-center rounded pr-3 text-slate-400 hover:text-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-1"
                         >
                             {showPassword ? (
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -123,9 +123,9 @@ export default function Login({ status, canResetPassword }) {
                             name="remember"
                             checked={data.remember}
                             onChange={(e) => setData('remember', e.target.checked)}
-                            className="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-600"
+                            className="rounded border-slate-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
                         />
-                        <span className="ms-2 text-xs text-gray-600 font-medium">
+                        <span className="ms-2 text-xs text-slate-600 font-medium">
                             Remember me
                         </span>
                     </label>
@@ -133,7 +133,7 @@ export default function Login({ status, canResetPassword }) {
                     {canResetPassword && (
                         <Link
                             href={typeof route === 'function' ? route('password.request') : '/forgot-password'}
-                            className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition"
+                            className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition"
                         >
                             Forgot password?
                         </Link>
@@ -143,7 +143,7 @@ export default function Login({ status, canResetPassword }) {
                 {/* Submit Action */}
                 <div>
                     <PrimaryButton
-                        className="w-full justify-center py-2 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold shadow-md shadow-blue-100 transition"
+                        className="w-full justify-center py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold shadow-md shadow-indigo-100 transition"
                         disabled={processing}
                     >
                         {processing ? 'Logging in...' : 'Log in'}
@@ -151,17 +151,17 @@ export default function Login({ status, canResetPassword }) {
                 </div>
 
                 {/* Footer Navigation */}
-                <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-3 text-xs">
+                <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
                     <Link
                         href="/"
-                        className="flex items-center gap-1 font-medium text-gray-500 hover:text-blue-600 transition"
+                        className="flex items-center gap-1 font-medium text-slate-500 hover:text-indigo-600 transition"
                     >
                         &larr; Home
                     </Link>
 
                     <Link
                         href={typeof route === 'function' ? route('register') : '/register'}
-                        className="flex items-center gap-1 font-semibold text-blue-600 hover:text-blue-800 transition"
+                        className="flex items-center gap-1 font-semibold text-indigo-600 hover:text-indigo-800 transition"
                     >
                         Create an account &rarr;
                     </Link>

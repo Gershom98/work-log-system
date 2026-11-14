@@ -51,7 +51,7 @@ export default function Edit({ user, roles = ['admin', 'supervisor', 'user'] }) 
 
             <div className="py-8">
                 <div className="mx-auto max-w-2xl space-y-6 px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+                    <div className="flex items-center gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-card">
                         <span className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-50 text-sm font-bold text-indigo-700">
                             {initials(user.name)}
                         </span>
@@ -65,7 +65,7 @@ export default function Edit({ user, roles = ['admin', 'supervisor', 'user'] }) 
                         <RoleBadge role={user.role} />
                     </div>
 
-                    <form onSubmit={submit} className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+                    <form onSubmit={submit} className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-card">
                         <div className="space-y-6 p-6 sm:p-8">
                             <Field label="Full name" htmlFor="name" required error={errors.name}>
                                 <input id="name" type="text" value={data.name} onChange={(event) => setData('name', event.target.value)} className={fieldClass('name')} required />

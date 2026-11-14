@@ -9,7 +9,7 @@ export default function Welcome({ auth }) {
     return (
         <>
             <Head title="Welcome" />
-            <div className="min-h-screen bg-gray-50 text-gray-800 flex flex-col selection:bg-indigo-500 selection:text-white">
+            <div className="flex min-h-screen flex-col bg-gradient-to-b from-white via-slate-50 to-indigo-50/50 text-slate-800 selection:bg-indigo-600 selection:text-white">
 
                 {/* Header Navigation */}
                 <header className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-6 flex items-center justify-between">
@@ -17,7 +17,7 @@ export default function Welcome({ auth }) {
                         <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-white text-base sm:text-xl shadow-md">
                             WL
                         </div>
-                        <span className="text-lg sm:text-xl font-bold tracking-tight text-gray-900">
+                        <span className="text-lg sm:text-xl font-bold tracking-tight text-slate-900">
                             Work<span className="text-indigo-600">Log</span>
                         </span>
                     </div>
@@ -34,7 +34,7 @@ export default function Welcome({ auth }) {
                             <>
                                 <Link
                                     href={typeof route === 'function' ? route('login') : '/login'}
-                                    className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-200/60 transition text-xs sm:text-sm font-medium"
+                                    className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition text-xs sm:text-sm font-medium"
                                 >
                                     Log in
                                 </Link>
@@ -56,7 +56,7 @@ export default function Welcome({ auth }) {
                         Daily Work & Task Tracking System
                     </span>
 
-                    <h1 className="text-[26px] sm:text-6xl font-extrabold text-gray-900 tracking-tight leading-[1.15]">
+                    <h1 className="text-[26px] sm:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.15]">
                         Track & Manage <br />
                         <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
                             Your Daily Work Logs Effortlessly
@@ -84,7 +84,7 @@ export default function Welcome({ auth }) {
                                 </Link>
                                 <Link
                                     href={typeof route === 'function' ? route('login') : '/login'}
-                                    className="w-full min-[420px]:w-auto px-6 sm:px-8 py-2.5 sm:py-3.5 rounded-xl bg-white hover:bg-gray-100/80 text-gray-700 text-sm sm:text-base border border-gray-300 font-semibold shadow-sm transition"
+                                    className="w-full min-[420px]:w-auto px-6 sm:px-8 py-2.5 sm:py-3.5 rounded-xl bg-white hover:bg-slate-100/80 text-slate-700 text-sm sm:text-base border border-slate-300 font-semibold shadow-sm transition"
                                 >
                                     Log In to Account
                                 </Link>
@@ -94,37 +94,37 @@ export default function Welcome({ auth }) {
 
                     {/* Features Grid */}
                     <div className="w-full mt-8 sm:mt-20 grid grid-cols-3 gap-3 sm:gap-6 text-left">
-                        <div className="p-3 sm:p-6 rounded-xl sm:rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition">
-                            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold mb-2 sm:mb-4">
+                        <div className="rounded-xl border border-slate-200/80 bg-white p-3 shadow-card transition duration-300 ease-soft hover:-translate-y-0.5 hover:shadow-lift sm:rounded-2xl sm:p-6">
+                            <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 font-bold text-indigo-600 sm:mb-4 sm:h-10 sm:w-10">
                                 <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                 </svg>
                             </div>
-                            <h3 className="text-xs sm:text-lg font-semibold text-gray-900">Log Daily Tasks</h3>
+                            <h3 className="text-xs sm:text-lg font-semibold text-slate-900">Log Daily Tasks</h3>
                         </div>
 
-                        <div className="p-3 sm:p-6 rounded-xl sm:rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition">
-                            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold mb-2 sm:mb-4">
+                        <div className="rounded-xl border border-slate-200/80 bg-white p-3 shadow-card transition duration-300 ease-soft hover:-translate-y-0.5 hover:shadow-lift sm:rounded-2xl sm:p-6">
+                            <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 font-bold text-emerald-600 sm:mb-4 sm:h-10 sm:w-10">
                                 <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
-                            <h3 className="text-xs sm:text-lg font-semibold text-gray-900">Status Tracking</h3>
+                            <h3 className="text-xs sm:text-lg font-semibold text-slate-900">Status Tracking</h3>
                         </div>
 
-                        <div className="p-3 sm:p-6 rounded-xl sm:rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition">
-                            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center font-bold mb-2 sm:mb-4">
+                        <div className="rounded-xl border border-slate-200/80 bg-white p-3 shadow-card transition duration-300 ease-soft hover:-translate-y-0.5 hover:shadow-lift sm:rounded-2xl sm:p-6">
+                            <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-rose-50 font-bold text-rose-600 sm:mb-4 sm:h-10 sm:w-10">
                                 <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                             </div>
-                            <h3 className="text-xs sm:text-lg font-semibold text-gray-900">Export PDF Reports</h3>
+                            <h3 className="text-xs sm:text-lg font-semibold text-slate-900">Export PDF Reports</h3>
                         </div>
                     </div>
                 </main>
 
                 {/* Footer */}
-                <footer className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-2.5 sm:py-6 text-center text-[10px] sm:text-xs text-gray-500 border-t border-gray-200/60">
+                <footer className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-2.5 sm:py-6 text-center text-[10px] sm:text-xs text-slate-500 border-t border-slate-200/60">
                     &copy; {new Date().getFullYear()} Daily Work Log System. All rights reserved.
                 </footer>
             </div>

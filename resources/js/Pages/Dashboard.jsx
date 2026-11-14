@@ -64,7 +64,7 @@ export default function Dashboard({ stats = {}, recentLogs = [], topContributors
                             label="Submitted"
                             value={stats.submitted_logs || 0}
                             hint="Awaiting review"
-                            tone="blue"
+                            tone="sky"
                             href={route('work-logs.index', { status: 'submitted' })}
                             icon={<SendIcon />}
                         />
@@ -94,7 +94,7 @@ export default function Dashboard({ stats = {}, recentLogs = [], topContributors
                     </div>
 
                     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                        <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm lg:col-span-2">
+                        <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-card lg:col-span-2">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <h3 className="text-base font-semibold text-slate-900">Status distribution</h3>
@@ -135,7 +135,7 @@ export default function Dashboard({ stats = {}, recentLogs = [], topContributors
                             )}
                         </div>
 
-                        <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+                        <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-card">
                             <h3 className="text-base font-semibold text-slate-900">Top contributors</h3>
                             <p className="text-xs text-slate-500">Users with the most work logs.</p>
 
@@ -164,7 +164,7 @@ export default function Dashboard({ stats = {}, recentLogs = [], topContributors
                         </div>
                     </div>
 
-                    <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+                    <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-card">
                         <div className="flex flex-col gap-2 border-b border-slate-100 p-6 sm:flex-row sm:items-center sm:justify-between">
                             <div>
                                 <h3 className="text-base font-semibold text-slate-900">Recent activity</h3>

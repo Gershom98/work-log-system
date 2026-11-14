@@ -45,7 +45,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                 </Link>
                             </div>
 
-                            <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                            <div className="hidden items-center gap-1 sm:ms-8 sm:flex">
                                 {navigation.map((item) => (
                                     <NavLink key={item.label} href={item.href} active={item.active}>
                                         {item.label}
@@ -167,7 +167,7 @@ export default function AuthenticatedLayout({ header, children }) {
             <FlashMessage />
 
             {header && (
-                <header className="border-b border-slate-200/80 bg-white">
+                <header className="border-b border-slate-200/80 bg-gradient-to-r from-white via-white to-indigo-50/50">
                     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{header}</div>
                 </header>
             )}

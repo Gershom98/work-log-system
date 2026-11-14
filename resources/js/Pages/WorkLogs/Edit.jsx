@@ -51,7 +51,7 @@ export default function Edit({ workLog, canManageStatus }) {
 
             <div className="py-8">
                 <div className="mx-auto max-w-3xl space-y-6 px-4 sm:px-6 lg:px-8">
-                    <div className="flex flex-col gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex flex-col gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-card sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex items-center gap-3">
                             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-50 text-sm font-bold text-indigo-700">
                                 {(workLog.user?.name || 'U').charAt(0).toUpperCase()}
@@ -74,7 +74,7 @@ export default function Edit({ workLog, canManageStatus }) {
                         </div>
                     </div>
 
-                    <form onSubmit={submit} className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+                    <form onSubmit={submit} className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-card">
                         <div className="space-y-6 p-6 sm:p-8">
                             <Field label="Requester name / department" htmlFor="requester_name" required error={errors.requester_name}>
                                 <input

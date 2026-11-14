@@ -79,7 +79,7 @@ export default function Show({ workLog, canManageStatus }) {
 
             <div className="py-8">
                 <div className="mx-auto max-w-4xl space-y-6 px-4 sm:px-6 lg:px-8">
-                    <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+                    <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-card">
                         <div className="flex flex-col gap-4 border-b border-slate-100 p-6 sm:flex-row sm:items-start sm:justify-between sm:p-8">
                             <div className="min-w-0">
                                 <p className="text-[11px] font-semibold uppercase tracking-wider text-indigo-600">Task / issue</p>
