@@ -216,14 +216,7 @@ export default function Register() {
                 </div>
 
                 {/* Footer Navigation */}
-                <div className="mt-2 flex items-center justify-between border-t border-slate-100 pt-2 text-xs">
-                    <Link
-                        href="/"
-                        className="flex items-center gap-1 font-medium text-slate-500 hover:text-indigo-600 transition"
-                    >
-                        &larr; Home
-                    </Link>
-
+                <div className="mt-2 flex items-center justify-end border-t border-slate-100 pt-2 text-xs">
                     <Link
                         href={typeof route === 'function' ? route('login') : '/login'}
                         className="flex items-center gap-1 font-semibold text-indigo-600 hover:text-indigo-800 transition"

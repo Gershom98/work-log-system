@@ -24,8 +24,14 @@ export default function Login({ status, canResetPassword }) {
         });
     };
 
+    const features = [
+        ['Log daily tasks', 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z'],
+        ['Status tracking', 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+        ['PDF reports', 'M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
+    ];
+
     return (
-        <GuestLayout>
+        <GuestLayout showBack={false}>
             <Head title="Log in" />
 
             {/* Header Section */}
@@ -33,6 +39,9 @@ export default function Login({ status, canResetPassword }) {
                 <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-slate-900">
                     Welcome Back
                 </h2>
+                <p className="mt-1 text-[11px] sm:text-xs text-slate-500">
+                    Sign in to track, manage and export your daily work logs.
+                </p>
             </div>
 
             {/* Status Message */}
@@ -150,15 +159,23 @@ export default function Login({ status, canResetPassword }) {
                     </PrimaryButton>
                 </div>
 
-                {/* Footer Navigation */}
-                <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
-                    <Link
-                        href="/"
-                        className="flex items-center gap-1 font-medium text-slate-500 hover:text-indigo-600 transition"
-                    >
-                        &larr; Home
-                    </Link>
+                {/* Feature Highlights */}
+                <ul className="mt-3 grid grid-cols-3 gap-1.5">
+                    {features.map(([label, path]) => (
+                        <li
+                            key={label}
+                            className="flex flex-col items-center gap-1 rounded-lg border border-slate-200/80 bg-slate-50/70 px-1 py-1.5 text-center text-[10px] font-medium text-slate-600"
+                        >
+                            <svg className="h-3.5 w-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={path} />
+                            </svg>
+                            {label}
+                        </li>
+                    ))}
+                </ul>
 
+                {/* Footer Navigation */}
+                <div className="mt-3 flex items-center justify-end border-t border-slate-100 pt-3 text-xs">
                     <Link
                         href={typeof route === 'function' ? route('register') : '/register'}
                         className="flex items-center gap-1 font-semibold text-indigo-600 hover:text-indigo-800 transition"

@@ -94,19 +94,12 @@ export default function ResetPassword({ token, email }) {
                 </PrimaryButton>
             </form>
 
-            <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
+            <div className="mt-3 flex items-center justify-start border-t border-slate-100 pt-3 text-xs">
                 <Link
                     href={route('login')}
                     className="flex items-center gap-1 font-medium text-slate-500 hover:text-indigo-600 transition"
                 >
                     &larr; Back to login
-                </Link>
-
-                <Link
-                    href="/"
-                    className="flex items-center gap-1 font-semibold text-indigo-600 hover:text-indigo-800 transition"
-                >
-                    Home
                 </Link>
             </div>
         </GuestLayout>

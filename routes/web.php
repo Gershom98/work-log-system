@@ -4,19 +4,12 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WorkLogController;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
-// Welcome Page
+// The sign-in screen is the entry point; signed-in users skip straight to their logs.
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
+    return redirect()->route(auth()->check() ? 'work-logs.index' : 'login');
+})->name('home');
 
 // Protected Routes (Requires Login and Email Verification)
 Route::middleware(['auth', 'verified'])->group(function () {
