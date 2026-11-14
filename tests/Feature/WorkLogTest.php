@@ -292,7 +292,7 @@ class WorkLogTest extends TestCase
         ]);
     }
 
-    public function test_work_date_cannot_be_moved_before_the_submission_day(): void
+    public function test_work_date_can_be_moved_to_an_earlier_date(): void
     {
         $user = User::factory()->create();
         $log = WorkLog::factory()->for($user)->create(['log_date' => '2026-11-10']);
@@ -304,11 +304,12 @@ class WorkLogTest extends TestCase
                 'title' => $log->title,
                 'log_date' => '2026-11-09',
             ])
-            ->assertSessionHasErrors('log_date');
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('work-logs.index'));
 
         $this->assertDatabaseHas('work_logs', [
             'id' => $log->id,
-            'log_date' => '2026-11-10',
+            'log_date' => '2026-11-09',
         ]);
     }
 

@@ -142,11 +142,7 @@ const sw = {
         'mf. Ukarabati wa printa / Kutatua hitilafu ya mtandao',
     'Work date': 'Tarehe ya kazi',
     'Must be today or earlier.': 'Lazima iwe leo au tarehe ya awali.',
-    'Must be :date or later, and not after today.': 'Lazima iwe :date au baadaye, na si baada ya leo.',
-    'Keep the original date or choose a date on or after :date, and not after today.':
-        'Baki na tarehe ya awali au chagua tarehe ya :date au baadaye, na si baada ya leo.',
-    'Keep the original date or choose a date between :from and today.':
-        'Baki na tarehe ya awali au chagua tarehe kati ya :from na leo.',
+    'Keep the original date or choose today or earlier.': 'Baki na tarehe ya awali au chagua leo au tarehe ya awali.',
     'Reason for rejection': 'Sababu ya kukataliwa',
     'Explain why this log is being rejected...': 'Eleza kwa nini kumbukumbu hii inakataliwa...',
     'Description / actions taken': 'Maelezo / hatua zilizochukuliwa',
