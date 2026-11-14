@@ -5,7 +5,7 @@ import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 
-export default function ForgotPassword({ status, dev_reset_url }) {
+export default function ForgotPassword({ status, mail_ready = true, dev_reset_url }) {
     const { data, setData, post, processing, errors } = useForm({
         email: '',
     });
@@ -26,6 +26,12 @@ export default function ForgotPassword({ status, dev_reset_url }) {
                 </h2>
             </div>
 
+            {!mail_ready && !dev_reset_url && (
+                <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] font-medium text-amber-800">
+                    Email delivery is off on this server, so no reset email can be sent. Contact your administrator.
+                </div>
+            )}
+
             {dev_reset_url ? (
                 <div className="mb-3 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-[11px]">
                     <p className="font-semibold text-emerald-800">Reset link ready</p>
@@ -43,7 +49,8 @@ export default function ForgotPassword({ status, dev_reset_url }) {
                     </Link>
                 </div>
             ) : (
-                status && (
+                status &&
+                mail_ready && (
                     <div className="mb-3 rounded-lg bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-700 border border-emerald-200 text-center">
                         {status}
                     </div>

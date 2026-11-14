@@ -136,4 +136,33 @@ class PasswordResetTest extends TestCase
         $this->get('/forgot-password')->assertInertia(fn ($page) => $page
             ->where('dev_reset_url', null));
     }
+
+    public function test_forgot_password_reports_when_mail_cannot_be_sent(): void
+    {
+        $mailer = \Mockery::mock();
+        $mailer->shouldReceive('send')->andThrow(new \RuntimeException('mail api down'));
+
+        \Illuminate\Support\Facades\Mail::shouldReceive('mailer')->andReturn($mailer);
+
+        $user = User::factory()->create();
+
+        $this->from('/forgot-password')
+            ->post('/forgot-password', ['email' => $user->email])
+            ->assertSessionHasErrors('email')
+            ->assertRedirect('/forgot-password');
+
+        $this->assertSame(
+            'We could not send the reset email. Please try again later or contact your administrator.',
+            session('errors')->first('email')
+        );
+    }
+
+    public function test_page_flags_mail_as_not_ready_while_the_log_driver_is_used(): void
+    {
+        config(['mail.default' => 'log']);
+        $this->get('/forgot-password')->assertInertia(fn ($page) => $page->where('mail_ready', false));
+
+        config(['mail.default' => 'smtp']);
+        $this->get('/forgot-password')->assertInertia(fn ($page) => $page->where('mail_ready', true));
+    }
 }
