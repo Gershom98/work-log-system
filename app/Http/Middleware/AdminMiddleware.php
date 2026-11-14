@@ -21,6 +21,6 @@ class AdminMiddleware
         }
 
         // Ikiwa sio admin, mruhusu arudi nyuma au umuelekeze kwenye work-logs
-        return redirect()->route('work-logs.index')->with('error', 'Hauna ruhusa ya kufikia ukurasa huu.');
+        return redirect()->route('work-logs.index')->with('error', __('You are not allowed to access this page.'));
     }
 }

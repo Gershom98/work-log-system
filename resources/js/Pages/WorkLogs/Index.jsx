@@ -5,6 +5,7 @@ import PageHeader from '@/Components/ui/PageHeader';
 import Pagination from '@/Components/ui/Pagination';
 import StatCard from '@/Components/ui/StatCard';
 import StatusBadge from '@/Components/ui/StatusBadge';
+import { useI18n } from '@/i18n';
 import { STATUS_OPTIONS, formatDate, inputClass, isoDateOffset, monthStartInputValue, todayInputValue } from '@/utils/format';
 import { Head, Link, router } from '@inertiajs/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -12,6 +13,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 const DEFAULT_PER_PAGE = 10;
 
 export default function Index({ logs, summary = {}, filters = {}, perPageOptions = [5, 10, 25, 50], canManageStatus }) {
+    const { t, locale } = useI18n();
     const [search, setSearch] = useState(filters.search || '');
     const [status, setStatus] = useState(filters.status || '');
     const [startDate, setStartDate] = useState(filters.start_date || '');
@@ -182,10 +184,10 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
     };
 
     const activeChips = [
-        search && { key: 'search', label: `Search: “${search}”`, clear: () => { setSearch(''); applyImmediately({ search: '' }, { skip: true }); } },
-        status && { key: 'status', label: STATUS_OPTIONS.find((option) => option.value === status)?.label, clear: () => { setStatus(''); applyImmediately({ status: '' }); } },
-        startDate && { key: 'start', label: `From ${formatDate(startDate)}`, clear: () => { setStartDate(''); applyImmediately({ start_date: '' }, { skip: true }); } },
-        endDate && { key: 'end', label: `To ${formatDate(endDate)}`, clear: () => { setEndDate(''); applyImmediately({ end_date: '' }, { skip: true }); } },
+        search && { key: 'search', label: t('Search: “:term”', { term: search }), clear: () => { setSearch(''); applyImmediately({ search: '' }, { skip: true }); } },
+        status && { key: 'status', label: t(STATUS_OPTIONS.find((option) => option.value === status)?.label), clear: () => { setStatus(''); applyImmediately({ status: '' }); } },
+        startDate && { key: 'start', label: t('From :date', { date: formatDate(startDate, locale) }), clear: () => { setStartDate(''); applyImmediately({ start_date: '' }, { skip: true }); } },
+        endDate && { key: 'end', label: t('To :date', { date: formatDate(endDate, locale) }), clear: () => { setEndDate(''); applyImmediately({ end_date: '' }, { skip: true }); } },
     ].filter(Boolean);
 
     const total = summary.total ?? 0;
@@ -195,11 +197,11 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
         <AuthenticatedLayout
             header={
                 <PageHeader
-                    title="Daily Work Logs"
+                    title={t('Daily Work Logs')}
                     description={
                         canManageStatus
-                            ? 'Review every submitted log, track statuses and export filtered reports.'
-                            : 'Keep a record of your daily work and follow the review status of each log.'
+                            ? t('Review every submitted log, track statuses and export filtered reports.')
+                            : t('Keep a record of your daily work and follow the review status of each log.')
                     }
                     actions={
                         <>
@@ -212,28 +214,28 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
                                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
-                                Export PDF
+                                {t('Export PDF')}
                             </a>
                             <Link href={route('work-logs.create')} className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700">
                                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
                                 </svg>
-                                New Log
+                                {t('New Log')}
                             </Link>
                         </>
                     }
                 />
             }
         >
-            <Head title="Daily Work Logs" />
+            <Head title={t('Daily Work Logs')} />
 
             <div className="py-8">
                 <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                        <StatCard label="Matching logs" value={total} hint="Based on current filters" tone="indigo" icon={<DocumentIcon />} />
-                        <StatCard label="Active" value={summary.active ?? 0} hint="Submitted or assigned" tone="sky" icon={<ActivityIcon />} />
-                        <StatCard label="Rejected" value={summary.rejected ?? 0} hint="Needs attention" tone="rose" icon={<RejectIcon />} />
-                        <StatCard label="No data" value={summary.no_data ?? 0} hint="Awaiting information" tone="amber" icon={<NoDataIcon />} />
+                        <StatCard label={t('Matching logs')} value={total} hint={t('Based on current filters')} tone="indigo" icon={<DocumentIcon />} />
+                        <StatCard label={t('Active')} value={summary.active ?? 0} hint={t('Submitted or assigned')} tone="sky" icon={<ActivityIcon />} />
+                        <StatCard label={t('Rejected')} value={summary.rejected ?? 0} hint={t('Needs attention')} tone="rose" icon={<RejectIcon />} />
+                        <StatCard label={t('No data')} value={summary.no_data ?? 0} hint={t('Awaiting information')} tone="amber" icon={<NoDataIcon />} />
                     </div>
 
                     <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-card sm:p-5">
@@ -249,7 +251,7 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
                                     <svg className="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L14 14.414V19a1 1 0 01-.553.894l-4 2A1 1 0 018 21v-6.586L3.293 6.707A1 1 0 013 6V4z" />
                                     </svg>
-                                    Filters
+                                    {t('Filters')}
                                     {activeFilterCount > 0 && (
                                         <span className="rounded-full bg-indigo-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
                                             {activeFilterCount}
@@ -265,13 +267,13 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
                         <div id="log-filters" className={(showFilters ? 'mt-4 block' : 'hidden') + ' md:mt-0 md:block'}>
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                                 <div>
-                                    <label htmlFor="search" className="mb-1 block text-xs font-medium text-slate-600">Search</label>
+                                    <label htmlFor="search" className="mb-1 block text-xs font-medium text-slate-600">{t('Search')}</label>
                                     <div className="relative">
                                         <input
                                             ref={searchRef}
                                             id="search"
                                             type="text"
-                                            placeholder="Task title or requester"
+                                            placeholder={t('Task title or requester')}
                                             value={search}
                                             onChange={(event) => setSearch(event.target.value)}
                                             className={inputClass + ' pr-9'}
@@ -283,50 +285,50 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
                                 </div>
 
                                 <div>
-                                    <label htmlFor="status" className="mb-1 block text-xs font-medium text-slate-600">Status</label>
+                                    <label htmlFor="status" className="mb-1 block text-xs font-medium text-slate-600">{t('Status')}</label>
                                     <select id="status" value={status} onChange={(event) => handleStatusChange(event.target.value)} className={inputClass}>
-                                        <option value="">All statuses</option>
+                                        <option value="">{t('All statuses')}</option>
                                         {STATUS_OPTIONS.map((option) => (
-                                            <option key={option.value} value={option.value}>{option.label}</option>
+                                            <option key={option.value} value={option.value}>{t(option.label)}</option>
                                         ))}
                                     </select>
                                 </div>
 
                                 <div>
-                                    <label htmlFor="start_date" className="mb-1 block text-xs font-medium text-slate-600">From</label>
+                                    <label htmlFor="start_date" className="mb-1 block text-xs font-medium text-slate-600">{t('From')}</label>
                                     <input id="start_date" type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} className={inputClass} />
                                 </div>
 
                                 <div>
-                                    <label htmlFor="end_date" className="mb-1 block text-xs font-medium text-slate-600">To</label>
+                                    <label htmlFor="end_date" className="mb-1 block text-xs font-medium text-slate-600">{t('To')}</label>
                                     <input id="end_date" type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} className={inputClass} />
                                 </div>
                             </div>
 
                             <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-4">
-                                <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Quick range</span>
-                                <button type="button" onClick={() => handlePreset('all')} className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-indigo-300 hover:text-indigo-700">All time</button>
-                                <button type="button" onClick={() => handlePreset('today')} className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-indigo-300 hover:text-indigo-700">Today</button>
-                                <button type="button" onClick={() => handlePreset('week')} className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-indigo-300 hover:text-indigo-700">Last 7 days</button>
-                                <button type="button" onClick={() => handlePreset('month')} className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-indigo-300 hover:text-indigo-700">This month</button>
+                                <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{t('Quick range')}</span>
+                                <button type="button" onClick={() => handlePreset('all')} className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-indigo-300 hover:text-indigo-700">{t('All time')}</button>
+                                <button type="button" onClick={() => handlePreset('today')} className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-indigo-300 hover:text-indigo-700">{t('Today')}</button>
+                                <button type="button" onClick={() => handlePreset('week')} className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-indigo-300 hover:text-indigo-700">{t('Last 7 days')}</button>
+                                <button type="button" onClick={() => handlePreset('month')} className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-indigo-300 hover:text-indigo-700">{t('This month')}</button>
                             </div>
                         </div>
 
                         <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-4">
                             <div className="flex flex-wrap items-center gap-2">
-                                <select aria-label="Sort by date" value={sort} onChange={(event) => handleSortChange(event.target.value)} className="rounded-lg border-slate-300 py-1.5 text-xs text-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    <option value="newest">Newest first</option>
-                                    <option value="oldest">Oldest first</option>
+                                <select aria-label={t('Sort by date')} value={sort} onChange={(event) => handleSortChange(event.target.value)} className="rounded-lg border-slate-300 py-1.5 text-xs text-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <option value="newest">{t('Newest first')}</option>
+                                    <option value="oldest">{t('Oldest first')}</option>
                                 </select>
-                                <select aria-label="Rows per page" value={perPage} onChange={(event) => handlePerPageChange(Number(event.target.value))} className="rounded-lg border-slate-300 py-1.5 text-xs text-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <select aria-label={t('Rows per page')} value={perPage} onChange={(event) => handlePerPageChange(Number(event.target.value))} className="rounded-lg border-slate-300 py-1.5 text-xs text-slate-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                     {perPageOptions.map((option) => (
-                                        <option key={option} value={option}>{option} / page</option>
+                                        <option key={option} value={option}>{t(':count per page', { count: option })}</option>
                                     ))}
                                 </select>
                             </div>
 
                             <button type="button" onClick={handleReset} className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50">
-                                Reset
+                                {t('Reset')}
                             </button>
                         </div>
 
@@ -354,21 +356,21 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
                             <table className="min-w-full divide-y divide-slate-200">
                                 <thead className="bg-slate-50">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">Date</th>
+                                        <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">{t('Date')}</th>
                                         {canManageStatus && (
-                                            <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">Submitted by</th>
+                                            <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">{t('Submitted by')}</th>
                                         )}
-                                        <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">Requester</th>
-                                        <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">Task</th>
-                                        <th className="px-6 py-3 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Status</th>
-                                        <th className="px-6 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-slate-500">Actions</th>
+                                        <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">{t('Requester')}</th>
+                                        <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">{t('Task')}</th>
+                                        <th className="px-6 py-3 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">{t('Status')}</th>
+                                        <th className="px-6 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-slate-500">{t('Actions')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 text-sm">
                                     {logs?.data?.length > 0 ? (
                                         logs.data.map((log) => (
                                             <tr key={log.id} className="transition hover:bg-slate-50/70">
-                                                <td className="whitespace-nowrap px-6 py-4 text-xs font-medium text-slate-500">{formatDate(log.log_date)}</td>
+                                                <td className="whitespace-nowrap px-6 py-4 text-xs font-medium text-slate-500">{formatDate(log.log_date, locale)}</td>
                                                 {canManageStatus && (
                                                     <td className="whitespace-nowrap px-6 py-4">
                                                         <div className="flex items-center gap-2.5">
@@ -391,16 +393,16 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
                                                 <td className="whitespace-nowrap px-6 py-4 text-center"><StatusBadge status={log.status} /></td>
                                                 <td className="whitespace-nowrap px-6 py-4">
                                                     <div className="flex items-center justify-end gap-1">
-                                                        <IconLink href={route('work-logs.show', log.id)} label="View log">
+                                                        <IconLink href={route('work-logs.show', log.id)} label={t('View log')}>
                                                             <EyeIcon />
                                                         </IconLink>
                                                         {log.can?.update && (
-                                                            <IconLink href={route('work-logs.edit', log.id)} label="Edit log">
+                                                            <IconLink href={route('work-logs.edit', log.id)} label={t('Edit log')}>
                                                                 <PencilIcon />
                                                             </IconLink>
                                                         )}
                                                         {log.can?.delete && (
-                                                            <button type="button" onClick={() => setDeletingLog(log)} className="rounded-lg p-2 text-rose-500 transition hover:bg-rose-50 hover:text-rose-700" aria-label="Delete log">
+                                                            <button type="button" onClick={() => setDeletingLog(log)} className="rounded-lg p-2 text-rose-500 transition hover:bg-rose-50 hover:text-rose-700" aria-label={t('Delete log')}>
                                                                 <TrashIcon />
                                                             </button>
                                                         )}
@@ -412,9 +414,9 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
                                         <tr>
                                             <td colSpan={canManageStatus ? 6 : 5}>
                                                 <EmptyState
-                                                    title="No work logs found"
-                                                    description="Try adjusting the filters, or create a new work log to get started."
-                                                    action={<Link href={route('work-logs.create')} className="text-sm font-semibold text-indigo-600 hover:text-indigo-800">Create a work log →</Link>}
+                                                    title={t('No work logs found')}
+                                                    description={t('Try adjusting the filters, or create a new work log to get started.')}
+                                                    action={<Link href={route('work-logs.create')} className="text-sm font-semibold text-indigo-600 hover:text-indigo-800">{t('Create a work log →')}</Link>}
                                                 />
                                             </td>
                                         </tr>
@@ -429,38 +431,38 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
                                     <div key={log.id} className="p-4">
                                         <div className="flex items-start justify-between gap-3">
                                             <div className="min-w-0">
-                                                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{formatDate(log.log_date)}</p>
+                                                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{formatDate(log.log_date, locale)}</p>
                                                 <Link href={route('work-logs.show', log.id)} className="mt-1 block truncate text-sm font-semibold text-slate-900">
                                                     {log.title}
                                                 </Link>
-                                                <p className="mt-0.5 text-xs text-slate-500">Requester: {log.requester_name}</p>
+                                                <p className="mt-0.5 text-xs text-slate-500">{t('Requester: :name', { name: log.requester_name })}</p>
                                                 {canManageStatus && log.user && (
-                                                    <p className="text-xs text-slate-400">By {log.user.name}</p>
+                                                    <p className="text-xs text-slate-400">{t('By :name', { name: log.user.name })}</p>
                                                 )}
                                             </div>
                                             <StatusBadge status={log.status} />
                                         </div>
                                         <div className="mt-3 flex items-center justify-end gap-2">
-                                            <Link href={route('work-logs.show', log.id)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">View</Link>
+                                            <Link href={route('work-logs.show', log.id)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">{t('View')}</Link>
                                             {log.can?.update && (
-                                                <Link href={route('work-logs.edit', log.id)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">Edit</Link>
+                                                <Link href={route('work-logs.edit', log.id)} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">{t('Edit')}</Link>
                                             )}
                                             {log.can?.delete && (
-                                                <button type="button" onClick={() => setDeletingLog(log)} className="rounded-lg border border-rose-200 px-3 py-2 text-xs font-semibold text-rose-600 transition hover:bg-rose-50">Delete</button>
+                                                <button type="button" onClick={() => setDeletingLog(log)} className="rounded-lg border border-rose-200 px-3 py-2 text-xs font-semibold text-rose-600 transition hover:bg-rose-50">{t('Delete')}</button>
                                             )}
                                         </div>
                                     </div>
                                 ))
                             ) : (
                                 <EmptyState
-                                    title="No work logs found"
-                                    description="Try adjusting the filters, or create a new work log to get started."
+                                    title={t('No work logs found')}
+                                    description={t('Try adjusting the filters, or create a new work log to get started.')}
                                 />
                             )}
                         </div>
 
                         <div className="px-4 pb-4 sm:px-6">
-                            <Pagination paginator={logs} label="logs" />
+                            <Pagination paginator={logs} label={t('logs')} />
                         </div>
                     </div>
                 </div>
@@ -468,9 +470,9 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
 
             <ConfirmDialog
                 open={Boolean(deletingLog)}
-                title="Delete work log"
-                description={deletingLog ? `“${deletingLog.title}” will be permanently deleted. This action cannot be undone.` : ''}
-                confirmLabel="Delete log"
+                title={t('Delete work log')}
+                description={deletingLog ? t('“:title” will be permanently deleted. This action cannot be undone.', { title: deletingLog.title }) : ''}
+                confirmLabel={t('Delete log')}
                 processing={deleting}
                 onConfirm={confirmDelete}
                 onClose={() => setDeletingLog(null)}

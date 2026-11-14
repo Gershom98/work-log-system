@@ -42,7 +42,7 @@ export function statusLabel(status) {
     return STATUS_META[status]?.label ?? capitalize(status || 'submitted');
 }
 
-export function formatDate(value) {
+export function formatDate(value, locale = 'en') {
     if (!value) {
         return '—';
     }
@@ -54,14 +54,14 @@ export function formatDate(value) {
         return raw;
     }
 
-    return new Intl.DateTimeFormat('en-GB', {
+    return new Intl.DateTimeFormat(locale === 'sw' ? 'sw-TZ' : 'en-GB', {
         day: '2-digit',
         month: 'short',
         year: 'numeric',
     }).format(date);
 }
 
-export function formatDateTime(value) {
+export function formatDateTime(value, locale = 'en') {
     if (!value) {
         return '—';
     }
@@ -72,7 +72,7 @@ export function formatDateTime(value) {
         return String(value);
     }
 
-    return new Intl.DateTimeFormat('en-GB', {
+    return new Intl.DateTimeFormat(locale === 'sw' ? 'sw-TZ' : 'en-GB', {
         day: '2-digit',
         month: 'short',
         year: 'numeric',

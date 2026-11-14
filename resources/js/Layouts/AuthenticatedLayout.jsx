@@ -1,14 +1,17 @@
 import Dropdown from '@/Components/Dropdown';
+import LanguageSwitcher from '@/Components/LanguageSwitcher';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import FlashMessage from '@/Components/ui/FlashMessage';
 import RoleBadge from '@/Components/ui/RoleBadge';
+import { useI18n } from '@/i18n';
 import { initials } from '@/utils/format';
 import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 
 export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth?.user;
+    const { t } = useI18n();
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
 
     const isAdmin = user?.role === 'admin';
@@ -16,15 +19,15 @@ export default function AuthenticatedLayout({ header, children }) {
 
     const navigation = [
         ...(isManager
-            ? [{ label: 'Dashboard', href: route('dashboard'), active: route().current('dashboard') }]
+            ? [{ label: t('Dashboard'), href: route('dashboard'), active: route().current('dashboard') }]
             : []),
         {
-            label: 'Daily Work Logs',
+            label: t('Daily Work Logs'),
             href: route('work-logs.index'),
             active: route().current('work-logs.*'),
         },
         ...(isAdmin
-            ? [{ label: 'Users', href: route('admin.users.index'), active: route().current('admin.users.*') }]
+            ? [{ label: t('Users'), href: route('admin.users.index'), active: route().current('admin.users.*') }]
             : []),
     ];
 
@@ -55,6 +58,17 @@ export default function AuthenticatedLayout({ header, children }) {
                         </div>
 
                         <div className="hidden sm:ms-6 sm:flex sm:items-center">
+                            <a
+                                href={route('manual.download')}
+                                title={t('Training manual (PDF)')}
+                                className="me-2 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900"
+                            >
+                                <svg className="h-3.5 w-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+                                </svg>
+                                {t('Manual')}
+                            </a>
+                            <LanguageSwitcher className="me-2" />
                             <div className="relative ms-3">
                                 <Dropdown>
                                     <Dropdown.Trigger>
@@ -68,7 +82,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                             <span className="flex flex-col items-start leading-tight">
                                                 <span className="max-w-[140px] truncate">{user?.name}</span>
                                                 <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-                                                    {user?.role}
+                                                    {t(user?.role === 'admin' ? 'Admin' : user?.role === 'supervisor' ? 'Supervisor' : 'User')}
                                                 </span>
                                             </span>
                                             <svg className="h-4 w-4 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -86,9 +100,9 @@ export default function AuthenticatedLayout({ header, children }) {
                                             <p className="truncate text-sm font-semibold text-slate-900">{user?.name}</p>
                                             <p className="truncate text-xs text-slate-500">{user?.email}</p>
                                         </div>
-                                        <Dropdown.Link href={route('profile.edit')}>Profile</Dropdown.Link>
+                                        <Dropdown.Link href={route('profile.edit')}>{t('Profile')}</Dropdown.Link>
                                         <Dropdown.Link href={route('logout')} method="post" as="button">
-                                            Log Out
+                                            {t('Log Out')}
                                         </Dropdown.Link>
                                     </Dropdown.Content>
                                 </Dropdown>
@@ -99,7 +113,7 @@ export default function AuthenticatedLayout({ header, children }) {
                             <button
                                 onClick={() => setShowingNavigationDropdown((previousState) => !previousState)}
                                 className="inline-flex items-center justify-center rounded-md p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                aria-label="Toggle navigation"
+                                aria-label={t('Toggle navigation')}
                                 aria-expanded={showingNavigationDropdown}
                                 aria-controls="mobile-navigation"
                             >
@@ -153,11 +167,24 @@ export default function AuthenticatedLayout({ header, children }) {
                         </div>
 
                         <div className="mt-3 space-y-1">
+                            <div className="px-4 pb-2">
+                                <LanguageSwitcher />
+                            </div>
                             <ResponsiveNavLink href={route('profile.edit')} onClick={() => setShowingNavigationDropdown(false)}>
-                                Profile
+                                {t('Profile')}
                             </ResponsiveNavLink>
+                            <a
+                                href={route('manual.download')}
+                                onClick={() => setShowingNavigationDropdown(false)}
+                                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
+                            >
+                                <svg className="h-4 w-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+                                </svg>
+                                {t('Training manual (PDF)')}
+                            </a>
                             <ResponsiveNavLink method="post" href={route('logout')} as="button" onClick={() => setShowingNavigationDropdown(false)}>
-                                Log Out
+                                {t('Log Out')}
                             </ResponsiveNavLink>
                         </div>
                     </div>

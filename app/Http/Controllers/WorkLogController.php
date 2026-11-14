@@ -72,7 +72,7 @@ class WorkLogController extends Controller
 
         return redirect()
             ->route('work-logs.index')
-            ->with('message', 'Work log created successfully.');
+            ->with('message', __('Work log created successfully.'));
     }
 
     public function show(Request $request, WorkLog $workLog)
@@ -91,10 +91,10 @@ class WorkLogController extends Controller
 
         if (blank(config('services.gemini.key'))) {
             $hint = app()->configurationIsCached()
-                ? 'Add GEMINI_API_KEY to the server environment, then run "php artisan config:clear".'
-                : 'Add GEMINI_API_KEY to the .env file on the server.';
+                ? __('Add GEMINI_API_KEY to the server environment, then run "php artisan config:clear".')
+                : __('Add GEMINI_API_KEY to the .env file on the server.');
 
-            return back()->with('error', 'AI solutions are not configured yet. '.$hint);
+            return back()->with('error', __('AI solutions are not configured yet.').' '.$hint);
         }
 
         try {
@@ -105,7 +105,7 @@ class WorkLogController extends Controller
                 'model' => config('services.gemini.model'),
             ]);
 
-            return back()->with('error', 'The AI service could not generate solutions. '.$this->describeAiFailure($exception));
+            return back()->with('error', __('The AI service could not generate solutions.').' '.$this->describeAiFailure($exception));
         }
 
         $workLog->forceFill([
@@ -113,7 +113,7 @@ class WorkLogController extends Controller
             'ai_solutions_generated_at' => now(),
         ])->save();
 
-        return back()->with('message', 'AI solutions generated.');
+        return back()->with('message', __('AI solutions generated.'));
     }
 
     public function edit(Request $request, WorkLog $workLog)
@@ -142,7 +142,7 @@ class WorkLogController extends Controller
 
         return redirect()
             ->route('work-logs.index')
-            ->with('message', 'Work log updated successfully.');
+            ->with('message', __('Work log updated successfully.'));
     }
 
     public function destroy(WorkLog $workLog)
@@ -153,7 +153,7 @@ class WorkLogController extends Controller
 
         return redirect()
             ->route('work-logs.index')
-            ->with('message', 'Work log deleted successfully.');
+            ->with('message', __('Work log deleted successfully.'));
     }
 
     public function downloadPdf(Request $request)

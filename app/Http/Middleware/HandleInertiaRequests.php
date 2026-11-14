@@ -35,6 +35,7 @@ class HandleInertiaRequests extends Middleware
                     ? $request->user()->only('id', 'name', 'email', 'role')
                     : null,
             ],
+            'locale' => fn () => app()->getLocale(),
             'flash' => [
                 'message' => fn () => $request->session()->get('message'),
                 'error' => fn () => $request->session()->get('error'),

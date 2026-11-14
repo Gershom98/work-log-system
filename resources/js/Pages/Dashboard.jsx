@@ -4,9 +4,12 @@ import StatCard from '@/Components/ui/StatCard';
 import StatusBadge from '@/Components/ui/StatusBadge';
 import RoleBadge from '@/Components/ui/RoleBadge';
 import { STATUS_META, formatDate, initials } from '@/utils/format';
+import { useI18n } from '@/i18n';
 import { Head, Link } from '@inertiajs/react';
 
 export default function Dashboard({ stats = {}, recentLogs = [], topContributors = [] }) {
+    const { t, locale } = useI18n();
+
     const statusRows = [
         { key: 'submitted', label: 'Submitted', count: stats.submitted_logs || 0, filter: 'submitted' },
         { key: 'assigned', label: 'Assigned', count: stats.assigned_logs || 0, filter: 'assigned' },
@@ -21,8 +24,8 @@ export default function Dashboard({ stats = {}, recentLogs = [], topContributors
         <AuthenticatedLayout
             header={
                 <PageHeader
-                    title="Dashboard"
-                    description="A quick overview of team activity, statuses and the latest submissions."
+                    title={t('Dashboard')}
+                    description={t('A quick overview of team activity, statuses and the latest submissions.')}
                     actions={
                         <>
                             <a
@@ -34,10 +37,10 @@ export default function Dashboard({ stats = {}, recentLogs = [], topContributors
                                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
-                                Export PDF
+                                {t('Export PDF')}
                             </a>
                             <Link href={route('work-logs.index')} className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700">
-                                View all logs
+                                {t('View all logs')}
                                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                                 </svg>
@@ -47,47 +50,47 @@ export default function Dashboard({ stats = {}, recentLogs = [], topContributors
                 />
             }
         >
-            <Head title="Dashboard" />
+            <Head title={t('Dashboard')} />
 
             <div className="py-8">
                 <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
                         <StatCard
-                            label="Total logs"
+                            label={t('Total logs')}
                             value={totalLogs}
-                            hint="All recorded work"
+                            hint={t('All recorded work')}
                             tone="indigo"
                             href={route('work-logs.index')}
                             icon={<LogsIcon />}
                         />
                         <StatCard
-                            label="Submitted"
+                            label={t('Submitted')}
                             value={stats.submitted_logs || 0}
-                            hint="Awaiting review"
+                            hint={t('Awaiting review')}
                             tone="sky"
                             href={route('work-logs.index', { status: 'submitted' })}
                             icon={<SendIcon />}
                         />
                         <StatCard
-                            label="Assigned"
+                            label={t('Assigned')}
                             value={stats.assigned_logs || 0}
-                            hint="In progress"
+                            hint={t('In progress')}
                             tone="emerald"
                             href={route('work-logs.index', { status: 'assigned' })}
                             icon={<CheckIcon />}
                         />
                         <StatCard
-                            label="Rejected"
+                            label={t('Rejected')}
                             value={stats.rejected_logs || 0}
-                            hint="Needs follow-up"
+                            hint={t('Needs follow-up')}
                             tone="rose"
                             href={route('work-logs.index', { status: 'rejected' })}
                             icon={<RejectIcon />}
                         />
                         <StatCard
-                            label="Team members"
+                            label={t('Team members')}
                             value={stats.total_users || 0}
-                            hint="Registered users"
+                            hint={t('Registered users')}
                             tone="slate"
                             icon={<UsersIcon />}
                         />
@@ -97,10 +100,10 @@ export default function Dashboard({ stats = {}, recentLogs = [], topContributors
                         <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-card lg:col-span-2">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <h3 className="text-base font-semibold text-slate-900">Status distribution</h3>
-                                    <p className="text-xs text-slate-500">Share of logs by current status.</p>
+                                    <h3 className="text-base font-semibold text-slate-900">{t('Status distribution')}</h3>
+                                    <p className="text-xs text-slate-500">{t('Share of logs by current status.')}</p>
                                 </div>
-                                <Link href={route('work-logs.index')} className="text-xs font-semibold text-indigo-600 hover:text-indigo-800">View logs →</Link>
+                                <Link href={route('work-logs.index')} className="text-xs font-semibold text-indigo-600 hover:text-indigo-800">{t('View logs →')}</Link>
                             </div>
 
                             <div className="mt-5 space-y-4">
@@ -114,7 +117,7 @@ export default function Dashboard({ stats = {}, recentLogs = [], topContributors
                                             <div className="flex items-center justify-between text-sm">
                                                 <span className="flex items-center gap-2 font-medium text-slate-700">
                                                     <span className={`h-2 w-2 rounded-full ${meta.dot}`} />
-                                                    {row.label}
+                                                    {t(row.label)}
                                                 </span>
                                                 <span className="text-xs text-slate-500">
                                                     <span className="font-semibold text-slate-700">{row.count}</span> · {percent}%
@@ -130,14 +133,14 @@ export default function Dashboard({ stats = {}, recentLogs = [], topContributors
 
                             {totalLogs === 0 && (
                                 <p className="mt-5 rounded-lg bg-slate-50 p-3 text-xs text-slate-500">
-                                    No work logs yet. Create the first one from the Work Logs page.
+                                    {t('No work logs yet. Create the first one from the Work Logs page.')}
                                 </p>
                             )}
                         </div>
 
                         <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-card">
-                            <h3 className="text-base font-semibold text-slate-900">Top contributors</h3>
-                            <p className="text-xs text-slate-500">Users with the most work logs.</p>
+                            <h3 className="text-base font-semibold text-slate-900">{t('Top contributors')}</h3>
+                            <p className="text-xs text-slate-500">{t('Users with the most work logs.')}</p>
 
                             <div className="mt-4 space-y-3">
                                 {topContributors.length > 0 ? (
@@ -154,11 +157,11 @@ export default function Dashboard({ stats = {}, recentLogs = [], topContributors
                                                 <span className="text-sm font-bold text-slate-700">{contributor.work_logs_count}</span>
                                                 <RoleBadge role={contributor.role} />
                                             </div>
-                                            <span className="sr-only">Rank {index + 1}</span>
+                                            <span className="sr-only">{t('Rank :rank', { rank: index + 1 })}</span>
                                         </div>
                                     ))
                                 ) : (
-                                    <p className="text-sm text-slate-500">No contributors yet.</p>
+                                    <p className="text-sm text-slate-500">{t('No contributors yet.')}</p>
                                 )}
                             </div>
                         </div>
@@ -167,29 +170,29 @@ export default function Dashboard({ stats = {}, recentLogs = [], topContributors
                     <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-card">
                         <div className="flex flex-col gap-2 border-b border-slate-100 p-6 sm:flex-row sm:items-center sm:justify-between">
                             <div>
-                                <h3 className="text-base font-semibold text-slate-900">Recent activity</h3>
-                                <p className="text-xs text-slate-500">The latest six work logs.</p>
+                                <h3 className="text-base font-semibold text-slate-900">{t('Recent activity')}</h3>
+                                <p className="text-xs text-slate-500">{t('The latest six work logs.')}</p>
                             </div>
-                            <Link href={route('work-logs.index')} className="text-xs font-semibold text-indigo-600 hover:text-indigo-800">View all →</Link>
+                            <Link href={route('work-logs.index')} className="text-xs font-semibold text-indigo-600 hover:text-indigo-800">{t('View all →')}</Link>
                         </div>
 
                         <div className="hidden overflow-x-auto md:block">
                             <table className="min-w-full divide-y divide-slate-200">
                                 <thead className="bg-slate-50">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">Date</th>
-                                        <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">Submitted by</th>
-                                        <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">Requester</th>
-                                        <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">Task</th>
-                                        <th className="px-6 py-3 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">Status</th>
-                                        <th className="px-6 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-slate-500">Action</th>
+                                        <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">{t('Date')}</th>
+                                        <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">{t('Submitted by')}</th>
+                                        <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">{t('Requester')}</th>
+                                        <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">{t('Task')}</th>
+                                        <th className="px-6 py-3 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-500">{t('Status')}</th>
+                                        <th className="px-6 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-slate-500">{t('Action')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 text-sm">
                                     {recentLogs.length > 0 ? (
                                         recentLogs.map((log) => (
                                             <tr key={log.id} className="transition hover:bg-slate-50/70">
-                                                <td className="whitespace-nowrap px-6 py-4 text-xs font-medium text-slate-500">{formatDate(log.log_date)}</td>
+                                                <td className="whitespace-nowrap px-6 py-4 text-xs font-medium text-slate-500">{formatDate(log.log_date, locale)}</td>
                                                 <td className="whitespace-nowrap px-6 py-4">
                                                     <div className="flex items-center gap-2.5">
                                                         <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-50 text-[11px] font-bold text-indigo-700">
@@ -209,13 +212,13 @@ export default function Dashboard({ stats = {}, recentLogs = [], topContributors
                                                 </td>
                                                 <td className="whitespace-nowrap px-6 py-4 text-center"><StatusBadge status={log.status} /></td>
                                                 <td className="whitespace-nowrap px-6 py-4 text-right">
-                                                    <Link href={route('work-logs.show', log.id)} className="text-xs font-semibold text-indigo-600 hover:text-indigo-800">View</Link>
+                                                    <Link href={route('work-logs.show', log.id)} className="text-xs font-semibold text-indigo-600 hover:text-indigo-800">{t('View')}</Link>
                                                 </td>
                                             </tr>
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan="6" className="px-6 py-10 text-center text-sm text-slate-500">No recent activity.</td>
+                                            <td colSpan="6" className="px-6 py-10 text-center text-sm text-slate-500">{t('No recent activity.')}</td>
                                         </tr>
                                     )}
                                 </tbody>
@@ -228,7 +231,7 @@ export default function Dashboard({ stats = {}, recentLogs = [], topContributors
                                     <Link key={log.id} href={route('work-logs.show', log.id)} className="block p-4 transition hover:bg-slate-50">
                                         <div className="flex items-start justify-between gap-3">
                                             <div className="min-w-0">
-                                                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{formatDate(log.log_date)}</p>
+                                                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{formatDate(log.log_date, locale)}</p>
                                                 <p className="mt-1 truncate text-sm font-semibold text-slate-900">{log.title}</p>
                                                 <p className="text-xs text-slate-500">{log.user?.name || 'N/A'} · {log.requester_name}</p>
                                             </div>
@@ -237,7 +240,7 @@ export default function Dashboard({ stats = {}, recentLogs = [], topContributors
                                     </Link>
                                 ))
                             ) : (
-                                <p className="p-6 text-center text-sm text-slate-500">No recent activity.</p>
+                                <p className="p-6 text-center text-sm text-slate-500">{t('No recent activity.')}</p>
                             )}
                         </div>
                     </div>

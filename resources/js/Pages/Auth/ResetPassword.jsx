@@ -3,9 +3,11 @@ import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
+import { useI18n } from '@/i18n';
 import { Head, Link, useForm } from '@inertiajs/react';
 
 export default function ResetPassword({ token, email }) {
+    const { t } = useI18n();
     const { data, setData, post, processing, errors, reset } = useForm({
         token: token,
         email: email,
@@ -23,17 +25,17 @@ export default function ResetPassword({ token, email }) {
 
     return (
         <GuestLayout>
-            <Head title="Reset Password" />
+            <Head title={t('Reset Password')} />
 
             <div className="mb-3 text-center">
                 <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-slate-900">
-                    Reset Password
+                    {t('Reset Password')}
                 </h2>
             </div>
 
             <form onSubmit={submit} className="space-y-2">
                 <div>
-                    <InputLabel htmlFor="email" value="Email Address" className="text-slate-700 text-xs font-semibold" />
+                    <InputLabel htmlFor="email" value={t('Email Address')} className="text-slate-700 text-xs font-semibold" />
 
                     <TextInput
                         id="email"
@@ -49,7 +51,7 @@ export default function ResetPassword({ token, email }) {
                 </div>
 
                 <div>
-                    <InputLabel htmlFor="password" value="New Password" className="text-slate-700 text-xs font-semibold" />
+                    <InputLabel htmlFor="password" value={t('New Password')} className="text-slate-700 text-xs font-semibold" />
 
                     <TextInput
                         id="password"
@@ -66,7 +68,7 @@ export default function ResetPassword({ token, email }) {
                 </div>
 
                 <div>
-                    <InputLabel htmlFor="password_confirmation" value="Confirm Password" className="text-slate-700 text-xs font-semibold" />
+                    <InputLabel htmlFor="password_confirmation" value={t('Confirm Password')} className="text-slate-700 text-xs font-semibold" />
 
                     <TextInput
                         type="password"
@@ -90,7 +92,7 @@ export default function ResetPassword({ token, email }) {
                     className="w-full justify-center py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold shadow-md shadow-indigo-100 transition"
                     disabled={processing}
                 >
-                    {processing ? 'Resetting...' : 'Reset Password'}
+                    {processing ? t('Resetting...') : t('Reset Password')}
                 </PrimaryButton>
             </form>
 
@@ -99,7 +101,7 @@ export default function ResetPassword({ token, email }) {
                     href={route('login')}
                     className="flex items-center gap-1 font-medium text-slate-500 hover:text-indigo-600 transition"
                 >
-                    &larr; Back to login
+                    &larr; {t('Back to login')}
                 </Link>
             </div>
         </GuestLayout>

@@ -4,9 +4,11 @@ import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
+import { useI18n } from '@/i18n';
 import { Head, Link, useForm } from '@inertiajs/react';
 
 export default function Register() {
+    const { t } = useI18n();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -37,19 +39,19 @@ export default function Register() {
 
     return (
         <GuestLayout>
-            <Head title="Register" />
+            <Head title={t('Register')} />
 
             {/* Header Section */}
             <div className="mb-4 text-center">
                 <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-slate-900">
-                    Create Account
+                    {t('Create Account')}
                 </h2>
             </div>
 
             <form onSubmit={submit} className="space-y-2">
                 {/* Full Name */}
                 <div>
-                    <InputLabel htmlFor="name" value="Full Name" className="text-slate-700 text-xs font-semibold" />
+                    <InputLabel htmlFor="name" value={t('Full Name')} className="text-slate-700 text-xs font-semibold" />
 
                     <div className="relative mt-1">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -75,7 +77,7 @@ export default function Register() {
 
                 {/* Email Address */}
                 <div>
-                    <InputLabel htmlFor="email" value="Email Address" className="text-slate-700 text-xs font-semibold" />
+                    <InputLabel htmlFor="email" value={t('Email Address')} className="text-slate-700 text-xs font-semibold" />
 
                     <div className="relative mt-1">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -103,7 +105,7 @@ export default function Register() {
                 <div className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-3 items-start">
                 <div>
                     <div className="flex items-center justify-between gap-2">
-                        <InputLabel htmlFor="password" value="Password" className="text-slate-700 text-xs font-semibold" />
+                        <InputLabel htmlFor="password" value={t('Password')} className="text-slate-700 text-xs font-semibold" />
 
                         {/* Password Strength Indicator */}
                         {data.password && (
@@ -112,7 +114,7 @@ export default function Register() {
                                     <div className={`h-full transition-all duration-300 ${strength.color.split(' ')[0]} ${data.password.length < 6 ? 'w-1/3' : data.password.length < 10 ? 'w-2/3' : 'w-full'}`}></div>
                                 </div>
                                 <span className={`text-[9px] font-bold ${strength.color.split(' ')[1]}`}>
-                                    {strength.label}
+                                    {t(strength.label)}
                                 </span>
                             </div>
                         )}
@@ -138,7 +140,7 @@ export default function Register() {
                         <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            aria-label={showPassword ? 'Hide password' : 'Show password'}
+                            aria-label={showPassword ? t('Hide password') : t('Show password')}
                             aria-pressed={showPassword}
                             aria-controls="password"
                             className="absolute inset-y-0 right-0 flex items-center rounded pr-3 text-slate-400 hover:text-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-1"
@@ -161,7 +163,7 @@ export default function Register() {
 
                 {/* Confirm Password Field */}
                 <div>
-                    <InputLabel htmlFor="password_confirmation" value="Confirm Password" className="text-slate-700 text-xs font-semibold" />
+                    <InputLabel htmlFor="password_confirmation" value={t('Confirm Password')} className="text-slate-700 text-xs font-semibold" />
 
                     <div className="relative mt-1">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -183,7 +185,7 @@ export default function Register() {
                         <button
                             type="button"
                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                            aria-label={showConfirmPassword ? 'Hide password confirmation' : 'Show password confirmation'}
+                            aria-label={showConfirmPassword ? t('Hide password confirmation') : t('Show password confirmation')}
                             aria-pressed={showConfirmPassword}
                             aria-controls="password_confirmation"
                             className="absolute inset-y-0 right-0 flex items-center rounded pr-3 text-slate-400 hover:text-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-1"
@@ -211,7 +213,7 @@ export default function Register() {
                         className="w-full justify-center py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold shadow-md shadow-indigo-100 transition"
                         disabled={processing}
                     >
-                        {processing ? 'Registering...' : 'Register'}
+                        {processing ? t('Registering...') : t('Register')}
                     </PrimaryButton>
                 </div>
 
@@ -221,7 +223,7 @@ export default function Register() {
                         href={typeof route === 'function' ? route('login') : '/login'}
                         className="flex items-center gap-1 font-semibold text-indigo-600 hover:text-indigo-800 transition"
                     >
-                        Already registered? Log in &rarr;
+                        {t('Already registered? Log in')} &rarr;
                     </Link>
                 </div>
             </form>

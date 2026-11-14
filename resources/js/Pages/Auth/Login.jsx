@@ -5,9 +5,11 @@ import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
+import { useI18n } from '@/i18n';
 import { Head, Link, useForm } from '@inertiajs/react';
 
 export default function Login({ status, canResetPassword }) {
+    const { t } = useI18n();
     const [showPassword, setShowPassword] = useState(false);
 
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -32,15 +34,15 @@ export default function Login({ status, canResetPassword }) {
 
     return (
         <GuestLayout showBack={false}>
-            <Head title="Log in" />
+            <Head title={t('Log in')} />
 
             {/* Header Section */}
             <div className="mb-3 text-center">
                 <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-slate-900">
-                    Welcome Back
+                    {t('Welcome Back')}
                 </h2>
                 <p className="mt-1 text-[11px] sm:text-xs text-slate-500">
-                    Sign in to track, manage and export your daily work logs.
+                    {t('Sign in to track, manage and export your daily work logs.')}
                 </p>
             </div>
 
@@ -54,7 +56,7 @@ export default function Login({ status, canResetPassword }) {
             <form onSubmit={submit} className="space-y-3">
                 {/* Email Field */}
                 <div>
-                    <InputLabel htmlFor="email" value="Email Address" className="text-slate-700 text-xs font-semibold" />
+                    <InputLabel htmlFor="email" value={t('Email Address')} className="text-slate-700 text-xs font-semibold" />
 
                     <div className="relative mt-1">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -81,7 +83,7 @@ export default function Login({ status, canResetPassword }) {
 
                 {/* Password Field */}
                 <div>
-                    <InputLabel htmlFor="password" value="Password" className="text-slate-700 text-xs font-semibold" />
+                    <InputLabel htmlFor="password" value={t('Password')} className="text-slate-700 text-xs font-semibold" />
 
                     <div className="relative mt-1">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -104,7 +106,7 @@ export default function Login({ status, canResetPassword }) {
                         <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            aria-label={showPassword ? 'Hide password' : 'Show password'}
+                            aria-label={showPassword ? t('Hide password') : t('Show password')}
                             aria-pressed={showPassword}
                             aria-controls="password"
                             className="absolute inset-y-0 right-0 flex items-center rounded pr-3 text-slate-400 hover:text-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-1"
@@ -135,7 +137,7 @@ export default function Login({ status, canResetPassword }) {
                             className="rounded border-slate-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
                         />
                         <span className="ms-2 text-xs text-slate-600 font-medium">
-                            Remember me
+                            {t('Remember me')}
                         </span>
                     </label>
 
@@ -144,7 +146,7 @@ export default function Login({ status, canResetPassword }) {
                             href={typeof route === 'function' ? route('password.request') : '/forgot-password'}
                             className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition"
                         >
-                            Forgot password?
+                            {t('Forgot password?')}
                         </Link>
                     )}
                 </div>
@@ -155,7 +157,7 @@ export default function Login({ status, canResetPassword }) {
                         className="w-full justify-center py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold shadow-md shadow-indigo-100 transition"
                         disabled={processing}
                     >
-                        {processing ? 'Logging in...' : 'Log in'}
+                        {processing ? t('Logging in...') : t('Log in')}
                     </PrimaryButton>
                 </div>
 
@@ -169,7 +171,7 @@ export default function Login({ status, canResetPassword }) {
                             <svg className="h-3.5 w-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={path} />
                             </svg>
-                            {label}
+                            {t(label)}
                         </li>
                     ))}
                 </ul>
@@ -180,7 +182,7 @@ export default function Login({ status, canResetPassword }) {
                         href={typeof route === 'function' ? route('register') : '/register'}
                         className="flex items-center gap-1 font-semibold text-indigo-600 hover:text-indigo-800 transition"
                     >
-                        Create an account &rarr;
+                        {t('Create an account')} &rarr;
                     </Link>
                 </div>
             </form>

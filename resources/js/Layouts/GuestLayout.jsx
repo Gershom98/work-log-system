@@ -1,8 +1,11 @@
+import LanguageSwitcher from '@/Components/LanguageSwitcher';
+import { useI18n } from '@/i18n';
 import React from 'react';
 import { Link, usePage } from '@inertiajs/react';
 
 export default function GuestLayout({ children, showBack = true }) {
     const flashError = usePage().props.flash?.error;
+    const { t } = useI18n();
 
     return (
         <div className="relative flex min-h-screen flex-col overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-slate-100 font-sans antialiased selection:bg-indigo-600 selection:text-white">
@@ -17,17 +20,20 @@ export default function GuestLayout({ children, showBack = true }) {
                         </div>
                         <span className="text-sm font-semibold tracking-wide text-slate-800">WorkLog</span>
                     </div>
-                    {showBack && (
-                        <Link
-                            href={route('login')}
-                            className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
-                        >
-                            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
-                            </svg>
-                            Back to sign in
-                        </Link>
-                    )}
+                    <div className="flex items-center gap-2">
+                        <LanguageSwitcher />
+                        {showBack && (
+                            <Link
+                                href={route('login')}
+                                className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+                            >
+                                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+                                </svg>
+                                {t('Back to sign in')}
+                            </Link>
+                        )}
+                    </div>
                 </div>
             </header>
 
@@ -42,11 +48,11 @@ export default function GuestLayout({ children, showBack = true }) {
                         <div className="relative z-10 flex flex-col items-center gap-1.5">
                             <span className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/15 px-2.5 py-0.5 text-[10px] font-medium text-white">
                                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-300"></span>
-                                Daily Work &amp; Task Tracking System
+                                {t('Daily Work & Task Tracking System')}
                             </span>
 
                             <h1 className="text-sm font-black tracking-[0.18em] text-white sm:text-xl">
-                                WORKLOG PORTAL
+                                {t('WORKLOG PORTAL')}
                             </h1>
                         </div>
                     </div>
@@ -74,7 +80,7 @@ export default function GuestLayout({ children, showBack = true }) {
                             <svg className="h-3 w-3 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622C17.176 19.29 21 14.591 21 9c0-1.042-.133-2.052-.382-3.016z" />
                             </svg>
-                            Secure sign-in
+                            {t('Secure sign-in')}
                         </span>
                     </div>
                 </div>
@@ -82,7 +88,7 @@ export default function GuestLayout({ children, showBack = true }) {
 
             {/* Bottom Footer Bar */}
             <footer className="z-10 hidden border-t border-slate-200/70 bg-white/70 py-2 text-center text-[10px] font-medium text-slate-500 backdrop-blur sm:block">
-                &copy; {new Date().getFullYear()} WorkLog System. All rights reserved.
+                &copy; {new Date().getFullYear()} WorkLog System. {t('All rights reserved.')}
             </footer>
         </div>
     );

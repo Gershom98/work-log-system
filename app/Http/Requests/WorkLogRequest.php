@@ -39,7 +39,7 @@ abstract class WorkLogRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'rejection_reason.required_if' => 'A rejection reason is required when the status is rejected.',
+            'rejection_reason.required_if' => __('A rejection reason is required when the status is rejected.'),
         ];
     }
 

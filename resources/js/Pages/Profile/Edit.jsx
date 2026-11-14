@@ -1,18 +1,21 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { useI18n } from '@/i18n';
 import { Head } from '@inertiajs/react';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
 
 export default function Edit({ mustVerifyEmail, status }) {
+    const { t } = useI18n();
+
     return (
         <AuthenticatedLayout
             header={
                 <h2 className="text-xl font-semibold leading-tight text-slate-800">
-                    Profile
+                    {t('Profile')}
                 </h2>
             }
         >
-            <Head title="Profile" />
+            <Head title={t('Profile')} />
 
             <div className="py-12">
                 <div className="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">

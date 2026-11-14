@@ -53,7 +53,7 @@ class UserController extends Controller
 
         return redirect()
             ->route('admin.users.index')
-            ->with('message', 'User created successfully.');
+            ->with('message', __('User created successfully.'));
     }
 
     public function edit(User $user)
@@ -69,7 +69,7 @@ class UserController extends Controller
         $data = $request->validated();
 
         if ($request->user()->id === $user->id && $data['role'] !== User::ROLE_ADMIN) {
-            return back()->with('error', 'You cannot remove your own admin role.');
+            return back()->with('error', __('You cannot remove your own admin role.'));
         }
 
         if (
@@ -77,7 +77,7 @@ class UserController extends Controller
             && $data['role'] !== User::ROLE_ADMIN
             && User::where('role', User::ROLE_ADMIN)->count() <= 1
         ) {
-            return back()->with('error', 'At least one admin account must remain.');
+            return back()->with('error', __('At least one admin account must remain.'));
         }
 
         if (blank($data['password'] ?? null)) {
@@ -88,23 +88,23 @@ class UserController extends Controller
 
         return redirect()
             ->route('admin.users.index')
-            ->with('message', 'User updated successfully.');
+            ->with('message', __('User updated successfully.'));
     }
 
     public function destroy(Request $request, User $user)
     {
         if ($request->user()->id === $user->id) {
-            return back()->with('error', 'You cannot delete your own account.');
+            return back()->with('error', __('You cannot delete your own account.'));
         }
 
         if ($user->isAdmin() && User::where('role', User::ROLE_ADMIN)->count() <= 1) {
-            return back()->with('error', 'At least one admin account must remain.');
+            return back()->with('error', __('At least one admin account must remain.'));
         }
 
         $user->delete();
 
         return redirect()
             ->route('admin.users.index')
-            ->with('message', 'User deleted successfully.');
+            ->with('message', __('User deleted successfully.'));
     }
 }

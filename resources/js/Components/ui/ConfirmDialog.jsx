@@ -1,3 +1,4 @@
+import { useI18n } from '@/i18n';
 import { useEffect, useRef } from 'react';
 
 const tones = {
@@ -23,6 +24,7 @@ export default function ConfirmDialog({
     onClose,
 }) {
     const cancelRef = useRef(null);
+    const { t } = useI18n();
     const previouslyFocusedRef = useRef(null);
     const processingRef = useRef(processing);
     processingRef.current = processing;
@@ -104,7 +106,7 @@ export default function ConfirmDialog({
                         disabled={processing}
                         className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 disabled:opacity-60"
                     >
-                        {cancelLabel}
+                        {t(cancelLabel)}
                     </button>
                     <button
                         type="button"
@@ -122,7 +124,7 @@ export default function ConfirmDialog({
                                 />
                             </svg>
                         )}
-                        {confirmLabel}
+                        {t(confirmLabel)}
                     </button>
                 </div>
             </div>

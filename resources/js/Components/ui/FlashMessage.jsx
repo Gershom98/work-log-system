@@ -1,7 +1,9 @@
+import { useI18n } from '@/i18n';
 import { usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 
 export default function FlashMessage() {
+    const { t } = useI18n();
     const { flash } = usePage().props;
     const [dismissed, setDismissed] = useState(false);
 
@@ -61,7 +63,7 @@ export default function FlashMessage() {
                     className={`rounded p-1 transition ${
                         isError ? 'text-rose-500 hover:bg-rose-100' : 'text-emerald-600 hover:bg-emerald-100'
                     }`}
-                    aria-label="Dismiss notification"
+                    aria-label={t('Dismiss notification')}
                 >
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />

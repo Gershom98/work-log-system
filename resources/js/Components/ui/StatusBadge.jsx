@@ -1,6 +1,8 @@
-import { STATUS_META, statusLabel } from '@/utils/format';
+import { useI18n } from '@/i18n';
+import { STATUS_META } from '@/utils/format';
 
 export default function StatusBadge({ status, size = 'sm' }) {
+    const { t } = useI18n();
     const meta = STATUS_META[status] ?? STATUS_META.submitted;
     const sizing = size === 'lg' ? 'px-3 py-1 text-xs' : 'px-2.5 py-1 text-[11px]';
 
@@ -9,7 +11,7 @@ export default function StatusBadge({ status, size = 'sm' }) {
             className={`inline-flex items-center gap-1.5 rounded-full font-semibold ring-1 ring-inset ${meta.badge} ${sizing}`}
         >
             <span className={`h-1.5 w-1.5 rounded-full ${meta.dot}`} />
-            {statusLabel(status)}
+            {t(meta.label)}
         </span>
     );
 }

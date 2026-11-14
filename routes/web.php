@@ -4,6 +4,8 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WorkLogController;
+use App\Http\Middleware\SetLocale;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // The sign-in screen is the entry point; signed-in users skip straight to their logs.
@@ -11,8 +13,26 @@ Route::get('/', function () {
     return redirect()->route(auth()->check() ? 'work-logs.index' : 'login');
 })->name('home');
 
+// Language switching is available to guests and signed-in users alike.
+Route::post('/language/{locale}', function (Request $request, string $locale) {
+    abort_unless(in_array($locale, SetLocale::SUPPORTED, true), 404);
+
+    $request->session()->put('locale', $locale);
+
+    return back();
+})->name('language.switch');
+
 // Protected Routes (Requires Login and Email Verification)
 Route::middleware(['auth', 'verified'])->group(function () {
+
+    // Training manual PDF, available to every signed-in user.
+    Route::get('/manual', function () {
+        $path = resource_path('manual/WorkLog-System-Training-Manual.pdf');
+
+        abort_unless(is_file($path), 404);
+
+        return response()->download($path);
+    })->name('manual.download');
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
