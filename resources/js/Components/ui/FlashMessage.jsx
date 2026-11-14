@@ -31,7 +31,7 @@ export default function FlashMessage() {
         <div className="pointer-events-none fixed inset-x-0 top-20 z-50 flex justify-center px-4 sm:justify-end sm:pr-6">
             <div
                 role="status"
-                className={`pointer-events-auto flex w-full max-w-md items-start gap-3 rounded-xl border p-4 shadow-lg ${
+                className={`pointer-events-auto flex w-full max-w-md animate-toast-in items-start gap-3 rounded-xl border p-4 shadow-lg ${
                     isError
                         ? 'border-rose-200 bg-rose-50 text-rose-800'
                         : 'border-emerald-200 bg-emerald-50 text-emerald-800'

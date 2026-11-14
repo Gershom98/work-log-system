@@ -13,7 +13,7 @@ Route::get('/', function () {
 
 // Protected Routes (Requires Login and Email Verification)
 Route::middleware(['auth', 'verified'])->group(function () {
-    
+
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 

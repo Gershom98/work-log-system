@@ -22,6 +22,15 @@ export default {
             transitionTimingFunction: {
                 soft: 'cubic-bezier(0.22, 1, 0.36, 1)',
             },
+            keyframes: {
+                'toast-in': {
+                    '0%': { opacity: '0', transform: 'translateY(-8px)' },
+                    '100%': { opacity: '1', transform: 'translateY(0)' },
+                },
+            },
+            animation: {
+                'toast-in': 'toast-in 0.25s cubic-bezier(0.22, 1, 0.36, 1) both',
+            },
         },
     },
 

@@ -40,9 +40,10 @@ COPY . .
 RUN composer dump-autoload --optimize
 
 # 8. Install Node dependencies & build frontend assets (Inertia/Vite)
-RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - \
+# Vite 7 requires Node 20.19+, so pin the runtime above that floor.
+RUN curl -sL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
-    && npm install \
+    && npm ci --no-audit --no-fund \
     && npm run build
 
 # 9. Clear Laravel build caches

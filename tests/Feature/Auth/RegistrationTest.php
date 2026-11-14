@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -27,6 +28,6 @@ class RegistrationTest extends TestCase
 
         $this->assertAuthenticated();
         $response->assertRedirect(route('work-logs.index', absolute: false));
-        $this->assertSame(\App\Models\User::ROLE_USER, \App\Models\User::where('email', 'test@example.com')->firstOrFail()->role);
+        $this->assertSame(User::ROLE_USER, User::where('email', 'test@example.com')->firstOrFail()->role);
     }
 }

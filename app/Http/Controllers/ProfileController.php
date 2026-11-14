@@ -6,7 +6,6 @@ use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -45,8 +44,8 @@ class ProfileController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-       return back()->withErrors([
-        'error' => 'You are not allowed to delete this account. please  contact with Admin.'
-    ]);
+        return back()->withErrors([
+            'error' => 'You are not allowed to delete this account. please  contact with Admin.',
+        ]);
     }
 }

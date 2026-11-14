@@ -9,6 +9,8 @@ export default function NavLink({
     return (
         <Link
             {...props}
+            prefetch
+            aria-current={active ? 'page' : undefined}
             className={
                 'inline-flex items-center rounded-lg px-3 py-2 text-sm font-medium transition duration-200 ease-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 ' +
                 (active

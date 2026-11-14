@@ -25,6 +25,7 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
 
     const isFirstRender = useRef(true);
     const skipDebounce = useRef(false);
+    const searchRef = useRef(null);
 
     const buildParams = useCallback((values) => {
         const params = {
@@ -87,6 +88,32 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
         }
         applyFilters(overrides);
     };
+
+    useEffect(() => {
+        const focusSearch = (event) => {
+            if (event.key !== '/' || event.metaKey || event.ctrlKey || event.altKey) {
+                return;
+            }
+
+            const target = event.target;
+            const typing = target instanceof HTMLElement && (
+                target.isContentEditable ||
+                ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)
+            );
+
+            if (typing) {
+                return;
+            }
+
+            event.preventDefault();
+            setShowFilters(true);
+            requestAnimationFrame(() => searchRef.current?.focus());
+        };
+
+        window.addEventListener('keydown', focusSearch);
+
+        return () => window.removeEventListener('keydown', focusSearch);
+    }, []);
 
     const handleStatusChange = (value) => {
         setStatus(value);
@@ -239,14 +266,20 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                                 <div>
                                     <label htmlFor="search" className="mb-1 block text-xs font-medium text-slate-600">Search</label>
-                                    <input
-                                        id="search"
-                                        type="text"
-                                        placeholder="Task title or requester"
-                                        value={search}
-                                        onChange={(event) => setSearch(event.target.value)}
-                                        className={inputClass}
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            ref={searchRef}
+                                            id="search"
+                                            type="text"
+                                            placeholder="Task title or requester"
+                                            value={search}
+                                            onChange={(event) => setSearch(event.target.value)}
+                                            className={inputClass + ' pr-9'}
+                                        />
+                                        <kbd className="pointer-events-none absolute right-2 top-1/2 hidden -translate-y-1/2 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-medium text-slate-400 sm:block">
+                                            /
+                                        </kbd>
+                                    </div>
                                 </div>
 
                                 <div>

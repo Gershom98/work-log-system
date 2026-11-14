@@ -2,8 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Models\WorkLog;
-
 class UpdateWorkLogRequest extends WorkLogRequest
 {
     public function authorize(): bool

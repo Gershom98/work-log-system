@@ -5,6 +5,7 @@ namespace Tests\Feature\Auth;
 use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
@@ -142,7 +143,7 @@ class PasswordResetTest extends TestCase
         $mailer = \Mockery::mock();
         $mailer->shouldReceive('send')->andThrow(new \RuntimeException('mail api down'));
 
-        \Illuminate\Support\Facades\Mail::shouldReceive('mailer')->andReturn($mailer);
+        Mail::shouldReceive('mailer')->andReturn($mailer);
 
         $user = User::factory()->create();
 
