@@ -1,17 +1,17 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Field from '@/Components/ui/Field';
 import PageHeader from '@/Components/ui/PageHeader';
-import { STATUS_OPTIONS, errorInputClass, inputClass, todayInputValue } from '@/utils/format';
+import { STATUS_OPTIONS, errorInputClass, inputClass } from '@/utils/format';
 import { useI18n } from '@/i18n';
 import { Head, Link, useForm } from '@inertiajs/react';
 
-export default function Create({ canManageStatus }) {
+export default function Create({ canManageStatus, today }) {
     const { t } = useI18n();
     const { data, setData, post, processing, errors } = useForm({
         requester_name: '',
         title: '',
         description: '',
-        log_date: todayInputValue(),
+        log_date: today,
         status: 'submitted',
         rejection_reason: '',
     });
@@ -93,11 +93,12 @@ export default function Create({ canManageStatus }) {
                             </Field>
 
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                                <Field label={t('Work date')} htmlFor="log_date" required error={errors.log_date}>
+                                <Field label={t('Work date')} htmlFor="log_date" required error={errors.log_date} hint={t('Must be today or earlier.')}>
                                     <input
                                         id="log_date"
                                         type="date"
                                         value={data.log_date}
+                                        max={today}
                                         onChange={(event) => setData('log_date', event.target.value)}
                                         className={fieldClass('log_date')}
                                         required

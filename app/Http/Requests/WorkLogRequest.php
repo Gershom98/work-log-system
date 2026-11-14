@@ -40,6 +40,7 @@ abstract class WorkLogRequest extends FormRequest
     {
         return [
             'rejection_reason.required_if' => __('A rejection reason is required when the status is rejected.'),
+            'log_date.before_or_equal' => __('The work date cannot be in the future.'),
         ];
     }
 

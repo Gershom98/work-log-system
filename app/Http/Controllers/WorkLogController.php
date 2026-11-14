@@ -53,6 +53,7 @@ class WorkLogController extends Controller
     {
         return Inertia::render('WorkLogs/Create', [
             'canManageStatus' => $request->user()->isSupervisorOrAdmin(),
+            'today' => now()->toDateString(),
         ]);
     }
 
@@ -123,6 +124,7 @@ class WorkLogController extends Controller
         return Inertia::render('WorkLogs/Edit', [
             'workLog' => $workLog->load('user:id,name,email'),
             'canManageStatus' => $request->user()->isSupervisorOrAdmin(),
+            'today' => now()->toDateString(),
         ]);
     }
 

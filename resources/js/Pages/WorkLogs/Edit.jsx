@@ -6,7 +6,7 @@ import { STATUS_OPTIONS, errorInputClass, formatDate, inputClass } from '@/utils
 import { useI18n } from '@/i18n';
 import { Head, Link, useForm } from '@inertiajs/react';
 
-export default function Edit({ workLog, canManageStatus }) {
+export default function Edit({ workLog, canManageStatus, today }) {
     const { t, locale } = useI18n();
     const { data, setData, put, processing, errors } = useForm({
         requester_name: workLog?.requester_name || '',
@@ -31,6 +31,18 @@ export default function Edit({ workLog, canManageStatus }) {
     };
 
     const fieldClass = (name) => `${inputClass} ${errors[name] ? errorInputClass : ''}`;
+
+    const submittedOn = workLog?.created_at ? String(workLog.created_at).slice(0, 10) : '';
+    const originalWorkDate = workLog?.log_date ? String(workLog.log_date).slice(0, 10) : '';
+    const minWorkDate = [submittedOn, originalWorkDate].filter(Boolean).sort()[0];
+    const maxWorkDate = [today, originalWorkDate].filter(Boolean).sort().pop();
+    const dateHint = !submittedOn
+        ? undefined
+        : originalWorkDate && originalWorkDate < submittedOn
+          ? t('Keep the original date or choose a date on or after :date, and not after today.', { date: formatDate(submittedOn, locale) })
+          : originalWorkDate && originalWorkDate > today
+            ? t('Keep the original date or choose a date between :from and today.', { from: formatDate(submittedOn, locale) })
+            : t('Must be :date or later, and not after today.', { date: formatDate(submittedOn, locale) });
 
     return (
         <AuthenticatedLayout
@@ -105,11 +117,13 @@ export default function Edit({ workLog, canManageStatus }) {
                             </Field>
 
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                                <Field label={t('Work date')} htmlFor="log_date" required error={errors.log_date}>
+                                <Field label={t('Work date')} htmlFor="log_date" required error={errors.log_date} hint={dateHint}>
                                     <input
                                         id="log_date"
                                         type="date"
                                         value={data.log_date}
+                                        min={minWorkDate || undefined}
+                                        max={maxWorkDate || undefined}
                                         onChange={(event) => setData('log_date', event.target.value)}
                                         className={fieldClass('log_date')}
                                         required

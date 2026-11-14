@@ -292,6 +292,141 @@ class WorkLogTest extends TestCase
         ]);
     }
 
+    public function test_work_date_cannot_be_moved_before_the_submission_day(): void
+    {
+        $user = User::factory()->create();
+        $log = WorkLog::factory()->for($user)->create(['log_date' => '2026-11-10']);
+        $log->forceFill(['created_at' => '2026-11-10 08:00:00'])->save();
+
+        $this->actingAs($user)
+            ->put(route('work-logs.update', $log), [
+                'requester_name' => $log->requester_name,
+                'title' => $log->title,
+                'log_date' => '2026-11-09',
+            ])
+            ->assertSessionHasErrors('log_date');
+
+        $this->assertDatabaseHas('work_logs', [
+            'id' => $log->id,
+            'log_date' => '2026-11-10',
+        ]);
+    }
+
+    public function test_work_date_can_move_to_the_submission_day_or_later(): void
+    {
+        $user = User::factory()->create();
+        $log = WorkLog::factory()->for($user)->create(['log_date' => '2026-11-10']);
+        $log->forceFill(['created_at' => '2026-11-10 08:00:00'])->save();
+
+        $this->actingAs($user)
+            ->put(route('work-logs.update', $log), [
+                'requester_name' => $log->requester_name,
+                'title' => $log->title,
+                'log_date' => '2026-11-12',
+            ])
+            ->assertRedirect(route('work-logs.index'));
+
+        $this->assertDatabaseHas('work_logs', [
+            'id' => $log->id,
+            'log_date' => '2026-11-12',
+        ]);
+    }
+
+    public function test_backdated_log_can_keep_its_original_date_when_edited(): void
+    {
+        $user = User::factory()->create();
+        $log = WorkLog::factory()->for($user)->assigned()->create(['log_date' => '2026-11-01']);
+        $log->forceFill(['created_at' => '2026-11-10 09:00:00'])->save();
+
+        $this->actingAs($user)
+            ->put(route('work-logs.update', $log), [
+                'requester_name' => $log->requester_name,
+                'title' => 'Added progress notes',
+                'log_date' => '2026-11-01',
+            ])
+            ->assertRedirect(route('work-logs.index'));
+
+        $this->assertDatabaseHas('work_logs', [
+            'id' => $log->id,
+            'title' => 'Added progress notes',
+            'log_date' => '2026-11-01',
+        ]);
+    }
+
+    public function test_future_work_date_is_rejected_on_create(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->post(route('work-logs.store'), [
+                'requester_name' => 'Jane Doe',
+                'title' => 'Laptop replacement',
+                'log_date' => now()->addDay()->toDateString(),
+            ])
+            ->assertSessionHasErrors('log_date');
+
+        $this->assertDatabaseCount('work_logs', 0);
+    }
+
+    public function test_today_work_date_is_allowed_on_create(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->post(route('work-logs.store'), [
+                'requester_name' => 'Jane Doe',
+                'title' => 'Laptop replacement',
+                'log_date' => now()->toDateString(),
+            ])
+            ->assertRedirect(route('work-logs.index'));
+
+        $this->assertDatabaseHas('work_logs', [
+            'user_id' => $user->id,
+            'log_date' => now()->toDateString(),
+        ]);
+    }
+
+    public function test_work_date_cannot_be_moved_to_the_future(): void
+    {
+        $user = User::factory()->create();
+        $log = WorkLog::factory()->for($user)->create(['log_date' => '2026-11-10']);
+        $log->forceFill(['created_at' => '2026-11-10 08:00:00'])->save();
+
+        $this->actingAs($user)
+            ->put(route('work-logs.update', $log), [
+                'requester_name' => $log->requester_name,
+                'title' => $log->title,
+                'log_date' => now()->addDay()->toDateString(),
+            ])
+            ->assertSessionHasErrors('log_date');
+
+        $this->assertDatabaseHas('work_logs', [
+            'id' => $log->id,
+            'log_date' => '2026-11-10',
+        ]);
+    }
+
+    public function test_future_dated_log_can_keep_its_original_date_when_edited(): void
+    {
+        $user = User::factory()->create();
+        $future = now()->addDays(5)->toDateString();
+        $log = WorkLog::factory()->for($user)->create(['log_date' => $future]);
+
+        $this->actingAs($user)
+            ->put(route('work-logs.update', $log), [
+                'requester_name' => $log->requester_name,
+                'title' => 'Updated title',
+                'log_date' => $future,
+            ])
+            ->assertRedirect(route('work-logs.index'));
+
+        $this->assertDatabaseHas('work_logs', [
+            'id' => $log->id,
+            'title' => 'Updated title',
+            'log_date' => $future,
+        ]);
+    }
+
     public function test_regular_user_cannot_update_a_rejected_log(): void
     {
         $user = User::factory()->create();
