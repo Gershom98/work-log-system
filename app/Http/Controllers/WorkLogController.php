@@ -9,9 +9,12 @@ use App\Models\WorkLog;
 use App\Services\GeminiSolutionService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use DateTimeImmutable;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use RuntimeException;
 
 class WorkLogController extends Controller
 {
@@ -97,9 +100,12 @@ class WorkLogController extends Controller
         try {
             $text = $solutions->generate($workLog);
         } catch (\Throwable $exception) {
-            Log::error('AI solution generation failed: '.$exception->getMessage());
+            Log::error('AI solution generation failed: '.$exception->getMessage(), [
+                'work_log_id' => $workLog->id,
+                'model' => config('services.gemini.model'),
+            ]);
 
-            return back()->with('error', 'The AI service could not generate solutions. Please try again.');
+            return back()->with('error', 'The AI service could not generate solutions. '.$this->describeAiFailure($exception));
         }
 
         $workLog->forceFill([
@@ -227,5 +233,30 @@ class WorkLogController extends Controller
                 'delete' => $user->can('delete', $workLog),
             ],
         ];
+    }
+
+    private function describeAiFailure(\Throwable $exception): string
+    {
+        if ($exception instanceof ConnectionException) {
+            return 'The server could not reach Google, so check outbound network access.';
+        }
+
+        if ($exception instanceof RequestException) {
+            $status = $exception->response->status();
+
+            return match (true) {
+                in_array($status, [400, 401, 403], true) => "Google rejected the request (HTTP {$status}); check GEMINI_API_KEY and GEMINI_MODEL.",
+                $status === 404 => 'The configured Gemini model was not found (HTTP 404); check GEMINI_MODEL.',
+                $status === 429 => 'The Gemini quota or rate limit is exhausted (HTTP 429); try again later.',
+                $status >= 500 => "Google is temporarily unavailable (HTTP {$status}).",
+                default => "The request failed (HTTP {$status}).",
+            };
+        }
+
+        if ($exception instanceof RuntimeException) {
+            return 'The AI service returned an empty response.';
+        }
+
+        return 'Please try again.';
     }
 }

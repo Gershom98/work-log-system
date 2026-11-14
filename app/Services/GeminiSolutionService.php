@@ -13,10 +13,13 @@ class GeminiSolutionService
 
     public function generate(WorkLog $workLog): string
     {
+        $key = trim((string) config('services.gemini.key'));
+        $model = trim((string) config('services.gemini.model')) ?: 'gemini-3.6-flash';
+
         $response = Http::timeout(25)
             ->retry(2, 300)
-            ->withHeaders(['x-goog-api-key' => (string) config('services.gemini.key')])
-            ->post(sprintf(self::ENDPOINT, config('services.gemini.model')), [
+            ->withHeaders(['x-goog-api-key' => $key])
+            ->post(sprintf(self::ENDPOINT, $model), [
                 'contents' => [[
                     'parts' => [['text' => $this->prompt($workLog)]],
                 ]],

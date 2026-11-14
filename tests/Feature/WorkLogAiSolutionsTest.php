@@ -80,7 +80,7 @@ class WorkLogAiSolutionsTest extends TestCase
         $this->actingAs($user)
             ->post(route('work-logs.solutions', $workLog))
             ->assertRedirect()
-            ->assertSessionHas('error');
+            ->assertSessionHas('error', fn ($message) => str_contains($message, 'HTTP 500'));
 
         $this->assertSame('Existing answer.', $workLog->fresh()->ai_solutions);
     }
