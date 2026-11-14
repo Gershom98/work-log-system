@@ -50,14 +50,20 @@ return Application::configure(basePath: dirname(__DIR__))
                 return $response;
             }
 
-            $message = 'Your session expired. Please try again.';
+            $locale = session('locale');
+            $message = in_array($locale, SetLocale::SUPPORTED, true)
+                ? __('Your session expired. Please try again.', [], $locale)
+                : 'Your session expired. Please try again.';
 
             if (request()->expectsJson()) {
                 return response()->json(['message' => $message], 419);
             }
 
+            // 303 forces the browser to follow up with GET. A 302 keeps the
+            // original method for PUT/PATCH/DELETE, which turns the retry into
+            // a PUT against the form's own "edit" URL and ends in a 405.
             return redirect()
-                ->back()
+                ->back(303)
                 ->withInput(request()->except(['_token', 'password', 'password_confirmation']))
                 ->with('error', $message);
         });

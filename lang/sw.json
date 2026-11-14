@@ -17,6 +17,7 @@
     "A rejection reason is required when the status is rejected.": "Sababu ya kukataliwa inahitajika wakati hali ni imekataliwa.",
     "The work date cannot be earlier than the day this log was submitted.": "Tarehe ya kazi haiwezi kuwa kabla ya siku ambayo kumbukumbu hii iliwasilishwa.",
     "The work date cannot be in the future.": "Tarehe ya kazi haiwezi kuwa ya baadaye.",
+    "Your session expired. Please try again.": "Kipindi chako kimeisha. Tafadhali jaribu tena.",
 
     "Daily Work Log Report": "Ripoti ya Kumbukumbu za Kazi za Kila Siku",
     "Official Performance & Task Record Summary": "Muhtasari Rasmi wa Utendaji na Kumbukumbu za Majukumu",
