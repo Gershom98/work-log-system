@@ -26,6 +26,11 @@ abstract class WorkLogRequest extends FormRequest
                 'max:1000',
                 'required_if:status,'.WorkLog::STATUS_REJECTED,
             ];
+        } else {
+            $rules['status'] = [
+                'sometimes',
+                Rule::in([WorkLog::STATUS_SUBMITTED, WorkLog::STATUS_ASSIGNED]),
+            ];
         }
 
         return $rules;

@@ -131,7 +131,7 @@ class WorkLogController extends Controller
         $data = $request->validated();
 
         if (! $request->user()->isSupervisorOrAdmin()) {
-            unset($data['status'], $data['rejection_reason']);
+            unset($data['rejection_reason']);
         } else {
             $data['rejection_reason'] = ($data['status'] ?? null) === WorkLog::STATUS_REJECTED
                 ? ($data['rejection_reason'] ?? null)

@@ -140,7 +140,7 @@ class WorkLogTest extends TestCase
         ]);
     }
 
-    public function test_regular_user_cannot_change_status_on_update(): void
+    public function test_regular_user_can_set_status_to_assigned(): void
     {
         $user = User::factory()->create();
         $log = WorkLog::factory()->for($user)->create(['status' => WorkLog::STATUS_SUBMITTED]);
@@ -157,7 +157,30 @@ class WorkLogTest extends TestCase
         $this->assertDatabaseHas('work_logs', [
             'id' => $log->id,
             'title' => 'Updated title',
-            'status' => WorkLog::STATUS_SUBMITTED,
+            'status' => WorkLog::STATUS_ASSIGNED,
+        ]);
+    }
+
+    public function test_regular_user_cannot_set_manager_only_statuses(): void
+    {
+        $user = User::factory()->create();
+        $log = WorkLog::factory()->for($user)->assigned()->create();
+
+        foreach ([WorkLog::STATUS_REJECTED, WorkLog::STATUS_NO_DATA] as $status) {
+            $this->actingAs($user)
+                ->put(route('work-logs.update', $log), [
+                    'requester_name' => $log->requester_name,
+                    'title' => $log->title,
+                    'log_date' => $log->log_date->toDateString(),
+                    'status' => $status,
+                    'rejection_reason' => 'Not allowed for regular users.',
+                ])
+                ->assertSessionHasErrors('status');
+        }
+
+        $this->assertDatabaseHas('work_logs', [
+            'id' => $log->id,
+            'status' => WorkLog::STATUS_ASSIGNED,
         ]);
     }
 

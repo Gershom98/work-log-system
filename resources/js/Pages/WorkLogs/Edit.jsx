@@ -35,7 +35,11 @@ export default function Edit({ workLog, canManageStatus }) {
             header={
                 <PageHeader
                     title={`Edit Work Log #${workLog.id}`}
-                    description="Update the log details. Status and rejection notes are managed by supervisors and admins."
+                    description={
+                        canManageStatus
+                            ? 'Update the log details and set any status.'
+                            : 'Update the log details. Status can only be Submitted or Assigned; Rejected and No Data are set by supervisors and admins.'
+                    }
                     actions={
                         <Link href={route('work-logs.index')} className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
                             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -119,13 +123,12 @@ export default function Edit({ workLog, canManageStatus }) {
                                         </select>
                                     </Field>
                                 ) : (
-                                    <div className="flex flex-col justify-end">
-                                        <p className="mb-1 text-sm font-medium text-slate-700">Status</p>
-                                        <div className="flex h-[42px] items-center rounded-lg border border-slate-200 bg-slate-50 px-3">
-                                            <StatusBadge status={workLog.status} />
-                                            <span className="ms-2 text-xs text-slate-400">managed by supervisor</span>
-                                        </div>
-                                    </div>
+                                    <Field label="Status" htmlFor="status" error={errors.status} hint="Rejected and No Data are set by supervisors and admins.">
+                                        <select id="status" value={data.status} onChange={(event) => handleStatusChange(event.target.value)} className={fieldClass('status')}>
+                                            <option value="submitted">Submitted</option>
+                                            <option value="assigned">Assigned</option>
+                                        </select>
+                                    </Field>
                                 )}
                             </div>
 
