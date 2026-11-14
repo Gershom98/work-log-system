@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -32,5 +33,25 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Laravel converts TokenMismatchException into a 419 HttpException
+        // before render callbacks run, so hook the finished response instead of
+        // the exception type. A stale form (expired session, spin-down or
+        // redeploy) then lands back on the page with a readable message instead
+        // of the bare "419 Page Expired" screen.
+        $exceptions->respond(function (Response $response) {
+            if ($response->getStatusCode() !== 419) {
+                return $response;
+            }
+
+            $message = 'Your session expired. Please try again.';
+
+            if (request()->expectsJson()) {
+                return response()->json(['message' => $message], 419);
+            }
+
+            return redirect()
+                ->back()
+                ->withInput(request()->except(['_token', 'password', 'password_confirmation']))
+                ->with('error', $message);
+        });
     })->create();

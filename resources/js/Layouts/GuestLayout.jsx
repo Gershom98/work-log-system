@@ -1,7 +1,9 @@
 import React from 'react';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 
 export default function GuestLayout({ children }) {
+    const flashError = usePage().props.flash?.error;
+
     return (
         <div className="relative flex min-h-screen flex-col overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-slate-100 font-sans antialiased selection:bg-indigo-600 selection:text-white">
             <div className="pointer-events-none absolute -top-24 right-1/4 h-72 w-72 rounded-full bg-indigo-300/30 blur-3xl sm:h-96 sm:w-96"></div>
@@ -49,6 +51,17 @@ export default function GuestLayout({ children }) {
 
                     {/* Card Body (Form Container) */}
                     <div className="bg-white p-3 sm:p-7">
+                        {flashError && (
+                            <div
+                                role="alert"
+                                className="mb-3 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700"
+                            >
+                                <svg className="mt-0.5 h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                                </svg>
+                                <span>{flashError}</span>
+                            </div>
+                        )}
                         {children}
                     </div>
 
