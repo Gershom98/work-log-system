@@ -1,18 +1,10 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { useI18n } from '@/i18n';
 import { Head } from '@inertiajs/react';
-import ManageApiTokens from './Partials/ManageApiTokens';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
 
-export default function Edit({
-    mustVerifyEmail,
-    status,
-    tokens = [],
-    plainTextToken,
-    apiEndpoint,
-    tokenLimit,
-}) {
+export default function Edit({ mustVerifyEmail, status }) {
     const { t } = useI18n();
 
     return (
@@ -39,17 +31,6 @@ export default function Edit({
                     {/* Update Password */}
                     <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8">
                         <UpdatePasswordForm className="max-w-xl" />
-                    </div>
-
-                    {/* Personal API tokens */}
-                    <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8">
-                        <ManageApiTokens
-                            tokens={tokens}
-                            plainTextToken={plainTextToken}
-                            apiEndpoint={apiEndpoint}
-                            tokenLimit={tokenLimit}
-                            className="max-w-3xl"
-                        />
                     </div>
                 </div>
             </div>

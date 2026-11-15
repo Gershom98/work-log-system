@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\ApiTokenController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WorkLogController;
@@ -42,10 +41,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-    // Personal API tokens for the downstream system that reads the logs.
-    Route::post('/profile/api-tokens', [ApiTokenController::class, 'store'])->name('api-tokens.store');
-    Route::delete('/profile/api-tokens/{token}', [ApiTokenController::class, 'destroy'])->name('api-tokens.destroy');
 
     // Daily Work Logs (Resource Routes)
     Route::get('/work-logs/download-pdf', [WorkLogController::class, 'downloadPdf'])->name('work-logs.downloadPdf');

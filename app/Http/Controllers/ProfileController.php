@@ -20,12 +20,6 @@ class ProfileController extends Controller
         return Inertia::render('Profile/Edit', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
-            'tokens' => $request->user()->tokens()
-                ->latest()
-                ->get(['id', 'name', 'last_used_at', 'created_at']),
-            'plainTextToken' => session('plainTextToken'),
-            'apiEndpoint' => url('/api/work-logs'),
-            'tokenLimit' => ApiTokenController::MAX_TOKENS,
         ]);
     }
 
