@@ -9,6 +9,9 @@ use App\Models\WorkLog;
 use App\Services\GeminiSolutionService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use DateTimeImmutable;
+use Dompdf\Canvas;
+use Dompdf\Dompdf;
+use Dompdf\FontMetrics;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Request;
@@ -173,7 +176,7 @@ class WorkLogController extends Controller
 
             $fileName = 'work-log-report-'.now()->format('Y-m-d').'.pdf';
 
-            return Pdf::loadView('pdf.work-logs', [
+            $pdf = Pdf::loadView('pdf.work-logs', [
                 'workLogs' => $workLogs,
                 'user' => $user,
                 'filters' => $filters,
@@ -185,13 +188,46 @@ class WorkLogController extends Controller
                     'isRemoteEnabled' => false,
                     'chroot' => public_path(),
                     'tempDir' => sys_get_temp_dir(),
-                ])
-                ->download($fileName);
+                ]);
+
+            $this->addReportFooter($pdf->getDomPDF());
+
+            return $pdf->download($fileName);
         } catch (\Exception $exception) {
             Log::error('PDF generation failed: '.$exception->getMessage());
 
             return response('The PDF report could not be generated. Please try again.', 500);
         }
+    }
+
+    /**
+     * Stamps the report footer on every page. This has to run after the layout
+     * pass so the page total is final; an inline script in the view would only
+     * ever see the pages laid out up to that point.
+     */
+    private function addReportFooter(Dompdf $dompdf): void
+    {
+        $text = __('WorkLog').'  |  '.__('Daily Work Log Report').'  |  '.__('Confidential - internal use only');
+
+        $dompdf->setCallbacks([
+            [
+                'event' => 'end_document',
+                'f' => function (int $pageNumber, int $pageCount, Canvas $canvas, FontMetrics $fontMetrics) use ($text): void {
+                    $font = $fontMetrics->get_font('DejaVu Sans', 'normal');
+                    $size = 7;
+                    $muted = [0.39, 0.45, 0.55];
+                    $rule = [0.89, 0.91, 0.94];
+
+                    $right = __('Page :current of :total', ['current' => $pageNumber, 'total' => $pageCount]);
+                    $width = $canvas->get_width();
+                    $edge = 21;
+
+                    $canvas->line($edge, 802, $width - $edge, 802, $rule, 0.6);
+                    $canvas->text($edge, 813, $text, $font, $size, $muted);
+                    $canvas->text($width - $edge - $fontMetrics->get_text_width($right, $font, $size), 813, $right, $font, $size, $muted);
+                },
+            ],
+        ]);
     }
 
     /**

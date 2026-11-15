@@ -41,5 +41,20 @@
     "No Data": "Hakuna Taarifa",
     "Rejected": "Imekataliwa",
     "Submitted": "Imewasilishwa",
-    "No work log records found for this period.": "Hakuna kumbukumbu za kazi zilizopatikana kwa kipindi hiki."
+    "No work log records found for this period.": "Hakuna kumbukumbu za kazi zilizopatikana kwa kipindi hiki.",
+    "Prepared for": "Imeandaliwa kwa",
+    "Reporting period": "Kipindi cha ripoti",
+    "Generated": "Imetengenezwa",
+    "Total": "Jumla",
+    "All dates": "Tarehe zote",
+    "From :date": "Kuanzia :date",
+    "Until :date": "Hadi :date",
+    "Matching logs: :count": "Kumbukumbu zinazolingana: :count",
+    "Log entries": "Kumbukumbu za kazi",
+    "Entries: :count": "Kumbukumbu: :count",
+    "REPORT": "RIPOTI",
+    "Confidential - internal use only": "Siri - kwa matumizi ya ndani pekee",
+    "Page :current of :total": "Ukurasa :current kati ya :total",
+    "Rejection reason:": "Sababu ya kukataliwa:",
+    "Daily Work & Task Tracking System": "Mfumo wa Ufuatiliaji wa Kazi na Majukumu ya Kila Siku"
 }
