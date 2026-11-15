@@ -213,6 +213,41 @@
         color: #64748b;
     }
 
+    .badge {
+        display: inline-block;
+        padding: 2px 7px;
+        font-size: 6.8px;
+        font-weight: bold;
+        border-radius: 8px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .badge-submitted {
+        background-color: #eff6ff;
+        color: #1d4ed8;
+        border: 1px solid #bfdbfe;
+    }
+
+    .badge-assigned {
+        background-color: #ecfdf5;
+        color: #047857;
+        border: 1px solid #a7f3d0;
+    }
+
+    .badge-nodata {
+        background-color: #fffbeb;
+        color: #b45309;
+        border: 1px solid #fde68a;
+    }
+
+    .badge-rejected {
+        background-color: #fef2f2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+    }
+
     .empty {
         padding: 22px;
         text-align: center;
@@ -330,10 +365,11 @@
                 <th style="width: 6%;" class="text-center">#</th>
                 <th style="width: 14%;">{{ __('Date') }}</th>
                 @if ($canManageStatus)
-                    <th style="width: 18%;">{{ __('Submitted By') }}</th>
+                    <th style="width: 17%;">{{ __('Submitted By') }}</th>
                 @endif
-                <th style="width: {{ $canManageStatus ? '20%' : '24%' }};">{{ __('Requester') }}</th>
-                <th style="width: {{ $canManageStatus ? '42%' : '56%' }};">{{ __('Task Title') }}</th>
+                <th style="width: {{ $canManageStatus ? '18%' : '22%' }};">{{ __('Requester') }}</th>
+                <th style="width: {{ $canManageStatus ? '32%' : '45%' }};">{{ __('Task Title') }}</th>
+                <th style="width: 13%;" class="text-center">{{ __('Status') }}</th>
             </tr>
         </thead>
         <tbody>
@@ -354,10 +390,21 @@
                         <div class="desc">{{ \Illuminate\Support\Str::limit($log->description, 160) }}</div>
                     @endif
                 </td>
+                <td class="text-center">
+                    @if ($log->status === 'assigned')
+                        <span class="badge badge-assigned">{{ __('Assigned') }}</span>
+                    @elseif ($log->status === 'no data')
+                        <span class="badge badge-nodata">{{ __('No Data') }}</span>
+                    @elseif ($log->status === 'rejected')
+                        <span class="badge badge-rejected">{{ __('Rejected') }}</span>
+                    @else
+                        <span class="badge badge-submitted">{{ __('Submitted') }}</span>
+                    @endif
+                </td>
             </tr>
             @empty
             <tr>
-                <td colspan="{{ $canManageStatus ? 5 : 4 }}" class="empty">
+                <td colspan="{{ $canManageStatus ? 6 : 5 }}" class="empty">
                     {{ __('No work log records found for this period.') }}
                 </td>
             </tr>
