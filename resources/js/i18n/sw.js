@@ -303,6 +303,7 @@ const sw = {
     Copy: 'Nakili',
     Copied: 'Imenakiliwa',
     'Copy task details': 'Nakili taarifa za kazi',
+    'Open ADLS': 'Fungua ADLS',
     'Token name': 'Jina la tokeni',
     'e.g. Supervisor dashboard': 'k.m. Dashibodi ya msimamizi',
     ':count of :max tokens used': 'Tokeni :count kati ya :max zimetumika',
