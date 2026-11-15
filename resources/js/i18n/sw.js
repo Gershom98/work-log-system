@@ -295,7 +295,6 @@ const sw = {
         'Akaunti yako ikifutwa, rasilimali na data zake zote zitafutwa kabisa. Tafadhali weka nenosiri lako ili kuthibitisha kuwa unataka kufuta akaunti yako kabisa.',
 
     // Exports and API access
-    'Export CSV': 'Pakua CSV',
     'API access': 'Ufikiaji wa API',
     'Let another system read work logs with a personal token. Tokens are read-only and follow the same visibility rules as your account.':
         'Ruhusu mfumo mwingine kusoma kumbukumbu za kazi kwa tokeni binafsi. Tokeni ni za kusoma tu na hufuata kanuni zile zile za uonekano kama akaunti yako.',

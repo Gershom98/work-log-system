@@ -227,52 +227,6 @@ class WorkLogController extends Controller
     }
 
     /**
-     * Spreadsheet-friendly copy of the same filtered list, for handing the
-     * queue to a system that cannot read the PDF.
-     */
-    public function exportCsv(Request $request)
-    {
-        $filters = WorkLogFilters::fromRequest($request);
-
-        $logs = WorkLog::query()
-            ->visibleTo($request->user())
-            ->filter($filters)
-            ->with('user:id,name,email')
-            ->sorted($filters['sort'])
-            ->lazy(200);
-
-        $fileName = 'work-log-report-'.now()->format('Y-m-d').'.csv';
-
-        return response()->streamDownload(function () use ($logs) {
-            $handle = fopen('php://output', 'w');
-
-            // Excel needs the BOM to read UTF-8 names correctly.
-            fwrite($handle, "\xEF\xBB\xBF");
-            fputcsv($handle, [
-                'ID', 'Date', 'Submitted by', 'Submitter email', 'Requester',
-                'Task title', 'Description', 'Status', 'Rejection reason', 'Solution',
-            ]);
-
-            foreach ($logs as $log) {
-                fputcsv($handle, [
-                    $log->id,
-                    $log->log_date?->toDateString(),
-                    $log->user?->name,
-                    $log->user?->email,
-                    $log->requester_name,
-                    $log->title,
-                    $log->description,
-                    $log->status,
-                    $log->rejection_reason,
-                    $log->ai_solutions,
-                ]);
-            }
-
-            fclose($handle);
-        }, $fileName, ['Content-Type' => 'text/csv; charset=UTF-8']);
-    }
-
-    /**
      * @return array<string, mixed>
      */
     private function withAbilities(User $user, WorkLog $workLog): array
