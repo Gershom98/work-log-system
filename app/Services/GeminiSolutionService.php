@@ -24,8 +24,8 @@ class GeminiSolutionService
                     'parts' => [['text' => $this->prompt($workLog)]],
                 ]],
                 'generationConfig' => [
-                    'temperature' => 0.4,
-                    'maxOutputTokens' => 1200,
+                    'temperature' => 0.3,
+                    'maxOutputTokens' => 400,
                     'thinkingConfig' => ['thinkingBudget' => 0],
                 ],
             ])
@@ -40,18 +40,19 @@ class GeminiSolutionService
 
         return <<<PROMPT
         You are the supervisor who handled this work issue. Write the resolution note
-        the way you would describe it yourself after fixing it.
+        you would record in the work log after fixing it.
 
         Issue title: {$workLog->title}
         Reported details: {$description}
 
-        Write in the first person and past tense, as actions you carried out. For example:
-        "I solved this problem by connecting the cable, and the network came back up."
+        Write exactly ONE short paragraph, in the first person and past tense, as
+        actions you carried out. It must still contain the essential facts: what the
+        problem was, what you did to fix it, and the final outcome. Aim for 50 to 70
+        words and never exceed 85 words.
 
-        Open with one short sentence saying what you found and how you fixed it. Then list
-        2 to 4 numbered steps you took, each one sentence. Close with the outcome.
-        Keep the whole note under 150 words. Use complete sentences with correct
-        capitalization and punctuation. Plain text only: no markdown, no bold, no headings.
+        Do not use lists, numbered steps, bullet points, headings or line breaks.
+        Plain text only: no markdown, no bold, no quotes around the paragraph. Use
+        complete sentences with correct capitalization and punctuation.
         PROMPT;
     }
 
@@ -61,7 +62,8 @@ class GeminiSolutionService
 
         foreach ((array) $parts as $part) {
             if (empty($part['thought']) && filled($part['text'] ?? null)) {
-                return trim($part['text']);
+                // Keep the note a single paragraph even if the model adds line breaks.
+                return trim(preg_replace('/\s+/u', ' ', trim($part['text'])));
             }
         }
 

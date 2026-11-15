@@ -12,7 +12,9 @@ class WorkLogAiSolutionsTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function fakeGemini(string $answer = "1. Restart the queue worker.\n2. Clear the stale cache."): void
+    private const SAMPLE = 'I found that the queue worker had stopped after a memory spike, so I restarted the worker and cleared the stale cache, and jobs are now processing normally.';
+
+    private function fakeGemini(string $answer = self::SAMPLE): void
     {
         Http::fake([
             'generativelanguage.googleapis.com/*' => Http::response([
@@ -38,7 +40,7 @@ class WorkLogAiSolutionsTest extends TestCase
 
         $workLog->refresh();
 
-        $this->assertSame("1. Restart the queue worker.\n2. Clear the stale cache.", $workLog->ai_solutions);
+        $this->assertSame(self::SAMPLE, $workLog->ai_solutions);
         $this->assertNotNull($workLog->ai_solutions_generated_at);
 
         Http::assertSent(function ($request) use ($workLog) {
@@ -47,8 +49,25 @@ class WorkLogAiSolutionsTest extends TestCase
         });
     }
 
-    public function test_solutions_are_not_requested_without_an_api_key(): void
+    public function test_multi_line_ai_answers_are_collapsed_into_one_paragraph(): void
     {
+        $this->fakeGemini("1. Restarted the worker.\n2. Cleared the cache.\n\nThe queue is healthy again.");
+        config(['services.gemini.key' => 'test-key']);
+
+        $user = User::factory()->create();
+        $workLog = WorkLog::factory()->create(['user_id' => $user->id]);
+
+        $this->actingAs($user)
+            ->post(route('work-logs.solutions', $workLog))
+            ->assertRedirect();
+
+        $solution = $workLog->fresh()->ai_solutions;
+
+        $this->assertStringNotContainsString("\n", $solution);
+        $this->assertSame('1. Restarted the worker. 2. Cleared the cache. The queue is healthy again.', $solution);
+    }
+
+    public function test_solutions_are_not_requested_without_an_api_key(): void    {
         Http::fake();
         config(['services.gemini.key' => null]);
 
