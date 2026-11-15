@@ -176,11 +176,11 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
         });
     };
 
-    const downloadPdfUrl = () => {
+    const downloadUrl = (routeName) => {
         const params = buildParams({ search, status, start_date: startDate, end_date: endDate, sort, per_page: perPage });
         const query = new URLSearchParams(params).toString();
 
-        return query ? `${route('work-logs.downloadPdf')}?${query}` : route('work-logs.downloadPdf');
+        return query ? `${route(routeName)}?${query}` : route(routeName);
     };
 
     const activeChips = [
@@ -206,7 +206,7 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
                     actions={
                         <>
                             <a
-                                href={downloadPdfUrl()}
+                                href={downloadUrl('work-logs.downloadPdf')}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
@@ -215,6 +215,15 @@ export default function Index({ logs, summary = {}, filters = {}, perPageOptions
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                                 {t('Export PDF')}
+                            </a>
+                            <a
+                                href={downloadUrl('work-logs.exportCsv')}
+                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                            >
+                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M3 14h18M10 3v18M14 3v18M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z" />
+                                </svg>
+                                {t('Export CSV')}
                             </a>
                             <Link href={route('work-logs.create')} className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700">
                                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

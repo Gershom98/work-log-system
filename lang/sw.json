@@ -54,5 +54,8 @@
     "REPORT": "RIPOTI",
     "Confidential - internal use only": "Siri - kwa matumizi ya ndani pekee",
     "Page :current of :total": "Ukurasa :current kati ya :total",
-    "Daily Work & Task Tracking System": "Mfumo wa Ufuatiliaji wa Kazi na Majukumu ya Kila Siku"
+    "Daily Work & Task Tracking System": "Mfumo wa Ufuatiliaji wa Kazi na Majukumu ya Kila Siku",
+    "API token revoked.": "Tokeni ya API imebatilishwa.",
+    "API token not found.": "Tokeni ya API haijapatikana.",
+    "You can keep at most :count API tokens. Revoke one first.": "Unaweza kuwa na tokeni :count za API kwa kiwango cha juu. Batilisha moja kwanza."
 }

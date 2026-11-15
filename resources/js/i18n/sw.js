@@ -293,6 +293,34 @@ const sw = {
         'Una uhakika unataka kufuta akaunti yako?',
     'Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.':
         'Akaunti yako ikifutwa, rasilimali na data zake zote zitafutwa kabisa. Tafadhali weka nenosiri lako ili kuthibitisha kuwa unataka kufuta akaunti yako kabisa.',
+
+    // Exports and API access
+    'Export CSV': 'Pakua CSV',
+    'API access': 'Ufikiaji wa API',
+    'Let another system read work logs with a personal token. Tokens are read-only and follow the same visibility rules as your account.':
+        'Ruhusu mfumo mwingine kusoma kumbukumbu za kazi kwa tokeni binafsi. Tokeni ni za kusoma tu na hufuata kanuni zile zile za uonekano kama akaunti yako.',
+    'Copy this token now. It will not be shown again.':
+        'Nakili tokeni hii sasa. Haitaonyeshwa tena.',
+    Copy: 'Nakili',
+    Copied: 'Imenakiliwa',
+    'Copy task details': 'Nakili taarifa za kazi',
+    'Token name': 'Jina la tokeni',
+    'e.g. Supervisor dashboard': 'k.m. Dashibodi ya msimamizi',
+    ':count of :max tokens used': 'Tokeni :count kati ya :max zimetumika',
+    'Generate token': 'Tengeneza tokeni',
+    'Generating...': 'Inatengeneza...',
+    Endpoint: 'Kiungo',
+    'Send the token as an Authorization: Bearer header.':
+        'Tuma tokeni kama kichwa cha Authorization: Bearer.',
+    'Your tokens': 'Tokeni zako',
+    'No tokens yet.': 'Hakuna tokeni bado.',
+    Created: 'Imeundwa',
+    'Last used': 'Ilitumika mwisho',
+    Never: 'Bado',
+    Revoke: 'Batilisha',
+    'Revoke token': 'Batilisha tokeni',
+    'Revoke “:name”? Any system using it will lose access immediately.':
+        'Unabatilisha “:name”? Mfumo wowote unaoitumia utapoteza ufikiaji mara moja.',
 };
 
 export default sw;

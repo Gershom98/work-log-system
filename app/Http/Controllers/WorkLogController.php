@@ -7,8 +7,8 @@ use App\Http\Requests\UpdateWorkLogRequest;
 use App\Models\User;
 use App\Models\WorkLog;
 use App\Services\GeminiSolutionService;
+use App\Support\WorkLogFilters;
 use Barryvdh\DomPDF\Facade\Pdf;
-use DateTimeImmutable;
 use Dompdf\Canvas;
 use Dompdf\Dompdf;
 use Dompdf\FontMetrics;
@@ -21,14 +21,10 @@ use RuntimeException;
 
 class WorkLogController extends Controller
 {
-    private const PER_PAGE_OPTIONS = [5, 10, 25, 50];
-
-    private const DEFAULT_PER_PAGE = 10;
-
     public function index(Request $request)
     {
         $user = $request->user();
-        $filters = $this->filtersFromRequest($request);
+        $filters = WorkLogFilters::fromRequest($request);
 
         $query = WorkLog::query()
             ->visibleTo($user)
@@ -47,7 +43,7 @@ class WorkLogController extends Controller
             'logs' => $logs,
             'summary' => $summary,
             'filters' => $filters,
-            'perPageOptions' => self::PER_PAGE_OPTIONS,
+            'perPageOptions' => WorkLogFilters::PER_PAGE_OPTIONS,
             'canManageStatus' => $user->isSupervisorOrAdmin(),
         ]);
     }
@@ -164,7 +160,7 @@ class WorkLogController extends Controller
     public function downloadPdf(Request $request)
     {
         $user = $request->user();
-        $filters = $this->filtersFromRequest($request);
+        $filters = WorkLogFilters::fromRequest($request);
 
         try {
             $workLogs = WorkLog::query()
@@ -231,32 +227,49 @@ class WorkLogController extends Controller
     }
 
     /**
-     * @return array{search: string, status: ?string, start_date: ?string, end_date: ?string, sort: string, per_page: int}
+     * Spreadsheet-friendly copy of the same filtered list, for handing the
+     * queue to a system that cannot read the PDF.
      */
-    private function filtersFromRequest(Request $request): array
+    public function exportCsv(Request $request)
     {
-        $status = $request->query('status');
-        $perPage = (int) $request->query('per_page', self::DEFAULT_PER_PAGE);
+        $filters = WorkLogFilters::fromRequest($request);
 
-        return [
-            'search' => trim((string) $request->query('search', '')),
-            'status' => in_array($status, WorkLog::getStatuses(), true) ? $status : null,
-            'start_date' => $this->sanitizeDate($request->query('start_date')),
-            'end_date' => $this->sanitizeDate($request->query('end_date')),
-            'sort' => $request->query('sort') === 'oldest' ? 'oldest' : 'newest',
-            'per_page' => in_array($perPage, self::PER_PAGE_OPTIONS, true) ? $perPage : self::DEFAULT_PER_PAGE,
-        ];
-    }
+        $logs = WorkLog::query()
+            ->visibleTo($request->user())
+            ->filter($filters)
+            ->with('user:id,name,email')
+            ->sorted($filters['sort'])
+            ->lazy(200);
 
-    private function sanitizeDate(mixed $value): ?string
-    {
-        if (! is_string($value) || $value === '') {
-            return null;
-        }
+        $fileName = 'work-log-report-'.now()->format('Y-m-d').'.csv';
 
-        $date = DateTimeImmutable::createFromFormat('Y-m-d', $value);
+        return response()->streamDownload(function () use ($logs) {
+            $handle = fopen('php://output', 'w');
 
-        return $date && $date->format('Y-m-d') === $value ? $value : null;
+            // Excel needs the BOM to read UTF-8 names correctly.
+            fwrite($handle, "\xEF\xBB\xBF");
+            fputcsv($handle, [
+                'ID', 'Date', 'Submitted by', 'Submitter email', 'Requester',
+                'Task title', 'Description', 'Status', 'Rejection reason', 'Solution',
+            ]);
+
+            foreach ($logs as $log) {
+                fputcsv($handle, [
+                    $log->id,
+                    $log->log_date?->toDateString(),
+                    $log->user?->name,
+                    $log->user?->email,
+                    $log->requester_name,
+                    $log->title,
+                    $log->description,
+                    $log->status,
+                    $log->rejection_reason,
+                    $log->ai_solutions,
+                ]);
+            }
+
+            fclose($handle);
+        }, $fileName, ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
     /**
