@@ -28,12 +28,14 @@ class WorkLog extends Model
         'status',
         'supervisor_comment',
         'rejection_reason',
+        'solution_notes',
     ];
 
     protected function casts(): array
     {
         return [
             'log_date' => 'date:Y-m-d',
+            'ai_solutions_generated_at' => 'datetime',
         ];
     }
 

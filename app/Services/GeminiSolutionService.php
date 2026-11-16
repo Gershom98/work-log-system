@@ -11,7 +11,7 @@ class GeminiSolutionService
 {
     private const ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent';
 
-    public function generate(WorkLog $workLog): string
+    public function generate(WorkLog $workLog, ?string $notes = null): string
     {
         $key = trim((string) config('services.gemini.key'));
         $model = trim((string) config('services.gemini.model')) ?: 'gemini-3.6-flash';
@@ -21,7 +21,7 @@ class GeminiSolutionService
             ->withHeaders(['x-goog-api-key' => $key])
             ->post(sprintf(self::ENDPOINT, $model), [
                 'contents' => [[
-                    'parts' => [['text' => $this->prompt($workLog)]],
+                    'parts' => [['text' => $this->prompt($workLog, $notes ?? $workLog->solution_notes)]],
                 ]],
                 'generationConfig' => [
                     'temperature' => 0.3,
@@ -34,9 +34,33 @@ class GeminiSolutionService
         return $this->textFrom($response);
     }
 
-    private function prompt(WorkLog $workLog): string
+    private function prompt(WorkLog $workLog, ?string $notes): string
     {
         $description = $workLog->description ?: 'No further details were provided.';
+
+        if (filled($notes)) {
+            return <<<PROMPT
+            You are the supervisor who handled this work issue. The person who did the
+            work recorded these notes in their own words:
+
+            "{$notes}"
+
+            Issue title: {$workLog->title}
+            Reported details: {$description}
+
+            Rewrite the notes as the resolution note you would record in the work log.
+            Keep every fact, action, tool and outcome the notes mention, and add nothing
+            that is not stated or clearly implied. Use fluent, professional technical
+            language in the first person and past tense, as actions you carried out.
+
+            Write exactly ONE paragraph of complete sentences. Aim for 40 to 90 words and
+            never exceed 120 words. Write in fluent, professional English regardless of
+            the language the notes are written in.
+
+            Do not use lists, numbered steps, bullet points, headings or line breaks.
+            Plain text only: no markdown, no bold, no quotes around the paragraph.
+            PROMPT;
+        }
 
         return <<<PROMPT
         You are the supervisor who handled this work issue. Write the resolution note

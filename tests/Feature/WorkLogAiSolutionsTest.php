@@ -104,6 +104,91 @@ class WorkLogAiSolutionsTest extends TestCase
         $this->assertSame('Existing answer.', $workLog->fresh()->ai_solutions);
     }
 
+    public function test_user_notes_are_saved_and_rewritten_professionally(): void
+    {
+        $this->fakeGemini();
+        config(['services.gemini.key' => 'test-key']);
+
+        $user = User::factory()->create();
+        $workLog = WorkLog::factory()->create(['user_id' => $user->id]);
+        $notes = 'switch ya rack B ilikuwa imeharibika, nikabadilisha na spare na kupima bandwidth usiku';
+
+        $this->actingAs($user)
+            ->post(route('work-logs.solutions', $workLog), ['solution_notes' => $notes])
+            ->assertRedirect()
+            ->assertSessionHas('message');
+
+        $this->assertSame($notes, $workLog->fresh()->solution_notes);
+        $this->assertSame(self::SAMPLE, $workLog->fresh()->ai_solutions);
+
+        Http::assertSent(function ($request) use ($workLog, $notes) {
+            $prompt = $request['contents'][0]['parts'][0]['text'];
+
+            return str_contains($prompt, $notes)
+                && str_contains($prompt, $workLog->title)
+                && str_contains($prompt, 'fluent, professional technical')
+                && str_contains($prompt, 'professional English regardless');
+        });
+    }
+
+    public function test_notes_are_kept_when_generation_fails(): void
+    {
+        Http::fake([
+            'generativelanguage.googleapis.com/*' => Http::response(['error' => 'boom'], 500),
+        ]);
+        config(['services.gemini.key' => 'test-key']);
+
+        $user = User::factory()->create();
+        $workLog = WorkLog::factory()->create(['user_id' => $user->id]);
+
+        $this->actingAs($user)
+            ->post(route('work-logs.solutions', $workLog), ['solution_notes' => 'Nilibadilisha switch.'])
+            ->assertRedirect()
+            ->assertSessionHas('error');
+
+        $this->assertSame('Nilibadilisha switch.', $workLog->fresh()->solution_notes);
+        $this->assertNull($workLog->fresh()->ai_solutions);
+    }
+
+    public function test_blank_notes_clear_the_saved_solution_notes(): void
+    {
+        $this->fakeGemini();
+        config(['services.gemini.key' => 'test-key']);
+
+        $user = User::factory()->create();
+        $workLog = WorkLog::factory()->create([
+            'user_id' => $user->id,
+            'solution_notes' => 'Notes written earlier.',
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('work-logs.solutions', $workLog), ['solution_notes' => '   '])
+            ->assertRedirect();
+
+        $this->assertNull($workLog->fresh()->solution_notes);
+
+        Http::assertSent(function ($request) {
+            $prompt = $request['contents'][0]['parts'][0]['text'];
+
+            return ! str_contains($prompt, 'Notes written earlier.');
+        });
+    }
+
+    public function test_solution_notes_longer_than_2000_characters_are_rejected(): void
+    {
+        Http::fake();
+        config(['services.gemini.key' => 'test-key']);
+
+        $user = User::factory()->create();
+        $workLog = WorkLog::factory()->create(['user_id' => $user->id]);
+
+        $this->actingAs($user)
+            ->post(route('work-logs.solutions', $workLog), ['solution_notes' => str_repeat('a', 2001)])
+            ->assertSessionHasErrors('solution_notes');
+
+        Http::assertNothingSent();
+    }
+
     public function test_other_users_cannot_generate_solutions(): void
     {
         Http::fake();

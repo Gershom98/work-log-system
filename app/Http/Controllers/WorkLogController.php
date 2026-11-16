@@ -85,9 +85,17 @@ class WorkLogController extends Controller
         ]);
     }
 
-    public function generateSolutions(WorkLog $workLog, GeminiSolutionService $solutions)
+    public function generateSolutions(Request $request, WorkLog $workLog, GeminiSolutionService $solutions)
     {
         $this->authorize('view', $workLog);
+
+        $data = $request->validate([
+            'solution_notes' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $notes = trim((string) ($data['solution_notes'] ?? ''));
+
+        $workLog->forceFill(['solution_notes' => $notes !== '' ? $notes : null])->save();
 
         if (blank(config('services.gemini.key'))) {
             $hint = app()->configurationIsCached()
@@ -98,7 +106,7 @@ class WorkLogController extends Controller
         }
 
         try {
-            $text = $solutions->generate($workLog);
+            $text = $solutions->generate($workLog, $notes !== '' ? $notes : null);
         } catch (\Throwable $exception) {
             Log::error('AI solution generation failed: '.$exception->getMessage(), [
                 'work_log_id' => $workLog->id,

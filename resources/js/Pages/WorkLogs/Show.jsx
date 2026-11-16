@@ -12,10 +12,11 @@ export default function Show({ workLog, canManageStatus }) {
     const [confirmingDelete, setConfirmingDelete] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [generating, setGenerating] = useState(false);
+    const [solutionNotes, setSolutionNotes] = useState(workLog.solution_notes || '');
 
     const generateSolutions = () => {
         setGenerating(true);
-        router.post(route('work-logs.solutions', workLog.id), {}, {
+        router.post(route('work-logs.solutions', workLog.id), { solution_notes: solutionNotes }, {
             preserveScroll: true,
             onFinish: () => setGenerating(false),
         });
@@ -186,7 +187,7 @@ export default function Show({ workLog, canManageStatus }) {
                                             {t('AI solutions')}
                                         </h2>
                                         <p className="mt-0.5 text-xs text-slate-500">
-                                            {t("Resolution note written from the supervisor's perspective.")}
+                                            {t('Write your own solution, then let AI rewrite it in clear, professional English.')}
                                         </p>
                                     </div>
                                     <div className="flex items-center gap-1.5">
@@ -208,9 +209,25 @@ export default function Show({ workLog, canManageStatus }) {
                                     </div>
                                 </div>
 
+                                <div className="mt-3">
+                                    <label htmlFor="solution_notes" className="text-[11px] font-semibold uppercase tracking-wider text-violet-700">
+                                        {t('Your solution notes')}
+                                    </label>
+                                    <textarea
+                                        id="solution_notes"
+                                        rows={3}
+                                        maxLength={2000}
+                                        value={solutionNotes}
+                                        onChange={(event) => setSolutionNotes(event.target.value)}
+                                        placeholder={t('Describe what you did in your own words. AI will rewrite it in professional English.')}
+                                        className="mt-1.5 w-full resize-y rounded-lg border border-violet-200 bg-white/90 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder:text-slate-400 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-200"
+                                    />
+                                </div>
+
                                 {workLog.ai_solutions ? (
                                     <div className="mt-3 rounded-lg bg-white/80 p-3">
-                                        <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{workLog.ai_solutions}</p>
+                                        <p className="text-[11px] font-semibold uppercase tracking-wider text-violet-600">{t('AI version')}</p>
+                                        <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{workLog.ai_solutions}</p>
                                         <p className="mt-2 text-[11px] text-slate-400">
                                             {t('Generated :date · Review before acting on it.', { date: formatDateTime(workLog.ai_solutions_generated_at, locale) })}
                                         </p>

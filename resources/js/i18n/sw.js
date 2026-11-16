@@ -166,6 +166,12 @@ const sw = {
     'No detailed description provided.': 'Hakuna maelezo ya kina yaliyotolewa.',
     'Supervisor comment': 'Maoni ya msimamizi',
     'AI solutions': 'Suluhisho za AI',
+    'Write your own solution, then let AI rewrite it in clear, professional English.':
+        'Andika suluhisho lako, kisha AI iandike upya kwa Kiingereza kilichonyooka na cha kitaalamu.',
+    'Your solution notes': 'Maelezo yako ya suluhisho',
+    'Describe what you did in your own words. AI will rewrite it in professional English.':
+        'Eleza ulichofanya kwa maneno yako mwenyewe. AI itaandika upya kwa Kiingereza cha kitaalamu.',
+    'AI version': 'Toleo la AI',
     "Resolution note written from the supervisor's perspective.":
         'Maelezo ya utatuzi yaliyoandikwa kwa mtazamo wa msimamizi.',
     'Generating…': 'Inatengeneza…',
